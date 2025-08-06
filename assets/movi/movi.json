@@ -1,0 +1,22 @@
+[
+  {
+    "title": "Inception",
+    "description": "A skilled thief enters people’s dreams to steal secrets.",
+    "languages": ["English", "Japanese", "French"],
+    "thumbnail": "https://example.com/thumbnails/inception.jpg",
+    "genre": "Science Fiction",
+    "release_year": 2010,
+    "duration_minutes": 148,
+    "rating": 8.8
+  },
+  {
+    "title": "The Dark Knight",
+    "description": "Batman faces the Joker, a criminal mastermind who causes chaos in Gotham.",
+    "languages": ["English", "Mandarin"],
+    "thumbnail": "https://example.com/thumbnails/dark_knight.jpg",
+    "genre": "Action",
+    "release_year": 2008,
+    "duration_minutes": 152,
+    "rating": 9.0
+  }
+]
