@@ -9,7 +9,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
+      endDrawer: AppDrawer(),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -28,6 +28,58 @@ class HomePage extends StatelessWidget {
     );
   }
 }
+class AppDrawer extends StatelessWidget {
+  const AppDrawer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(topRight: Radius.circular(20), bottomRight: Radius.circular(20)),
+      ),
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: const BoxDecoration(
+              color: Color(0xFF1C0834),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: const [
+                Icon(Icons.local_movies_rounded, color: Colors.orangeAccent, size: 40),
+                SizedBox(height: 10),
+                Text('loflix', style: TextStyle(color: Colors.white, fontSize: 20)),
+              ],
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.home),
+            title: const Text('Home'),
+            onTap: () => Navigator.pop(context),
+          ),
+          ListTile(
+            leading: const Icon(Icons.movie),
+            title: const Text('Movies'),
+            onTap: () => Navigator.pop(context),
+          ),
+          ListTile(
+            leading: const Icon(Icons.tv),
+            title: const Text('TV Shows'),
+            onTap: () => Navigator.pop(context),
+          ),
+          ListTile(
+            leading: const Icon(Icons.settings),
+            title: const Text('Settings'),
+            onTap: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class CustomTopperLogo extends StatelessWidget {
    CustomTopperLogo({super.key});
 
@@ -74,6 +126,12 @@ class CustomTopperLogo extends StatelessWidget {
               ],
             ),
             SizedBox(width: 12.w),
+            IconButton(
+              icon: const Icon(Icons.menu_rounded, color: Colors.white, size: 24),
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
+            ),
           ],
         ),
         SizedBox(height: 20.h,)
@@ -93,10 +151,10 @@ class CustomTopperLogo extends StatelessWidget {
   ];
  void goToSearch(BuildContext context){
     showSearch(context: context, delegate: CustomSearchDelegate(items));
-
   }
 
 }
+
 class CustomSearchDelegate extends SearchDelegate {
   final List<String> searchList;
 
