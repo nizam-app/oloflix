@@ -1,0 +1,8 @@
+import 'dart:ui';
+
+import 'package:flutter/material.dart';
+class AllColor {
+  static final red = Colors.red;
+  static final amber = Colors.amber;
+  static final green500 = Colors.green.shade500;
+}
