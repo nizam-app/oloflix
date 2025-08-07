@@ -1,10 +1,20 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:go_router/go_router.dart';
 import 'package:market_jango/core/constants/color_control/all_color.dart';
 import 'package:market_jango/core/constants/color_control/theme_color_controller.dart';
 import 'package:market_jango/core/constants/image_control/image_path.dart';
+import 'package:market_jango/core/theme/logic/theme_changer.dart';
+import 'package:market_jango/features/home/screens/dashboard_screen.dart';
+import 'package:market_jango/features/home/screens/my_watchlist_screen.dart';
+import 'package:market_jango/features/home/screens/profile_screeen.dart';
+import 'package:market_jango/features/home/screens/subscription_plan_screen.dart';
 
-class HomePage extends StatelessWidget {
+class HomeScreen extends StatelessWidget {
   static final routeName ="/homePage";
   @override
   Widget build(BuildContext context) {
@@ -37,30 +47,21 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(topRight: Radius.circular(20), bottomRight: Radius.circular(20)),
-      ),
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
-            decoration: const BoxDecoration(
-              color: Color(0xFF1C0834),
+            decoration:  BoxDecoration(
+              color: ThemeColorController.purpul,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Icon(Icons.local_movies_rounded, color: Colors.orangeAccent, size: 40),
-                SizedBox(height: 10),
-                Text('loflix', style: TextStyle(color: Colors.white, fontSize: 20)),
-              ],
+            child: Center(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children:  [
+                Image.asset(ImagePath.logo, width: 200.w,),
+                ],
+              ),
             ),
-          ),
-          ListTile(
-            leading: const Icon(Icons.home),
-            title: const Text('Home'),
-            onTap: () => Navigator.pop(context),
           ),
           ListTile(
             leading: const Icon(Icons.movie),
@@ -73,6 +74,18 @@ class AppDrawer extends StatelessWidget {
             onTap: () => Navigator.pop(context),
           ),
           ListTile(
+            leading: const Icon(Icons.music_video_rounded),
+            title: const Text('PPV'),
+            onTap: () => Navigator.pop(context),
+          ),ListTile(
+            leading: const Icon(Icons.live_tv),
+            title: const Text('Live'),
+            onTap: () => Navigator.pop(context),
+          ),ListTile(
+            leading: const Icon(Icons.settings),
+            title: const Text('Settings'),
+            onTap: () => Navigator.pop(context),
+          ),ListTile(
             leading: const Icon(Icons.settings),
             title: const Text('Settings'),
             onTap: () => Navigator.pop(context),
@@ -104,38 +117,34 @@ class CustomTopperLogo extends StatelessWidget {
                   backgroundColor: AllColor.red,
                   child: Icon(Icons.search,color: ThemeColorController.white,)),
             ),
-            SizedBox(width: 12.w),
-            Container(
-                width: 26.w,
-                height: 26.h,
-                decoration: BoxDecoration(
-        color: AllColor.amber,
-                  borderRadius: BorderRadius.all(Radius.circular(5.r)),),
+            SizedBox(width: 20.w),
+            InkWell(
+              onTap: (){goToSubscriptionScreen(context);},
+              child: Container(
+                  width: 26.w,
+                  height: 26.h,
+                  decoration: BoxDecoration(
+                  color: AllColor.amber,
+                    borderRadius: BorderRadius.all(Radius.circular(5.r)),),
 
-                child: Icon(Icons.workspace_premium), ),
-            // Crown
-            SizedBox(width: 12.w),
-            Stack(
-              children: [
-                Icon(Icons.account_circle),
-                Positioned(
-                  top:0,
-                  right: 0,
-                  child: CircleAvatar(
-                    backgroundColor: AllColor.green500,
-                    radius: 4.r,
-                  ),
-                )
-              ],
+                  child: Icon(Icons.workspace_premium), ),
             ),
+
+            // Crown
+            SizedBox(width: 5.w),
+            _UserMenu(menuItems: menuItems),
+
             SizedBox(width: 12.w),
+
 
             IconButton(
-              icon: const Icon(Icons.menu_rounded, color: Colors.white, size: 24),
+              icon:  Icon(Icons.menu_rounded, color: Colors.white, size: 24.sp),
               onPressed: () {
                 Scaffold.of(context).openEndDrawer();
               },
             ),
+
+            SizedBox(width: 5.w),
 
           ],
         ),
@@ -144,6 +153,12 @@ class CustomTopperLogo extends StatelessWidget {
 
     );
   }
+   final List<_MenuItem> menuItems = [
+     _MenuItem('Dashboard', Icons.storage),
+     _MenuItem('Profile', Icons.person),
+     _MenuItem('My Watchlist', Icons.list_alt),
+     _MenuItem('Logout', Icons.logout),
+   ];
   final List<String> items = [
     'Apple',
     'Banana',
@@ -159,8 +174,109 @@ class CustomTopperLogo extends StatelessWidget {
 
 
   }
+  void goToSubscriptionScreen(BuildContext context){
+   context.push(SubscriptionPlanScreen.routeName);
+  }
 
 }
+class _UserMenu extends StatelessWidget {
+  final List<_MenuItem> menuItems;
+
+  const _UserMenu({required this.menuItems});
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeChanger _themeController = Get.put(ThemeChanger());
+    return PopupMenuButton<int>(
+      icon: Stack(
+        children: [
+          Icon(Icons.person, size: 24.sp,),
+          Positioned(
+            right: 0,
+            top: 0,
+            child: Container(
+              width: 10.w,
+              height: 10.h,
+              decoration: BoxDecoration(
+                color: Colors.green,
+                shape: BoxShape.circle,
+                border: Border.all(color: ThemeColorController.white, width: 1.w),
+              ),
+            ),
+          )
+        ],
+      ),
+      itemBuilder: (context) => List.generate(
+        menuItems.length,
+            (index) => PopupMenuItem<int>(
+          value: index,
+          child: Row(
+            children: [
+              Icon(menuItems[index].icon,color:_themeController.isDarkMode == true?ThemeColorController.white:ThemeColorController.black,),
+               SizedBox(width: 10.w),
+              Text(menuItems[index].title),
+            ],
+          ),
+        ),
+      ),
+      onSelected: (index) {
+       goToNextPage(index, context);
+      },
+    );
+  }
+  void goToNextPage(int index, BuildContext context){
+    if(index == 0){
+      context.push(DashboardScreen.routeName);
+    }
+    else if(index == 1){
+
+      context.push(ProfileScreen.routeName);
+    }
+    else if(index == 2){
+      context.push(MyWatchlistScreen.routeName);
+    }
+    else if(index == 3){
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("LogOut"),
+            content: Text("Are you sure you want to LogOut ?"),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15.r),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => context.pop(),
+                child: const Text("Cancel"),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AllColor.red,
+                ),
+                onPressed: () {
+                  context.pop();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text(" LogOut Done")),
+                  );
+                },
+                child: const Text("LogOut"),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+}
+
+class _MenuItem {
+  final String title;
+  final IconData icon;
+
+  _MenuItem(this.title, this.icon);
+}
+
 
 
 

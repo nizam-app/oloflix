@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:market_jango/features/home/screens/dashboard_screen.dart';
+import 'package:market_jango/features/home/screens/home_screen.dart';
+import 'package:market_jango/features/home/screens/my_watchlist_screen.dart';
+import 'package:market_jango/features/home/screens/profile_screeen.dart';
+import 'package:market_jango/features/home/screens/subscription_plan_screen.dart';
+
+
 import 'package:market_jango/features/auth/screens/forgod_screen.dart';
 import 'package:market_jango/features/auth/screens/login_screen.dart';
 import 'package:market_jango/features/auth/screens/signup_screen.dart';
@@ -12,10 +19,15 @@ import 'package:market_jango/features/live/screen/live_screen.dart';
 import 'package:market_jango/features/ppv/screen/ppv_screen.dart';
 import 'package:market_jango/features/profile/screen/profile_screen.dart';
 
+
 final GoRouter router = GoRouter(
   initialLocation: "${SplashScreen.routeName}",
   errorBuilder: (context, state) =>
       Scaffold(body: Center(child: Text('Error: ${state.error} '))),
+  initialLocation: "${HomeScreen.routeName}",
+  errorBuilder: (context, state) => Scaffold(
+    body: Center(
+      child: Text('Error: ${state.error } '),
 
   routes: [
     GoRoute(
@@ -29,9 +41,36 @@ final GoRouter router = GoRouter(
       path: SplashScreen.routeName,
       name: "splash",
       builder: (context, state) => SplashScreen(),
+
     ),
 
     GoRoute(
+        path:HomeScreen.routeName,
+      name: "home_screen",
+    builder: (context,state)=> HomeScreen(),
+    ),
+ GoRoute(
+        path:ProfileScreen.routeName,
+      name: "profile_screen",
+    builder: (context,state)=> const ProfileScreen(),
+    ),
+ GoRoute(
+        path:DashboardScreen.routeName,
+    name: DashboardScreen.routeName ,
+    builder: (context,state)=>const DashboardScreen(),
+    ),
+ GoRoute(
+        path:MyWatchlistScreen.routeName,
+      name: MyWatchlistScreen.routeName,
+    builder: (context,state)=>const MyWatchlistScreen(),
+    ),
+GoRoute(
+        path:SubscriptionPlanScreen.routeName,
+      name: SubscriptionPlanScreen.routeName,
+    builder: (context,state)=>const SubscriptionPlanScreen(),
+    ),
+
+
       path: LoginScreen.routeName,
       name: "login_screen",
       builder: (context, state) => LoginScreen(),
@@ -72,6 +111,7 @@ final GoRouter router = GoRouter(
       name: "ppv_screen",
       builder: (context, state) => PpvScreen(),
     ), 
+
 
 
 
