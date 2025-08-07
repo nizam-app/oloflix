@@ -31,12 +31,10 @@ class _LoginScreenState extends State<LoginScreen> {
               _buildPasswordField(),
               SizedBox(height: 10.h),
               _buildOptionsRow(context),
-              SizedBox(height: 5.h),
-              _buildTermsText(),
               SizedBox(height: 30.h),
               CustomButtom(
                 text: "LOGIN",
-                onTap: () => context.push('/homePage'),
+                onTap: () => context.push('/bottom_nav_bar'),
               ),
               SizedBox(height: 20.h),
               _buildSignupText(context),
@@ -149,30 +147,30 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildTermsText() {
-    return RichText(
-      text: TextSpan(
-        children: [
-          TextSpan(
-            text: "By Signing in you accept ",
-            style: TextStyle(color: Colors.white, fontSize: 12.sp),
-          ),
-          TextSpan(
-            text: "Terms ",
-            style: TextStyle(color: Colors.pinkAccent, fontSize: 12.sp),
-          ),
-          TextSpan(
-            text: "and ",
-            style: TextStyle(color: Colors.white, fontSize: 12.sp),
-          ),
-          TextSpan(
-            text: "Privacy Policy",
-            style: TextStyle(color: Colors.orange, fontSize: 12.sp),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildTermsText() {
+  //   return RichText(
+  //     text: TextSpan(
+  //       children: [
+  //         TextSpan(
+  //           text: "By Signing in you accept ",
+  //           style: TextStyle(color: Colors.white, fontSize: 12.sp),
+  //         ),
+  //         TextSpan(
+  //           text: "Terms ",
+  //           style: TextStyle(color: Colors.pinkAccent, fontSize: 12.sp),
+  //         ),
+  //         TextSpan(
+  //           text: "and ",
+  //           style: TextStyle(color: Colors.white, fontSize: 12.sp),
+  //         ),
+  //         TextSpan(
+  //           text: "Privacy Policy",
+  //           style: TextStyle(color: Colors.orange, fontSize: 12.sp),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildSignupText(BuildContext context) {
     return Center(
