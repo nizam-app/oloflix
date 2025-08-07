@@ -7,4 +7,5 @@ import 'package:flutter/material.dart';
    static Color green= Color(0xFF06402a);
    static Color grey = Color(0xFFF5F5F5);
    static Color teal = Color(0xFF004D40);
+   static Color purpul = Color(0xFF1C0834);
  }
