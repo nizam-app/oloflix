@@ -13,7 +13,7 @@ class BottomNavController extends GetxController {
   }
 
   final pages = [
-     HomePage(),
+     HomeScreen(),
      PpvScreen(), 
      LiveScreen(),
      ProfileScreen(), 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:market_jango/features/auth/widgets/custom_buttom.dart';
+import 'package:market_jango/features/home/widgets/bottom_nav_bar/screen/bottom_nav_bar.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -63,7 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             TextButton(
               onPressed: () {
-                context.push('/homePage');
+                context.push(BottomNavBar.routeName);
               },
               child: Text(
                 "Skip",

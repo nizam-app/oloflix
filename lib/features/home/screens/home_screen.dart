@@ -9,10 +9,18 @@ import 'package:market_jango/core/constants/color_control/all_color.dart';
 import 'package:market_jango/core/constants/color_control/theme_color_controller.dart';
 import 'package:market_jango/core/constants/image_control/image_path.dart';
 import 'package:market_jango/core/theme/logic/theme_changer.dart';
+import 'package:market_jango/features/comedy/screen/shows_comedy_screen.dart';
 import 'package:market_jango/features/home/screens/dashboard_screen.dart';
 import 'package:market_jango/features/home/screens/my_watchlist_screen.dart';
 import 'package:market_jango/features/home/screens/profile_screeen.dart';
 import 'package:market_jango/features/home/screens/subscription_plan_screen.dart';
+import 'package:market_jango/features/live/screen/live_screen.dart';
+import 'package:market_jango/features/movies/screen/movies_screen.dart';
+import 'package:market_jango/features/music_video/screen/music_video_screen.dart';
+import 'package:market_jango/features/nollywood/screen/nollywood_screen.dart';
+import 'package:market_jango/features/ppv/screen/ppv_screen.dart';
+import 'package:market_jango/features/setting/screen/setting_screen.dart';
+import 'package:market_jango/features/tv_shows/screen/tv_shows_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   static final routeName ="/homePage";
@@ -66,29 +74,39 @@ class AppDrawer extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.movie),
             title: const Text('Movies'),
-            onTap: () => Navigator.pop(context),
+            onTap: () => context.push(MoviesScreen.routeName),
           ),
           ListTile(
             leading: const Icon(Icons.tv),
             title: const Text('TV Shows'),
-            onTap: () => Navigator.pop(context),
+            onTap: () => context.push(TvShowsScreen.routeName),
           ),
           ListTile(
             leading: const Icon(Icons.music_video_rounded),
             title: const Text('PPV'),
-            onTap: () => Navigator.pop(context),
+            onTap: () => context.push(PpvScreen.routeName),
           ),ListTile(
             leading: const Icon(Icons.live_tv),
             title: const Text('Live'),
-            onTap: () => Navigator.pop(context),
-          ),ListTile(
+            onTap: () => context.push(LiveScreen.routeName),
+          ),
+          ListTile(
+            leading: const Icon(Icons.music_video),
+            title: const Text('Music video'),
+            onTap: () => context.push(MusicVideoScreen.routeName),
+          ), ListTile(
+            leading: const Icon(Icons.theater_comedy),
+            title: const Text('Shows Comedy'),
+            onTap: () => context.push(ShowsComedyScreen.routeName),
+          ), ListTile(
+            leading: const Icon(Icons.movie),
+            title: const Text('Nollywood & African Movies'),
+            onTap: () => context.push(NollywoodScreen.routeName),
+          ),
+          ListTile(
             leading: const Icon(Icons.settings),
             title: const Text('Settings'),
-            onTap: () => Navigator.pop(context),
-          ),ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('Settings'),
-            onTap: () => Navigator.pop(context),
+            onTap: () => context.push(SettingScreen.routeName),
           ),
         ],
       ),
@@ -129,13 +147,9 @@ class CustomTopperLogo extends StatelessWidget {
 
                   child: Icon(Icons.workspace_premium), ),
             ),
-
             // Crown
             SizedBox(width: 5.w),
             _UserMenu(menuItems: menuItems),
-
-            SizedBox(width: 12.w),
-
 
             IconButton(
               icon:  Icon(Icons.menu_rounded, color: Colors.white, size: 24.sp),
@@ -143,9 +157,7 @@ class CustomTopperLogo extends StatelessWidget {
                 Scaffold.of(context).openEndDrawer();
               },
             ),
-
             SizedBox(width: 5.w),
-
           ],
         ),
         SizedBox(height: 20.h,)
@@ -171,8 +183,6 @@ class CustomTopperLogo extends StatelessWidget {
   ];
  void goToSearch(BuildContext context){
     showSearch(context: context, delegate: CustomSearchDelegate(items));
-
-
   }
   void goToSubscriptionScreen(BuildContext context){
    context.push(SubscriptionPlanScreen.routeName);
@@ -278,9 +288,6 @@ class _MenuItem {
 }
 
 
-
-
-
 class CustomSearchDelegate extends SearchDelegate {
   final List<String> searchList;
 
@@ -325,6 +332,7 @@ class CustomSearchDelegate extends SearchDelegate {
     );
   }
 
+  
   @override
   Widget buildSuggestions(BuildContext context) {
     final suggestions = searchList
