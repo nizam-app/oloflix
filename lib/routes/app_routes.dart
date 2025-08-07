@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:market_jango/features/comedy/screen/shows_comedy_screen.dart';
 import 'package:market_jango/features/home/screens/dashboard_screen.dart';
-
 import 'package:market_jango/features/auth/screens/forgod_screen.dart';
 import 'package:market_jango/features/auth/screens/login_screen.dart';
 import 'package:market_jango/features/auth/screens/signup_screen.dart';
 import 'package:market_jango/features/auth/screens/splash_screen.dart';
-
 import 'package:market_jango/features/home/screens/home_screen.dart';
 import 'package:market_jango/features/home/screens/my_watchlist_screen.dart';
 import 'package:market_jango/features/home/screens/profile_screeen.dart';
@@ -18,7 +16,6 @@ import 'package:market_jango/features/movies/screen/movies_screen.dart';
 import 'package:market_jango/features/music_video/screen/music_video_screen.dart';
 import 'package:market_jango/features/nollywood/screen/nollywood_screen.dart';
 import 'package:market_jango/features/ppv/screen/ppv_screen.dart';
-import 'package:market_jango/features/profile/screen/profile_screen.dart' hide ProfileScreen;
 import 'package:market_jango/features/setting/screen/setting_screen.dart';
 import 'package:market_jango/features/tv_shows/screen/tv_shows_screen.dart';
 
