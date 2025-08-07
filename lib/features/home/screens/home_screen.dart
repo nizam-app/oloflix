@@ -19,7 +19,9 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       endDrawer: AppDrawer(),
+
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -34,10 +36,11 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: buildBottomNavigationBar(),
+      //bottomNavigationBar: buildBottomNavigationBar(),
     );
   }
 }
+
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 
@@ -126,9 +129,13 @@ class CustomTopperLogo extends StatelessWidget {
 
                   child: Icon(Icons.workspace_premium), ),
             ),
+
             // Crown
             SizedBox(width: 5.w),
             _UserMenu(menuItems: menuItems),
+
+            SizedBox(width: 12.w),
+
 
             IconButton(
               icon:  Icon(Icons.menu_rounded, color: Colors.white, size: 24.sp),
@@ -136,7 +143,9 @@ class CustomTopperLogo extends StatelessWidget {
                 Scaffold.of(context).openEndDrawer();
               },
             ),
+
             SizedBox(width: 5.w),
+
           ],
         ),
         SizedBox(height: 20.h,)
@@ -162,6 +171,8 @@ class CustomTopperLogo extends StatelessWidget {
   ];
  void goToSearch(BuildContext context){
     showSearch(context: context, delegate: CustomSearchDelegate(items));
+
+
   }
   void goToSubscriptionScreen(BuildContext context){
    context.push(SubscriptionPlanScreen.routeName);
@@ -265,6 +276,9 @@ class _MenuItem {
 
   _MenuItem(this.title, this.icon);
 }
+
+
+
 
 
 class CustomSearchDelegate extends SearchDelegate {
