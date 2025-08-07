@@ -9,7 +9,9 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       endDrawer: AppDrawer(),
+
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -24,10 +26,11 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: buildBottomNavigationBar(),
+      //bottomNavigationBar: buildBottomNavigationBar(),
     );
   }
 }
+
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 
@@ -126,12 +129,14 @@ class CustomTopperLogo extends StatelessWidget {
               ],
             ),
             SizedBox(width: 12.w),
+
             IconButton(
               icon: const Icon(Icons.menu_rounded, color: Colors.white, size: 24),
               onPressed: () {
                 Scaffold.of(context).openEndDrawer();
               },
             ),
+
           ],
         ),
         SizedBox(height: 20.h,)
@@ -151,9 +156,14 @@ class CustomTopperLogo extends StatelessWidget {
   ];
  void goToSearch(BuildContext context){
     showSearch(context: context, delegate: CustomSearchDelegate(items));
+
+
   }
 
 }
+
+
+
 
 class CustomSearchDelegate extends SearchDelegate {
   final List<String> searchList;
