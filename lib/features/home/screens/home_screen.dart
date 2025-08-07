@@ -332,6 +332,7 @@ class CustomSearchDelegate extends SearchDelegate {
     );
   }
 
+  
   @override
   Widget buildSuggestions(BuildContext context) {
     final suggestions = searchList
