@@ -43,8 +43,16 @@ class HomeScreen extends StatelessWidget {
               SponsorBanner(),
               buildLIstName(context: context, text: "Pay-Per-View Movies (PPV)",
                   onPressed: (){goToPPVScreen();}),
-              CustomCard(isLeft: true,),
-              buildLIstName(context: context, text: "Nollywood & African Movies", onPressed: (){goToNollywoodScreen();}),
+              CustomCard(),
+              buildLIstName(context: context, text: "Nollywood & African Movies",
+                  onPressed: (){goToNollywoodScreen();}),
+              CustomCard(),
+              buildLIstName(context: context, text: "Music Video",
+                  onPressed: (){goToMosicVideoScreen();}),
+              CustomCard(),
+              buildLIstName(context: context, text: "Talk Shows & Podcasts",
+                  onPressed: (){goToMosicVideoScreen();}),
+              CustomCard()
 
 
             ],
@@ -57,6 +65,7 @@ class HomeScreen extends StatelessWidget {
   void goToPPVScreen(){
   }
   void goToNollywoodScreen(){}
+  void goToMosicVideoScreen (){}
 
   Padding buildLIstName({required BuildContext context, required String text, required VoidCallback onPressed}) {
     return Padding(
@@ -470,37 +479,11 @@ class MovieSlider extends ConsumerWidget {
   void buyPlan(){}
 
 }
-class PodcastCarousel extends StatelessWidget {
-  const PodcastCarousel({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Center(
-        child: SizedBox(
-          height: 400,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            itemCount: 2,
-            separatorBuilder: (_, __) => const SizedBox(width: 20),
-            itemBuilder: (context, index) {
-              return CustomCard(
-                isLeft: index == 0,
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class CustomCard extends StatelessWidget {
-  final bool isLeft;
 
-  const CustomCard({super.key, required this.isLeft});
+
+  const CustomCard({super.key,});
 
   @override
   Widget build(BuildContext context) {
