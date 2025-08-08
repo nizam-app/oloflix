@@ -480,6 +480,99 @@ class MovieSlider extends ConsumerWidget {
 
 }
 
+
+class MovieSlider extends ConsumerWidget {
+  final CarouselSliderController _controller = CarouselSliderController();
+
+  final List<String> imageList = [
+    'assets/images/movie1.jpg',
+    'assets/images/movie2.jpg',
+    'assets/images/movie3.jpg',
+  ];
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final _currentIndex = ref.watch(sliderIndexProvider);
+    final _currentIndexNotifier = ref.read(sliderIndexProvider.notifier);
+    return Column(
+      children: [
+        CarouselSlider.builder(
+          carouselController: _controller,
+          itemCount: imageList.length,
+          itemBuilder: (context, index, realIndex) {
+            return Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(5.r),
+                  child: Image.asset(
+                    imageList[index],
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                  ),
+                ),
+                Positioned(
+                  bottom: 0,
+                  left: 2,
+                  child: Row(
+                    children: [
+                      ElevatedButton(onPressed: (){},style: ElevatedButton.styleFrom(backgroundColor: AllColor.amber), child: Row(children: [
+                        Icon(Icons.play_arrow),
+                        Text("Watch"),
+                      ],)),
+                      SizedBox(width: 10),
+                      ElevatedButton(onPressed: (){},style: ElevatedButton.styleFrom(backgroundColor: AllColor.red), child: Row(children: [
+                        Icon(Icons.workspace_premium),
+                        Text("Buy Plan"),
+                      ],)),
+
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+          options: CarouselOptions(
+            height: 200.h,
+            autoPlay: true,
+            autoPlayInterval: Duration(seconds: 10),
+            enlargeCenterPage: false,
+            viewportFraction: 1.0,
+            onPageChanged: (index, reason) {
+              _currentIndexNotifier.state = index;
+            },
+            scrollDirection: Axis.horizontal,
+            reverse: false,
+            enableInfiniteScroll: true,
+          ),
+        ),
+
+        SizedBox(height: 12),
+        // Dot Indicator (Reactive with Riverpod)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: imageList.asMap().entries.map((entry) {
+            return AnimatedContainer(
+              duration: Duration(milliseconds: 300),
+              width: _currentIndex == entry.key ? 30.0.w : 8.0.w,
+              height: 8.0.h,
+              margin: EdgeInsets.symmetric(horizontal: 8.0.w),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8.r),
+                color: _currentIndex == entry.key
+                    ? Colors.orange
+                    : Colors.orange.withOpacity(0.1.sp),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+  void watch(){}
+  void buyPlan(){}
+
+}
+
 class CustomCard extends StatelessWidget {
 
 
