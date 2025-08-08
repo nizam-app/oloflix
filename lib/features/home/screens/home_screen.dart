@@ -1,9 +1,7 @@
-import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:go_router/go_router.dart';
 import 'package:market_jango/core/constants/color_control/all_color.dart';
 import 'package:market_jango/core/constants/color_control/theme_color_controller.dart';
@@ -12,13 +10,13 @@ import 'package:market_jango/core/theme/logic/theme_changer.dart';
 import 'package:market_jango/features/comedy/screen/shows_comedy_screen.dart';
 import 'package:market_jango/features/home/screens/dashboard_screen.dart';
 import 'package:market_jango/features/home/screens/my_watchlist_screen.dart';
-import 'package:market_jango/features/home/screens/profile_screeen.dart';
 import 'package:market_jango/features/home/screens/subscription_plan_screen.dart';
 import 'package:market_jango/features/live/screen/live_screen.dart';
 import 'package:market_jango/features/movies/screen/movies_screen.dart';
 import 'package:market_jango/features/music_video/screen/music_video_screen.dart';
 import 'package:market_jango/features/nollywood/screen/nollywood_screen.dart';
 import 'package:market_jango/features/ppv/screen/ppv_screen.dart';
+import 'package:market_jango/features/profile/screen/profile_screen.dart';
 import 'package:market_jango/features/setting/screen/setting_screen.dart';
 import 'package:market_jango/features/tv_shows/screen/tv_shows_screen.dart';
 
@@ -471,6 +469,8 @@ Widget buildHorizontalList({required String title, required List<String> images}
     ],
   );
 }
+
+
 BottomNavigationBar buildBottomNavigationBar() {
   return BottomNavigationBar(
     backgroundColor: Colors.black,
