@@ -17,6 +17,7 @@ import 'package:market_jango/features/home/screens/dashboard_screen.dart';
 import 'package:market_jango/features/home/screens/my_watchlist_screen.dart';
 import 'package:market_jango/features/home/screens/profile_screeen.dart';
 import 'package:market_jango/features/home/screens/subscription_plan_screen.dart';
+import 'package:market_jango/features/home/widgets/aboute_fooder.dart';
 import 'package:market_jango/features/live/screen/live_screen.dart';
 import 'package:market_jango/features/movies/screen/movies_screen.dart';
 import 'package:market_jango/features/music_video/screen/music_video_screen.dart';
@@ -40,7 +41,7 @@ class HomeScreen extends StatelessWidget {
               CustomTopperLogo(),
               MovieSlider(),
               PPVNoticeSection(),
-              SponsorBanner(),
+              PromosionSlider(),
               buildLIstName(context: context, text: "Pay-Per-View Movies (PPV)",
                   onPressed: (){goToPPVScreen();}),
               CustomCard(),
@@ -52,7 +53,8 @@ class HomeScreen extends StatelessWidget {
               CustomCard(),
               buildLIstName(context: context, text: "Talk Shows & Podcasts",
                   onPressed: (){goToMosicVideoScreen();}),
-              CustomCard()
+              CustomCard(),
+              FooterSection()
 
 
             ],
@@ -481,91 +483,55 @@ class MovieSlider extends ConsumerWidget {
 }
 
 
-class MovieSlider extends ConsumerWidget {
+class PromosionSlider extends ConsumerWidget {
   final CarouselSliderController _controller = CarouselSliderController();
 
   final List<String> imageList = [
-    'assets/images/movie1.jpg',
-    'assets/images/movie2.jpg',
-    'assets/images/movie3.jpg',
+    "assets/images/promotion.jpg",
+    "assets/images/promotion1.jpeg",
+    "assets/images/promotion2.jpg",
+    "assets/images/promotion3.webp"
   ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final _currentIndex = ref.watch(sliderIndexProvider);
-    final _currentIndexNotifier = ref.read(sliderIndexProvider.notifier);
-    return Column(
-      children: [
-        CarouselSlider.builder(
-          carouselController: _controller,
-          itemCount: imageList.length,
-          itemBuilder: (context, index, realIndex) {
-            return Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(5.r),
-                  child: Image.asset(
-                    imageList[index],
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                  ),
+    return Padding(
+      padding:  EdgeInsets.all(10.r),
+      child: Column(
+        children: [
+          CarouselSlider.builder(
+            carouselController: _controller,
+            itemCount: imageList.length,
+            itemBuilder: (context, index, realIndex) {
+              return ClipRRect(
+                borderRadius: BorderRadius.circular(5.r),
+                child: Image.asset(
+                  imageList[index],
+                  fit: BoxFit.cover,
+                  width: double.infinity,
                 ),
-                Positioned(
-                  bottom: 0,
-                  left: 2,
-                  child: Row(
-                    children: [
-                      ElevatedButton(onPressed: (){},style: ElevatedButton.styleFrom(backgroundColor: AllColor.amber), child: Row(children: [
-                        Icon(Icons.play_arrow),
-                        Text("Watch"),
-                      ],)),
-                      SizedBox(width: 10),
-                      ElevatedButton(onPressed: (){},style: ElevatedButton.styleFrom(backgroundColor: AllColor.red), child: Row(children: [
-                        Icon(Icons.workspace_premium),
-                        Text("Buy Plan"),
-                      ],)),
-
-                    ],
-                  ),
-                ),
-              ],
-            );
-          },
-          options: CarouselOptions(
-            height: 200.h,
-            autoPlay: true,
-            autoPlayInterval: Duration(seconds: 10),
-            enlargeCenterPage: false,
-            viewportFraction: 1.0,
-            onPageChanged: (index, reason) {
-              _currentIndexNotifier.state = index;
+              );
             },
-            scrollDirection: Axis.horizontal,
-            reverse: false,
-            enableInfiniteScroll: true,
-          ),
-        ),
+            options: CarouselOptions(
+              height: 100.h,
+              autoPlay: true,
+              autoPlayInterval: Duration(seconds: 5),
+              enlargeCenterPage: false,
+              viewportFraction: 1.0,
+              onPageChanged: (index, reason) {
 
-        SizedBox(height: 12),
-        // Dot Indicator (Reactive with Riverpod)
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: imageList.asMap().entries.map((entry) {
-            return AnimatedContainer(
-              duration: Duration(milliseconds: 300),
-              width: _currentIndex == entry.key ? 30.0.w : 8.0.w,
-              height: 8.0.h,
-              margin: EdgeInsets.symmetric(horizontal: 8.0.w),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8.r),
-                color: _currentIndex == entry.key
-                    ? Colors.orange
-                    : Colors.orange.withOpacity(0.1.sp),
-              ),
-            );
-          }).toList(),
-        ),
-      ],
+              },
+              scrollDirection: Axis.horizontal,
+              reverse: false,
+              enableInfiniteScroll: true,
+            ),
+          ),
+
+          SizedBox(height: 12),
+          // Dot Indicator (Reactive with Riverpod)
+
+        ],
+      ),
     );
   }
   void watch(){}
