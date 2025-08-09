@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:market_jango/core/theme/text_theme.dart';
 import '../constants/color_control/theme_color_controller.dart';
+import 'elevated_button_theme.dart';
 import 'input_decoration_theme.dart';
 import 'logic/theme_changer.dart';
 final ThemeChanger _themeController = Get.put(ThemeChanger());
@@ -12,15 +14,18 @@ ThemeData themeMood(){
   brightness:brightness,
   colorScheme: ColorScheme.light(
     brightness: brightness,
-      primary: ThemeColorController.green,
-      onPrimary:_themeController.isDarkMode.value?  ThemeColorController.white :ThemeColorController.black,
-      secondary:ThemeColorController.green,
-      onSecondary:_themeController.isDarkMode.value? ThemeColorController.white:ThemeColorController.black,
-      surface:  _themeController.isDarkMode.value? ThemeColorController.black:ThemeColorController.white,
-      onSurface:_themeController.isDarkMode.value? ThemeColorController.white:ThemeColorController.black),
+      primary: _themeController.isDarkMode.value?  ThemeColorController.white :ThemeColorController.black,
+      onPrimary:_themeController.isDarkMode.value?  ThemeColorController.black :ThemeColorController.white,
+      secondary:_themeController.isDarkMode.value?  ThemeColorController.white :ThemeColorController.black,
+      onSecondary:_themeController.isDarkMode.value? ThemeColorController.black:ThemeColorController.white,
+      surface:  _themeController.isDarkMode.value? ThemeColorController.white:ThemeColorController.black,
+      onSurface:_themeController.isDarkMode.value?
+      ThemeColorController.black:ThemeColorController.white),
 inputDecorationTheme: inputDecorationTheme,
   useMaterial3: true,
-  scaffoldBackgroundColor: _themeController.isDarkMode.value? ThemeColorController.white: ThemeColorController.black,
-    textTheme: textTheme
+  scaffoldBackgroundColor: _themeController.isDarkMode.value?
+  ThemeColorController.white: ThemeColorController.black,
+    textTheme: textTheme,
+      elevatedButtonTheme: elevatedButtonTheme()
 );
 }
