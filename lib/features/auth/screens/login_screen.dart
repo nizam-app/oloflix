@@ -148,30 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // Widget _buildTermsText() {
-  //   return RichText(
-  //     text: TextSpan(
-  //       children: [
-  //         TextSpan(
-  //           text: "By Signing in you accept ",
-  //           style: TextStyle(color: Colors.white, fontSize: 12.sp),
-  //         ),
-  //         TextSpan(
-  //           text: "Terms ",
-  //           style: TextStyle(color: Colors.pinkAccent, fontSize: 12.sp),
-  //         ),
-  //         TextSpan(
-  //           text: "and ",
-  //           style: TextStyle(color: Colors.white, fontSize: 12.sp),
-  //         ),
-  //         TextSpan(
-  //           text: "Privacy Policy",
-  //           style: TextStyle(color: Colors.orange, fontSize: 12.sp),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
+  
 
   Widget _buildSignupText(BuildContext context) {
     return Center(
