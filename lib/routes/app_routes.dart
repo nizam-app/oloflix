@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:market_jango/features/about/screen/about_screen.dart';
 import 'package:market_jango/features/comedy/screen/shows_comedy_screen.dart';
 import 'package:market_jango/features/auth/screens/forgod_screen.dart';
 import 'package:market_jango/features/auth/screens/login_screen.dart';
 import 'package:market_jango/features/auth/screens/signup_screen.dart';
 import 'package:market_jango/features/auth/screens/splash_screen.dart';
-import 'package:market_jango/features/home/screens/dashboard_screen.dart';
+import 'package:market_jango/features/contact/screen/contact_screen.dart';
+import 'package:market_jango/features/delete_account/screen/delete_account_screen.dart';
+import 'package:market_jango/features/deshboard/screen/dashboard_screen.dart';
 import 'package:market_jango/features/home/screens/home_screen.dart';
-import 'package:market_jango/features/home/screens/my_watchlist_screen.dart';
-import 'package:market_jango/features/home/screens/subscription_plan_screen.dart';
+import 'package:market_jango/features/pricing_refunds/screen/pricing_refunds_screen.dart';
+import 'package:market_jango/features/privacy_policy/screen/privacy_screen.dart';
+import 'package:market_jango/features/terms_of/screen/terms_of_use_screen.dart';
+import 'package:market_jango/features/watchlist/screen/my_watchlist_screen.dart';
+import 'package:market_jango/features/subscription/screen/subscription_plan_screen.dart';
 import 'package:market_jango/features/home/widgets/bottom_nav_bar/screen/bottom_nav_bar.dart';
 import 'package:market_jango/features/live/screen/live_screen.dart';
 import 'package:market_jango/features/movies/screen/movies_screen.dart';
@@ -130,7 +136,37 @@ GoRoute(
       builder: (context, state) => SettingScreen(),
     ),
 
-
+    // This is Bottom side navigation
+    GoRoute(
+      path: AboutScreen.routeName,
+      name: AboutScreen.routeName,
+      builder: (context, state) => AboutScreen(),
+    ),
+  GoRoute(
+      path: TermsOfUseScreen.routeName,
+      name: TermsOfUseScreen.routeName,
+      builder: (context, state) => TermsOfUseScreen(),
+    ),
+  GoRoute(
+      path: PrivacyScreen.routeName,
+      name: PrivacyScreen.routeName,
+      builder: (context, state) => PrivacyScreen(),
+    ),
+  GoRoute(
+      path: PricingRefundsScreen.routeName,
+      name: PricingRefundsScreen.routeName,
+      builder: (context, state) => PricingRefundsScreen(),
+    ),
+GoRoute(
+      path: ContactScreen.routeName,
+      name: ContactScreen.routeName,
+      builder: (context, state) => ContactScreen(),
+    ),
+    GoRoute(
+      path: DeleteAccountScreen.routeName,
+      name: DeleteAccountScreen.routeName,
+      builder: (context, state) => DeleteAccountScreen(),
+    ),
 
   ],
 );
