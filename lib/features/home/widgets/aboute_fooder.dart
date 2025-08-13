@@ -33,7 +33,7 @@ class FooterSection extends StatelessWidget {
             "Connect with us",
             style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.bold),
           ),
-          Container(height: 2, width: 40, color: Colors.red),
+          
           SizedBox(height: 10.h),
           Row(
             children: [

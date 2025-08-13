@@ -101,6 +101,8 @@ GoRoute(
       builder: (context, state) => DashboardScreen(),
     ), 
 
+  
+
     GoRoute(
       path: MoviesScreen.routeName,
       name: MoviesScreen.routeName,

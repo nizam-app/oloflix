@@ -40,7 +40,7 @@ Widget dashboardTextImages(BuildContext context) {
       width: double.infinity,
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: AssetImage("assets/images/background.jpg"),
+          image: AssetImage("assets/images/background.png"),
           fit: BoxFit.cover,
         ),
       ),
@@ -52,7 +52,7 @@ Widget dashboardTextImages(BuildContext context) {
           Text(
             "Dashboard",
             style: TextStyle(
-              fontSize: 25.sp,
+              fontSize: 30.sp,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
@@ -66,11 +66,11 @@ Widget dashboardTextImages(BuildContext context) {
                 onTap: () => context.push("/homePage"),
                 child: Text(
                   "Home",
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ),
               SizedBox(width: 5),
-              Icon(Icons.arrow_right, size: 16),
+              Icon(Icons.arrow_right, size: 20),
               SizedBox(width: 5),
               InkWell(
                 onTap: () {
@@ -78,7 +78,7 @@ Widget dashboardTextImages(BuildContext context) {
                 },
                 child: Text(
                   "Dashboard",
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -272,6 +272,13 @@ Widget dashboardDeailsn() {
 }
 
 Widget userHistory() {
+      List<String> headers = [
+  "Plan",
+  "Amount",
+  "Payment Gateway",
+  "Payment ID",
+  "Payment Date"
+];
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -284,70 +291,42 @@ Widget userHistory() {
               ),
             ),
             SizedBox(height: 10.h),
-      Container(
-        height: 60.h,
-        width: double.infinity,
-        decoration: BoxDecoration(
-        color:  Color.fromARGB(255, 119, 93, 184),
-          borderRadius: BorderRadius.circular(8), 
+  
+
+Container(
+  height: 60.h,
+  width: double.infinity,
+  decoration: BoxDecoration(
+    color: Color.fromARGB(255, 119, 93, 184),
+    borderRadius: BorderRadius.circular(8),
+  ),
+  child: ListView.builder(
+    scrollDirection: Axis.horizontal, 
+    itemCount: headers.length,
+    itemBuilder: (context, index) {
+      return InkWell(
+        onTap: () {
+          
+          
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Center(
+            child: Text(
+              headers[index],
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white, 
+              ),
+            ),
+          ),
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            InkWell(
-              onTap: () {
+      );
+    },
+  ),
+),  
 
-              },
-              child: Text(
-                "Plan",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-            ),
-            SizedBox(width: 5),
-           Spacer(),  
-            
-            InkWell(
-              onTap: () {
-               // context.push("/dashboard");
-              },
-              child: Text(
-                "Amount",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-            ),
-              
-              InkWell(
-              onTap: () {
-               // context.push("/dashboard");
-              },
-              child: Text(
-                "Payment Gettway",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-            ),
-            InkWell(
-              onTap: () {
-               // context.push("/dashboard");
-              },
-              child: Text(
-                "Payment ID ",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-            ),
-            InkWell(
-              onTap: () {
-               // context.push("/dashboard");
-              },
-              child: Text(
-                "Payment Date",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-            ),
-
-
-          ],
-        ),
-      ),
     ],
   );
 }

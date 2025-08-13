@@ -44,7 +44,7 @@ class ProfileScreen extends StatelessWidget {
         width: double.infinity,
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage("assets/images/background.jpg"),
+            image: AssetImage("assets/images/background.png"),
             fit: BoxFit.cover,
           ),
         ),
@@ -56,7 +56,7 @@ class ProfileScreen extends StatelessWidget {
             Text(
               "Edit Profile",
               style: TextStyle(
-                fontSize: 25.sp,
+                fontSize: 30.sp,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
@@ -70,11 +70,11 @@ class ProfileScreen extends StatelessWidget {
                   onTap: () => context.push("/homePage"),
                   child: Text(
                     "Home",
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
                 SizedBox(width: 5),
-                Icon(Icons.arrow_right, size: 16),
+                Icon(Icons.arrow_right, size: 20),
                 SizedBox(width: 5),
                 InkWell(
                   onTap: () {
@@ -82,11 +82,11 @@ class ProfileScreen extends StatelessWidget {
                   },
                   child: Text(
                     "Dashboard",
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, ),
                   ),
                 ),
                 SizedBox(width: 5),
-                Icon(Icons.arrow_right, size: 16),
+                Icon(Icons.arrow_right, size: 20),
                 SizedBox(width: 5),
                 InkWell(
                   onTap: () {
@@ -94,7 +94,7 @@ class ProfileScreen extends StatelessWidget {
                   },
                   child: Text(
                     "Edit Profile ",
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
