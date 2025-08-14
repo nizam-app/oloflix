@@ -20,6 +20,7 @@ import 'package:market_jango/features/movies/screen/movies_screen.dart';
 import 'package:market_jango/features/music_video/screen/music_video_screen.dart';
 import 'package:market_jango/features/nollywood/screen/nollywood_screen.dart';
 import 'package:market_jango/features/ppv/screen/ppv_screen.dart';
+import 'package:market_jango/features/profile/screen/dashboard.dart';
 import 'package:market_jango/features/profile/screen/profile_screen.dart';
 import 'package:market_jango/features/setting/screen/setting_screen.dart';
 import 'package:market_jango/features/tv_shows/screen/tv_shows_screen.dart';

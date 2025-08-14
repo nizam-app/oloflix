@@ -16,7 +16,7 @@ class FooterSection extends StatelessWidget {
     return Container(
       color: const Color(0xFF171029),
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 30.h),
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 30.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -41,6 +41,7 @@ class FooterSection extends StatelessWidget {
             "Connect with us",
             style: TextStyle(color: ThemeColorController.white, fontSize: 14.sp, fontWeight: FontWeight.bold),
           ),
+          
           SizedBox(height: 10.h),
           Row(
             children: [

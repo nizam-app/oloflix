@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import 'package:market_jango/features/home/widgets/aboute_fooder.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -8,10 +10,10 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+     backgroundColor: Color(0xFF171029),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 20.w),
+         // padding: EdgeInsets.symmetric(horizontal: 20.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -22,8 +24,13 @@ class ProfileScreen extends StatelessWidget {
               customField(context, label: "Password", hint: "12345678"),
               customField(context, label: "Phone", hint: "+880 1826344872"),
               customField(context, label: "Address", hint: "Dhaka, Bangladesh"),
-              customField(context, label: "Profile Images", hint: "upload "),
+              SizedBox(height: 10.h),
+              imageUpload(),
+               SizedBox(height: 10.h),
+               FooterSection()
+
             ],
+
           ),
         ),
       ),
@@ -31,28 +38,70 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget profileTextImages(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(height: 30.h),
-        Text(
-          "Your Profile",
-          style: TextStyle(
-            fontSize: 22.sp,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+    return SafeArea(
+      child: Container(
+        height: 200.h,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage("assets/images/background.png"),
+            fit: BoxFit.cover,
           ),
         ),
-        SizedBox(height: 20.h),
-        Center(
-  child: CircleAvatar(
-    radius: 50,
-    backgroundImage: NetworkImage(
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face",
-    ),
-     child: Icon(Icons.person, size: 50, color: Colors.white.withOpacity(0.5)),
-  ),
-),
-      ],
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(height: 40.h),
+            Text(
+              "Edit Profile",
+              style: TextStyle(
+                fontSize: 30.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(height: 10.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                InkWell(
+                  onTap: () => context.push("/homePage"),
+                  child: Text(
+                    "Home",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                SizedBox(width: 5),
+                Icon(Icons.arrow_right, size: 20),
+                SizedBox(width: 5),
+                InkWell(
+                  onTap: () {
+                    context.push("/dashboard");
+                  },
+                  child: Text(
+                    "Dashboard",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, ),
+                  ),
+                ),
+                SizedBox(width: 5),
+                Icon(Icons.arrow_right, size: 20),
+                SizedBox(width: 5),
+                InkWell(
+                  onTap: () {
+                   // context.push("/profile");
+                  },
+                  child: Text(
+                    "Edit Profile ",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -62,7 +111,8 @@ class ProfileScreen extends StatelessWidget {
     required String hint,
   }) {
     return Padding(
-      padding: EdgeInsets.only(top: 15.h),
+      //padding: EdgeInsets.only(top: 15.h),
+      padding: EdgeInsets.symmetric(horizontal: 20.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -70,7 +120,7 @@ class ProfileScreen extends StatelessWidget {
             label,
             style: TextStyle(
               color: Colors.white,
-              fontSize: 20.sp,
+              fontSize: 14.sp,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -92,4 +142,75 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget imageUpload() {
+  return Padding(
+    padding: EdgeInsets.symmetric(horizontal: 20.w),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Profile Image ",
+          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 10.h,), 
+        Container(
+          padding: EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Color(0xFF1F1F1F),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        "Choose File..",
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                    ),
+                    Container(
+                   
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Colors.orange, Colors.red],
+                        ),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        "BROWSE",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 16.h),
+        CircleAvatar(
+          radius: 20,
+          backgroundColor: Colors.grey[700],
+          child: Icon(Icons.person, color: Colors.white),
+        ),
+        SizedBox(height: 16.h),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: [Colors.orange, Colors.red]),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text("UPDATE", style: TextStyle(color: Colors.white)),
+        ),
+      ],
+    ),
+  );
 }
