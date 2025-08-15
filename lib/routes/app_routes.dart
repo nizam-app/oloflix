@@ -1,61 +1,65 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:go_router/go_router.dart';
+
+// Project imports:
+import 'package:market_jango/core/widget/bottom_nav_bar/screen/bottom_nav_bar.dart';
 import 'package:market_jango/features/about/screen/about_screen.dart';
-import 'package:market_jango/features/comedy/screen/shows_comedy_screen.dart';
 import 'package:market_jango/features/auth/screens/forgod_screen.dart';
 import 'package:market_jango/features/auth/screens/login_screen.dart';
 import 'package:market_jango/features/auth/screens/signup_screen.dart';
 import 'package:market_jango/features/auth/screens/splash_screen.dart';
+import 'package:market_jango/features/comedy/screen/shows_comedy_screen.dart';
 import 'package:market_jango/features/contact/screen/contact_screen.dart';
 import 'package:market_jango/features/delete_account/screen/delete_account_screen.dart';
 import 'package:market_jango/features/deshboard/screen/dashboard_screen.dart';
 import 'package:market_jango/features/home/screens/home_screen.dart';
-import 'package:market_jango/features/pricing_refunds/screen/pricing_refunds_screen.dart';
-import 'package:market_jango/features/privacy_policy/screen/privacy_screen.dart';
-import 'package:market_jango/features/terms_of/screen/terms_of_use_screen.dart';
-import 'package:market_jango/features/watchlist/screen/my_watchlist_screen.dart';
-import 'package:market_jango/features/subscription/screen/subscription_plan_screen.dart';
-import 'package:market_jango/features/home/widgets/bottom_nav_bar/screen/bottom_nav_bar.dart';
 import 'package:market_jango/features/live/screen/live_screen.dart';
 import 'package:market_jango/features/movies/screen/movies_screen.dart';
 import 'package:market_jango/features/music_video/screen/music_video_screen.dart';
 import 'package:market_jango/features/nollywood/screen/nollywood_screen.dart';
 import 'package:market_jango/features/ppv/screen/ppv_screen.dart';
-import 'package:market_jango/features/profile/screen/dashboard.dart';
+import 'package:market_jango/features/pricing_refunds/screen/pricing_refunds_screen.dart';
+import 'package:market_jango/features/privacy_policy/screen/privacy_policy_screen.dart';
 import 'package:market_jango/features/profile/screen/profile_screen.dart';
 import 'package:market_jango/features/setting/screen/setting_screen.dart';
+import 'package:market_jango/features/subscription/screen/subscription_plan_screen.dart';
+import 'package:market_jango/features/terms_of/screen/terms_of_use_screen.dart';
 import 'package:market_jango/features/tv_shows/screen/tv_shows_screen.dart';
+import 'package:market_jango/features/watchlist/screen/my_watchlist_screen.dart';
 
 final GoRouter router = GoRouter(
-  initialLocation: "${SplashScreen.routeName}",
+  initialLocation: SplashScreen.routeName,
   errorBuilder: (context, state) =>
       Scaffold(body: Center(child: Text('Error: ${state.error} '))),
 
   routes: [
     GoRoute(
-        path:HomeScreen.routeName,
+      path: HomeScreen.routeName,
       name: "homePage",
-    builder: (context,state)=> HomeScreen(),
+      builder: (context, state) => HomeScreen(),
     ),
- GoRoute(
-        path:ProfileScreen.routeName,
+    GoRoute(
+      path: ProfileScreen.routeName,
       name: "profile",
-    builder: (context,state)=> const ProfileScreen(),
+      builder: (context, state) => const ProfileScreen(),
     ),
- GoRoute(
-        path:DashboardScreen.routeName,
-    name: DashboardScreen.routeName ,
-    builder: (context,state)=>const DashboardScreen(),
+    GoRoute(
+      path: DashboardScreen.routeName,
+      name: DashboardScreen.routeName,
+      builder: (context, state) => const DashboardScreen(),
     ),
- GoRoute(
-        path:MyWatchlistScreen.routeName,
+    GoRoute(
+      path: MyWatchlistScreen.routeName,
       name: MyWatchlistScreen.routeName,
-    builder: (context,state)=>const MyWatchlistScreen(),
+      builder: (context, state) => const MyWatchlistScreen(),
     ),
-GoRoute(
-        path:SubscriptionPlanScreen.routeName,
+    GoRoute(
+      path: SubscriptionPlanScreen.routeName,
       name: SubscriptionPlanScreen.routeName,
-    builder: (context,state)=>const SubscriptionPlanScreen(),
+      builder: (context, state) => const SubscriptionPlanScreen(),
     ),
 
     GoRoute(
@@ -82,8 +86,6 @@ GoRoute(
       builder: (context, state) => ForgotScreen(),
     ),
 
-  
-
     GoRoute(
       path: BottomNavBar.routeName,
       name: "bottom_nav_bar",
@@ -102,13 +104,11 @@ GoRoute(
       builder: (context, state) => PpvScreen(),
     ),
 
-     GoRoute(
+    GoRoute(
       path: DashboardScreen.routeName,
       name: "dashboard",
       builder: (context, state) => DashboardScreen(),
-    ), 
-
-  
+    ),
 
     GoRoute(
       path: MoviesScreen.routeName,
@@ -121,25 +121,25 @@ GoRoute(
       builder: (context, state) => TvShowsScreen(),
     ),
 
-GoRoute(
+    GoRoute(
       path: MusicVideoScreen.routeName,
       name: MusicVideoScreen.routeName,
       builder: (context, state) => MusicVideoScreen(),
     ),
 
-GoRoute(
+    GoRoute(
       path: NollywoodScreen.routeName,
       name: NollywoodScreen.routeName,
       builder: (context, state) => NollywoodScreen(),
     ),
 
-GoRoute(
+    GoRoute(
       path: ShowsComedyScreen.routeName,
       name: ShowsComedyScreen.routeName,
       builder: (context, state) => ShowsComedyScreen(),
     ),
 
-GoRoute(
+    GoRoute(
       path: SettingScreen.routeName,
       name: SettingScreen.routeName,
       builder: (context, state) => SettingScreen(),
@@ -151,22 +151,22 @@ GoRoute(
       name: AboutScreen.routeName,
       builder: (context, state) => AboutScreen(),
     ),
-  GoRoute(
+    GoRoute(
       path: TermsOfUseScreen.routeName,
       name: TermsOfUseScreen.routeName,
       builder: (context, state) => TermsOfUseScreen(),
     ),
-  GoRoute(
-      path: PrivacyScreen.routeName,
-      name: PrivacyScreen.routeName,
-      builder: (context, state) => PrivacyScreen(),
+    GoRoute(
+      path: PrivacyPolicyScreen.routeName,
+      name: PrivacyPolicyScreen.routeName,
+      builder: (context, state) => PrivacyPolicyScreen(),
     ),
-  GoRoute(
+    GoRoute(
       path: PricingRefundsScreen.routeName,
       name: PricingRefundsScreen.routeName,
       builder: (context, state) => PricingRefundsScreen(),
     ),
-GoRoute(
+    GoRoute(
       path: ContactScreen.routeName,
       name: ContactScreen.routeName,
       builder: (context, state) => ContactScreen(),
@@ -176,6 +176,5 @@ GoRoute(
       name: DeleteAccountScreen.routeName,
       builder: (context, state) => DeleteAccountScreen(),
     ),
-
   ],
 );

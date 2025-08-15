@@ -1,6 +1,11 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:market_jango/features/home/widgets/aboute_fooder.dart';
+
+// Project imports:
+import 'package:market_jango/core/widget/aboute_fooder.dart';
 
 class PpvScreen extends StatelessWidget {
   const PpvScreen({super.key});
@@ -14,24 +19,21 @@ class PpvScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-             playViewText(), 
-             SizedBox(height: 20.h,), 
-             playMovieList() , 
-             SizedBox(height: 60.h,), 
+              playViewText(),
+              SizedBox(height: 20.h),
+              playMovieList(),
+              SizedBox(height: 60.h),
               FooterSection(),
-
             ],
           ),
         ),
       ),
     );
-  
   }
 }
 
-
 Widget playViewText() {
-      return Padding(
+  return Padding(
     padding: EdgeInsets.only(top: 40.h),
     child: Container(
       height: 60.h,
@@ -40,7 +42,7 @@ Widget playViewText() {
         color: const Color.fromARGB(255, 119, 93, 184),
         borderRadius: BorderRadius.circular(8),
       ),
-     
+
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -59,15 +61,12 @@ Widget playViewText() {
               ),
             ),
           ),
-          Container(), 
+          Container(),
         ],
       ),
     ),
   );
 }
- 
-
-
 
 Widget playMovieList() {
   final List<String> images = [
@@ -110,35 +109,26 @@ Widget playMovieList() {
               alignment: Alignment.bottomCenter,
               children: [
                 Positioned.fill(
-                  child: Image.asset(
-                    images[index],
-                    fit: BoxFit.cover,
-                  ),
+                  child: Image.asset(images[index], fit: BoxFit.cover),
                 ),
-                
-                Positioned.fill(
-                  child: Container(
-                    color: Colors.black26,
-                  ),
-                ),
-                
-                Container(
-                  
-             width: double.infinity,
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [Colors.orange, Colors.red]),
-                borderRadius: BorderRadius.circular(4),
-              ),
-             
-                child:  
-              
-                  Text("ELENIYAN The retur..", style: TextStyle(color: Colors.white)),
-               
-              ),
-           
 
-                
+                Positioned.fill(child: Container(color: Colors.black26)),
+
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.orange, Colors.red],
+                    ),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+
+                  child: Text(
+                    "ELENIYAN The retur..",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
               ],
             ),
           ),
@@ -157,9 +147,7 @@ class MovieDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Movie Detail")),
-      body: Center(
-        child: Image.asset(image),
-      ),
+      body: Center(child: Image.asset(image)),
     );
   }
 }

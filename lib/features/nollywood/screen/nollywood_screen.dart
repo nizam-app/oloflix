@@ -1,3 +1,4 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 class NollywoodScreen extends StatelessWidget {
@@ -6,10 +7,6 @@ class NollywoodScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text("NollywoodScreen"),
-      ),
-    );
+    return const Scaffold(body: Center(child: Text("NollywoodScreen")));
   }
 }
