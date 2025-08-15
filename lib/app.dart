@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Project imports:
 import 'package:market_jango/routes/app_routes.dart';
 import 'core/theme/light_dark_theme.dart';
 
@@ -19,4 +22,3 @@ class _AppState extends State<App> {
     );
   }
 }
-

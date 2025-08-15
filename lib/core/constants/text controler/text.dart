@@ -8,7 +8,7 @@ Map<String, String> settingTextEn = {
   "app_language": "Language",
   "about_app": "About App",
   "manage_account": "Manage Account",
-  "logout": "Logout"
+  "logout": "Logout",
 };
 Map<String, String> settingTextBn = {
   "settings": "সেটিংস",
@@ -20,7 +20,7 @@ Map<String, String> settingTextBn = {
   "app_language": "ভাষা",
   "about_app": "অ্যাপ সম্পর্কে",
   "manage_account": "অ্যাকাউন্ট ম্যানেজ করুন",
-  "logout": "লগ আউট"
+  "logout": "লগ আউট",
 };
 const Map<String, String> homeTextEn = {
   'search': 'Search',

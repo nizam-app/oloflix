@@ -1,3 +1,4 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
 
 class TvShowsScreen extends StatelessWidget {
@@ -6,10 +7,6 @@ class TvShowsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text("TvShowsScreen"),
-      ),
-    );
+    return const Scaffold(body: Center(child: Text("TvShowsScreen")));
   }
 }

@@ -1,6 +1,11 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+
+// Project imports:
 import 'package:market_jango/features/auth/widgets/custom_buttom.dart';
 
 class SignupScreen extends StatelessWidget {
@@ -160,10 +165,7 @@ class SignupBottomText extends StatelessWidget {
                 onTap: () => context.push('/login_screen'),
                 child: Text(
                   " Signin",
-                  style: TextStyle(
-                    color: Colors.orange,
-                    fontSize: 13.sp,
-                  ),
+                  style: TextStyle(color: Colors.orange, fontSize: 13.sp),
                 ),
               ),
             ),

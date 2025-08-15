@@ -1,7 +1,12 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:market_jango/features/home/widgets/aboute_fooder.dart';
+
+// Project imports:
+import 'package:market_jango/core/widget/aboute_fooder.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -12,7 +17,6 @@ class DashboardScreen extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-        
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -22,9 +26,6 @@ class DashboardScreen extends StatelessWidget {
               SizedBox(height: 20.h),
               userHistory(),
               FooterSection(),
-              
-              
-
             ],
           ),
         ),
@@ -74,7 +75,7 @@ Widget dashboardTextImages(BuildContext context) {
               SizedBox(width: 5),
               InkWell(
                 onTap: () {
-                 // context.push("/dashboard");
+                  // context.push("/dashboard");
                 },
                 child: Text(
                   "Dashboard",
@@ -166,15 +167,12 @@ Widget dashboardDeailsn() {
               width: double.infinity,
               padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.w),
               decoration: BoxDecoration(
-              color: Color.fromARGB(255, 119, 93, 184),
+                color: Color.fromARGB(255, 119, 93, 184),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 20.w,
-                  vertical: 10.w,
-                ),
-              
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.w),
+
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -209,21 +207,18 @@ Widget dashboardDeailsn() {
               ),
             ),
 
-           SizedBox(height: 10.h,),
-           Container(
+            SizedBox(height: 10.h),
+            Container(
               height: 180,
               width: double.infinity,
               padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.w),
               decoration: BoxDecoration(
-              color: Color.fromARGB(255, 119, 93, 184),
+                color: Color.fromARGB(255, 119, 93, 184),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 20.w,
-                  vertical: 10.w,
-                ),
-              
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.w),
+
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -272,61 +267,56 @@ Widget dashboardDeailsn() {
 }
 
 Widget userHistory() {
-      List<String> headers = [
-  "Plan",
-  "Amount",
-  "Payment Gateway",
-  "Payment ID",
-  "Payment Date"
-];
+  List<String> headers = [
+    "Plan",
+    "Amount",
+    "Payment Gateway",
+    "Payment ID",
+    "Payment Date",
+  ];
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-            Text(
-              "User History",
-              style: TextStyle(
-                fontSize: 25.sp,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(height: 10.h),
-  
-
-Container(
-  height: 60.h,
-  width: double.infinity,
-  decoration: BoxDecoration(
-    color: Color.fromARGB(255, 119, 93, 184),
-    borderRadius: BorderRadius.circular(8),
-  ),
-  child: ListView.builder(
-    scrollDirection: Axis.horizontal, 
-    itemCount: headers.length,
-    itemBuilder: (context, index) {
-      return InkWell(
-        onTap: () {
-          
-          
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Center(
-            child: Text(
-              headers[index],
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white, 
-              ),
-            ),
-          ),
+      Text(
+        "User History",
+        style: TextStyle(
+          fontSize: 25.sp,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
         ),
-      );
-    },
-  ),
-),  
+      ),
+      SizedBox(height: 10.h),
 
+      Container(
+        height: 60.h,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Color.fromARGB(255, 119, 93, 184),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: headers.length,
+          itemBuilder: (context, index) {
+            return InkWell(
+              onTap: () {},
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Center(
+                  child: Text(
+                    headers[index],
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
     ],
   );
 }

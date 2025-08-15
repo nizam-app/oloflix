@@ -1,8 +1,13 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+
+// Project imports:
+import 'package:market_jango/core/widget/bottom_nav_bar/screen/bottom_nav_bar.dart';
 import 'package:market_jango/features/auth/widgets/custom_buttom.dart';
-import 'package:market_jango/features/home/widgets/bottom_nav_bar/screen/bottom_nav_bar.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -68,10 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
               },
               child: Text(
                 "Skip",
-                style: TextStyle(
-                  color: Colors.pinkAccent,
-                  fontSize: 14.sp,
-                ),
+                style: TextStyle(color: Colors.pinkAccent, fontSize: 14.sp),
               ),
             ),
           ],
@@ -129,10 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
               checkColor: Colors.black,
               activeColor: Colors.white,
             ),
-            Text(
-              "Remember Me",
-              style: TextStyle(color: Colors.white),
-            ),
+            Text("Remember Me", style: TextStyle(color: Colors.white)),
           ],
         ),
         TextButton(
@@ -147,8 +146,6 @@ class _LoginScreenState extends State<LoginScreen> {
       ],
     );
   }
-
-  
 
   Widget _buildSignupText(BuildContext context) {
     return Center(
