@@ -15,6 +15,7 @@ import 'package:market_jango/features/delete_account/screen/delete_account_scree
 import 'package:market_jango/features/pricing_refunds/screen/pricing_refunds_screen.dart';
 import 'package:market_jango/features/privacy_policy/screen/privacy_policy_screen.dart';
 import 'package:market_jango/features/terms_of/screen/terms_of_use_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class FooterSection extends StatelessWidget {
   const FooterSection({super.key});
@@ -87,7 +88,7 @@ class FooterSection extends StatelessWidget {
           SizedBox(height: 10.h),
           Row(
             children: [
-              buildCircleAvatar(onTap: () {}, icon: FontAwesomeIcons.twitter),
+              buildCircleAvatar(onTap: () {goToTwitter();}, icon: FontAwesomeIcons.twitter),
 
               SizedBox(width: 10.w),
               buildCircleAvatar(onTap: () {}, icon: FontAwesomeIcons.instagram),
@@ -97,6 +98,14 @@ class FooterSection extends StatelessWidget {
       ),
     );
   }
+  void goToTwitter() async {
+  final Uri url = Uri.parse("https://x.com/oloflix");
+  if (await canLaunchUrl(url)) {
+  await launchUrl(url, mode: LaunchMode.externalApplication);
+  } else {
+  print('Could not launch $url');
+  }
+}
 
   InkWell buildCircleAvatar({
     required VoidCallback onTap,

@@ -11,6 +11,7 @@ import 'package:market_jango/core/constants/color_control/all_color.dart';
 import 'package:market_jango/core/constants/color_control/theme_color_controller.dart';
 import 'package:market_jango/core/constants/image_control/image_path.dart';
 import 'package:market_jango/core/theme/logic/theme_changer.dart';
+import 'package:market_jango/core/widget/bottom_nav_bar/screen/bottom_nav_bar.dart';
 import 'package:market_jango/features/deshboard/screen/dashboard_screen.dart';
 import 'package:market_jango/features/home/screens/home_screen.dart';
 import 'package:market_jango/features/profile/screen/profile_screen.dart';
@@ -26,7 +27,11 @@ class CustomHomeTopperSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            Image.asset(ImagePath.logo, width: 80.w),
+            InkWell(
+              onTap: (){
+                context.go(BottomNavBar.routeName);
+              },
+                child: Image.asset(ImagePath.logo, width: 80.w)),
             Spacer(),
             InkWell(
               onTap: () {

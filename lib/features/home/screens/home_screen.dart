@@ -13,6 +13,7 @@ import 'package:market_jango/core/constants/color_control/theme_color_controller
 import 'package:market_jango/core/constants/image_control/image_path.dart';
 import 'package:market_jango/core/widget/aboute_fooder.dart';
 import 'package:market_jango/core/widget/custom_home_topper_section.dart';
+import 'package:market_jango/core/widget/custom_primium_button.dart';
 import 'package:market_jango/features/comedy/screen/shows_comedy_screen.dart';
 import 'package:market_jango/features/home/logic/movie_selaider_manage.dart';
 import 'package:market_jango/features/live/screen/live_screen.dart';
@@ -437,14 +438,9 @@ class CustomCard extends StatelessWidget {
 
               // PG 15+ top-right
               Positioned(
-                top: 5,
-                right: 10,
-                child: Icon(
-                  Icons.workspace_premium,
-                  size: 28.sp,
-                  color: AllColor.amber,
-                ),
-              ),
+                top: 8.h,
+                right: 18.w,
+                  child: CustomPrimiumButton()),
 
               // Left/Right Arrow
             ],
