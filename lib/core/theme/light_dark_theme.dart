@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 // Project imports:
-import 'package:market_jango/core/theme/text_theme.dart';
+import 'package:Oloflix/core/theme/text_theme.dart';
 import '../constants/color_control/theme_color_controller.dart';
 import 'elevated_button_theme.dart';
 import 'input_decoration_theme.dart';

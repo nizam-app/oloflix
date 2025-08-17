@@ -7,14 +7,14 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:market_jango/core/constants/color_control/all_color.dart';
-import 'package:market_jango/core/constants/color_control/theme_color_controller.dart';
-import 'package:market_jango/features/about/screen/about_screen.dart';
-import 'package:market_jango/features/contact/screen/contact_screen.dart';
-import 'package:market_jango/features/delete_account/screen/delete_account_screen.dart';
-import 'package:market_jango/features/pricing_refunds/screen/pricing_refunds_screen.dart';
-import 'package:market_jango/features/privacy_policy/screen/privacy_policy_screen.dart';
-import 'package:market_jango/features/terms_of/screen/terms_of_use_screen.dart';
+import 'package:Oloflix/core/constants/color_control/all_color.dart';
+import 'package:Oloflix/core/constants/color_control/theme_color_controller.dart';
+import 'package:Oloflix/features/about/screen/about_screen.dart';
+import 'package:Oloflix/features/contact/screen/contact_screen.dart';
+import 'package:Oloflix/features/delete_account/screen/delete_account_screen.dart';
+import 'package:Oloflix/features/pricing_refunds/screen/pricing_refunds_screen.dart';
+import 'package:Oloflix/features/privacy_policy/screen/privacy_policy_screen.dart';
+import 'package:Oloflix/features/terms_of/screen/terms_of_use_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class FooterSection extends StatelessWidget {

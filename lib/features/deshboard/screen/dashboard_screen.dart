@@ -1,8 +1,8 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:market_jango/core/widget/aboute_backgrount_image.dart';
-import 'package:market_jango/core/widget/aboute_fooder.dart';
-import 'package:market_jango/core/widget/custom_home_topper_section.dart';
+import 'package:Oloflix/core/widget/aboute_backgrount_image.dart';
+import 'package:Oloflix/core/widget/aboute_fooder.dart';
+import 'package:Oloflix/core/widget/custom_home_topper_section.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});

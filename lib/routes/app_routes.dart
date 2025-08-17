@@ -5,30 +5,26 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:market_jango/core/widget/bottom_nav_bar/screen/bottom_nav_bar.dart';
-import 'package:market_jango/features/about/screen/about_screen.dart';
-import 'package:market_jango/features/auth/screens/forgod_screen.dart';
-import 'package:market_jango/features/auth/screens/login_screen.dart';
-import 'package:market_jango/features/auth/screens/signup_screen.dart';
-import 'package:market_jango/features/auth/screens/splash_screen.dart';
-import 'package:market_jango/features/comedy/screen/shows_comedy_screen.dart';
-import 'package:market_jango/features/contact/screen/contact_screen.dart';
-import 'package:market_jango/features/delete_account/screen/delete_account_screen.dart';
-import 'package:market_jango/features/deshboard/screen/dashboard_screen.dart';
-import 'package:market_jango/features/home/screens/home_screen.dart';
-import 'package:market_jango/features/live/screen/live_screen.dart';
-import 'package:market_jango/features/movies/screen/movies_screen.dart';
-import 'package:market_jango/features/music_video/screen/music_video_screen.dart';
-import 'package:market_jango/features/nollywood/screen/nollywood_screen.dart';
-import 'package:market_jango/features/ppv/screen/ppv_screen.dart';
-import 'package:market_jango/features/pricing_refunds/screen/pricing_refunds_screen.dart';
-import 'package:market_jango/features/privacy_policy/screen/privacy_policy_screen.dart';
-import 'package:market_jango/features/profile/screen/profile_screen.dart';
-import 'package:market_jango/features/setting/screen/setting_screen.dart';
-import 'package:market_jango/features/subscription/screen/subscription_plan_screen.dart';
-import 'package:market_jango/features/terms_of/screen/terms_of_use_screen.dart';
-import 'package:market_jango/features/tv_shows/screen/tv_shows_screen.dart';
-import 'package:market_jango/features/watchlist/screen/my_watchlist_screen.dart';
+import 'package:Oloflix/core/widget/bottom_nav_bar/screen/bottom_nav_bar.dart';
+import 'package:Oloflix/features/about/screen/about_screen.dart';
+import 'package:Oloflix/features/auth/screens/forgod_screen.dart';
+import 'package:Oloflix/features/auth/screens/login_screen.dart';
+import 'package:Oloflix/features/auth/screens/signup_screen.dart';
+import 'package:Oloflix/features/auth/screens/splash_screen.dart';
+import 'package:Oloflix/features/contact/screen/contact_screen.dart';
+import 'package:Oloflix/features/delete_account/screen/delete_account_screen.dart';
+import 'package:Oloflix/features/deshboard/screen/dashboard_screen.dart';
+import 'package:Oloflix/features/home/screens/home_screen.dart';
+import 'package:Oloflix/features/live/screen/live_screen.dart';
+import 'package:Oloflix/features/movies_music_video/screen/movies_screen.dart';
+import 'package:Oloflix/features/ppv/screen/ppv_screen.dart';
+import 'package:Oloflix/features/pricing_refunds/screen/pricing_refunds_screen.dart';
+import 'package:Oloflix/features/privacy_policy/screen/privacy_policy_screen.dart';
+import 'package:Oloflix/features/profile/screen/profile_screen.dart';
+import 'package:Oloflix/features/subscription/screen/subscription_plan_screen.dart';
+import 'package:Oloflix/features/terms_of/screen/terms_of_use_screen.dart';
+import 'package:Oloflix/features/tv_shows/screen/tv_shows_screen.dart';
+import 'package:Oloflix/features/watchlist/screen/my_watchlist_screen.dart';
 
 final GoRouter router = GoRouter(
   initialLocation: SplashScreen.routeName,
@@ -88,7 +84,7 @@ final GoRouter router = GoRouter(
 
     GoRoute(
       path: BottomNavBar.routeName,
-      name: "bottom_nav_bar",
+      name: BottomNavBar.routeName,
       builder: (context, state) => BottomNavBar(),
     ),
 
@@ -120,31 +116,6 @@ final GoRouter router = GoRouter(
       name: TvShowsScreen.routeName,
       builder: (context, state) => TvShowsScreen(),
     ),
-
-    GoRoute(
-      path: MusicVideoScreen.routeName,
-      name: MusicVideoScreen.routeName,
-      builder: (context, state) => MusicVideoScreen(),
-    ),
-
-    GoRoute(
-      path: NollywoodScreen.routeName,
-      name: NollywoodScreen.routeName,
-      builder: (context, state) => NollywoodScreen(),
-    ),
-
-    GoRoute(
-      path: ShowsComedyScreen.routeName,
-      name: ShowsComedyScreen.routeName,
-      builder: (context, state) => ShowsComedyScreen(),
-    ),
-
-    GoRoute(
-      path: SettingScreen.routeName,
-      name: SettingScreen.routeName,
-      builder: (context, state) => SettingScreen(),
-    ),
-
     // This is Bottom side navigation
     GoRoute(
       path: AboutScreen.routeName,

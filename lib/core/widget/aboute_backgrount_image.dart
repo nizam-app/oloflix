@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // Project imports:
-import 'package:market_jango/core/constants/image_control/image_path.dart';
+import 'package:Oloflix/core/constants/image_control/image_path.dart';
 
 class AbouteBackgrountImage extends StatelessWidget {
   const AbouteBackgrountImage({super.key, required this.screenName});

@@ -7,16 +7,18 @@ import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:market_jango/core/constants/color_control/all_color.dart';
-import 'package:market_jango/core/constants/color_control/theme_color_controller.dart';
-import 'package:market_jango/core/constants/image_control/image_path.dart';
-import 'package:market_jango/core/theme/logic/theme_changer.dart';
-import 'package:market_jango/core/widget/bottom_nav_bar/screen/bottom_nav_bar.dart';
-import 'package:market_jango/features/deshboard/screen/dashboard_screen.dart';
-import 'package:market_jango/features/home/screens/home_screen.dart';
-import 'package:market_jango/features/profile/screen/profile_screen.dart';
-import 'package:market_jango/features/subscription/screen/subscription_plan_screen.dart';
-import 'package:market_jango/features/watchlist/screen/my_watchlist_screen.dart';
+import 'package:Oloflix/core/constants/color_control/all_color.dart';
+import 'package:Oloflix/core/constants/color_control/theme_color_controller.dart';
+import 'package:Oloflix/core/constants/image_control/image_path.dart';
+import 'package:Oloflix/core/theme/logic/theme_changer.dart';
+import 'package:Oloflix/core/widget/bottom_nav_bar/screen/bottom_nav_bar.dart';
+import 'package:Oloflix/features/deshboard/screen/dashboard_screen.dart';
+import 'package:Oloflix/features/home/screens/home_screen.dart';
+import 'package:Oloflix/features/profile/screen/profile_screen.dart';
+import 'package:Oloflix/features/subscription/screen/subscription_plan_screen.dart';
+import 'package:Oloflix/features/watchlist/screen/my_watchlist_screen.dart';
+
+import 'bottom_nav_bar/screen/bottom_nav_bar.dart';
 
 class CustomHomeTopperSection extends StatelessWidget {
   CustomHomeTopperSection({super.key});

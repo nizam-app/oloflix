@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:market_jango/core/constants/color_control/all_color.dart';
+import 'package:Oloflix/core/constants/color_control/all_color.dart';
 
 // Project imports:
-import 'package:market_jango/core/widget/aboute_backgrount_image.dart';
-import 'package:market_jango/core/widget/aboute_fooder.dart';
-import 'package:market_jango/core/widget/custom_home_topper_section.dart';
+import 'package:Oloflix/core/widget/aboute_backgrount_image.dart';
+import 'package:Oloflix/core/widget/aboute_fooder.dart';
+import 'package:Oloflix/core/widget/custom_home_topper_section.dart';
 
 class ContactScreen extends StatelessWidget {
   const ContactScreen({super.key});

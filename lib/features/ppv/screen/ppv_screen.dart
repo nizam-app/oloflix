@@ -4,12 +4,13 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:market_jango/core/constants/color_control/all_color.dart';
+import 'package:Oloflix/core/constants/color_control/all_color.dart';
 
 // Project imports:
-import 'package:market_jango/core/widget/aboute_fooder.dart';
-import 'package:market_jango/core/widget/custom_home_topper_section.dart';
-import 'package:market_jango/core/widget/custom_primium_button.dart';
+import 'package:Oloflix/core/widget/aboute_fooder.dart';
+import 'package:Oloflix/core/widget/app_drawer.dart';
+import 'package:Oloflix/core/widget/custom_home_topper_section.dart';
+import 'package:Oloflix/core/widget/custom_primium_button.dart';
 
 class PpvScreen extends StatelessWidget {
   const PpvScreen({super.key});
@@ -18,6 +19,7 @@ class PpvScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      endDrawer: AppDrawer(),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -66,7 +68,7 @@ Widget _buildPayPerViewHeader() {
   );
 }
 
-/// Builds the grid list of Pay Per View movies.
+/// Builds the grid list of Pay Per View movies_music_video.
 ///
 /// This widget handles the layout and data for the movie posters.
 Widget _buildPpvMovieList() {

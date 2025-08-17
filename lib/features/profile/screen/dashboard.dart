@@ -6,7 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:market_jango/core/widget/aboute_fooder.dart';
+import 'package:Oloflix/core/widget/aboute_fooder.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});

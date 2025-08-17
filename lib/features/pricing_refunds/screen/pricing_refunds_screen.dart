@@ -6,10 +6,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:market_jango/core/widget/aboute_backgrount_image.dart';
-import 'package:market_jango/core/widget/aboute_fooder.dart';
-import 'package:market_jango/core/widget/bottom_nav_bar/screen/bottom_nav_bar.dart';
-import 'package:market_jango/core/widget/custom_home_topper_section.dart';
+import 'package:Oloflix/core/widget/aboute_backgrount_image.dart';
+import 'package:Oloflix/core/widget/aboute_fooder.dart';
+import 'package:Oloflix/core/widget/bottom_nav_bar/screen/bottom_nav_bar.dart';
+import 'package:Oloflix/core/widget/custom_home_topper_section.dart';
 
 class PricingRefundsScreen extends StatelessWidget {
   const PricingRefundsScreen({super.key});

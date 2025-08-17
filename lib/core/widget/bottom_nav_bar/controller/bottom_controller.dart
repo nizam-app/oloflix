@@ -1,18 +1,7 @@
-// Package imports:
-import 'package:get/get.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// Project imports:
-import 'package:market_jango/features/home/screens/home_screen.dart';
-import 'package:market_jango/features/live/screen/live_screen.dart';
-import 'package:market_jango/features/ppv/screen/ppv_screen.dart';
-import 'package:market_jango/features/profile/screen/profile_screen.dart';
+final selectedIndexProvider = StateProvider<int>((ref) => 0);
 
-class BottomNavController extends GetxController {
-  var selectedIndex = 0.obs;
-
-  void changeIndex(int index) {
-    selectedIndex.value = index;
-  }
-
-  final pages = [HomeScreen(), PpvScreen(), LiveScreen(), ProfileScreen()];
+void goToPPvScreen(WidgetRef ref,) {
+  ref.read(selectedIndexProvider.notifier).state = 1;
 }

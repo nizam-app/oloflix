@@ -6,8 +6,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
-import 'package:market_jango/core/widget/bottom_nav_bar/screen/bottom_nav_bar.dart';
-import 'package:market_jango/features/auth/widgets/custom_buttom.dart';
+import 'package:Oloflix/core/widget/bottom_nav_bar/screen/bottom_nav_bar.dart';
+import 'package:Oloflix/features/auth/widgets/custom_buttom.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -40,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: 30.h),
               CustomButtom(
                 text: "LOGIN",
-                onTap: () => context.push('/bottom_nav_bar'),
+                onTap: () => context.push(BottomNavBar.routeName),
               ),
               SizedBox(height: 20.h),
               _buildSignupText(context),

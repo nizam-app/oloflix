@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:market_jango/core/constants/color_control/all_color.dart';
+import 'package:Oloflix/core/constants/color_control/all_color.dart';
 
 class CustomPrimiumButton extends StatelessWidget {
   const CustomPrimiumButton({

@@ -10,4 +10,6 @@ class AllColor {
   static final white70 = Colors.white70;
   static final white = Colors.white;
   static final blue = Colors.blue;
+  static final black = Colors.black;
+  static final transparent = Colors.transparent;
 }

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // Project imports:
-import 'package:market_jango/core/constants/color_control/all_color.dart';
+import 'package:Oloflix/core/constants/color_control/all_color.dart';
 
 TextTheme get textTheme {
   return TextTheme(

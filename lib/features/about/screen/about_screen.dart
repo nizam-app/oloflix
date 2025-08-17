@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // Project imports:
-import 'package:market_jango/core/widget/aboute_backgrount_image.dart';
-import 'package:market_jango/core/widget/aboute_fooder.dart';
-import 'package:market_jango/core/widget/custom_home_topper_section.dart';
+import 'package:Oloflix/core/widget/aboute_backgrount_image.dart';
+import 'package:Oloflix/core/widget/aboute_fooder.dart';
+import 'package:Oloflix/core/widget/custom_home_topper_section.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -50,7 +50,7 @@ class AboutScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 16.h), // Responsive spacing
                     Text(
-                      "With Oloflix, you can enjoy a daily blast of entertainment, including new movies, series, short films, podcasts, documentaries and educative videos. Our app features a range of great tools to enhance your viewing experience.",
+                      "With Oloflix, you can enjoy a daily blast of entertainment, including new movies_music_video, series, short films, podcasts, documentaries and educative videos. Our app features a range of great tools to enhance your viewing experience.",
                       style: TextStyle(
                         fontSize: 14.sp,
                         color: Colors.white70,
@@ -59,7 +59,7 @@ class AboutScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 16.h), // Responsive spacing
                     Text(
-                      "With Oloflix, you can enjoy a daily blast of entertainment, including new movies, series, short films, podcasts, documentaries and educative videos. Our app features a range of great tools to enhance your viewing experience.",
+                      "With Oloflix, you can enjoy a daily blast of entertainment, including new movies_music_video, series, short films, podcasts, documentaries and educative videos. Our app features a range of great tools to enhance your viewing experience.",
                       style: TextStyle(
                         fontSize: 14.sp,
                         color: Colors.white70,
@@ -77,7 +77,7 @@ class AboutScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 16.h),
                     Text(
-                      "But that's not all, we also offer a wide range of features to enhance your viewing experience. Oloflix App gives you access to a massive library of contents, including Nollywood movies and shows. We have something for everyone, with genres that appeal to different audience.",
+                      "But that's not all, we also offer a wide range of features to enhance your viewing experience. Oloflix App gives you access to a massive library of contents, including Nollywood movies_music_video and shows. We have something for everyone, with genres that appeal to different audience.",
                       style: TextStyle(
                         fontSize: 14.sp,
                         color: Colors.white70,
