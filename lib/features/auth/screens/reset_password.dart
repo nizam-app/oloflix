@@ -18,28 +18,26 @@ class _ResetPasswordState extends State<ResetPassword> {
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
-      body: Center(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 50),
-              _TitleText(),
-              SizedBox(height: 30),
-                passwordField(passCtrl),
-              SizedBox(height: 10.h),
-              confirmPasswordField(confirmPassCtrl),
-              SizedBox(height: 30),
-              CustomButtom(
-                text: "SUBMIT",
-                onTap: () {
-                  context.push('/login_screen');
-                },
-              ),
-              SizedBox(height: 20),
-            ],
-          ),
+      body: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 50),
+            _TitleText(),
+            SizedBox(height: 30),
+              passwordField(passCtrl),
+            SizedBox(height: 10.h),
+            confirmPasswordField(confirmPassCtrl),
+            SizedBox(height: 30),
+            CustomButtom(
+              text: "SUBMIT",
+              onTap: () {
+                context.push('/login_screen');
+              },
+            ),
+            SizedBox(height: 20),
+          ],
         ),
       ),
     );
