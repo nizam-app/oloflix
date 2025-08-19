@@ -1,13 +1,15 @@
 // Flutter imports:
+import 'package:Oloflix/features/auth/logic/loging_controller.dart';
+import 'package:Oloflix/features/auth/widgets/custom_buttom.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 
 // Project imports:
 import 'package:Oloflix/core/widget/bottom_nav_bar/screen/bottom_nav_bar.dart';
-import 'package:Oloflix/features/auth/widgets/custom_buttom.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,6 +21,9 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final LoginController controller = Get.put(LoginController());
+  final emailCtrl = TextEditingController();
+  final passCtrl = TextEditingController();
   bool rememberMe = false;
 
   @override
@@ -26,27 +31,44 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20.w),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(context),
-              SizedBox(height: 30.h),
-              _buildEmailField(),
-              SizedBox(height: 15.h),
-              _buildPasswordField(),
-              SizedBox(height: 10.h),
-              _buildOptionsRow(context),
-              SizedBox(height: 30.h),
-              CustomButtom(
-                text: "LOGIN",
-                onTap: () => context.push(BottomNavBar.routeName),
-              ),
-              SizedBox(height: 20.h),
-              _buildSignupText(context),
-              SizedBox(height: 30.h),
-            ],
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(context),
+            SizedBox(height: 30.h),
+            _buildEmailField(),
+            SizedBox(height: 15.h),
+            _buildPasswordField(),
+            SizedBox(height: 10.h),
+            _buildOptionsRow(context),
+            SizedBox(height: 30.h),
+            Obx(
+              () => controller.isLoading.value
+                  ? CircularProgressIndicator()
+                  : CustomButtom(
+                      text: "LOGIN",
+                      onTap: () {
+                      context.push('/bottomNavBar');
+                        // if (emailCtrl.text.trim().isEmpty ||
+                        //     passCtrl.text.trim().isEmpty) {
+                        //   Get.snackbar(
+                        //     "Error",
+                        //     "Pleae valid Email or Password ",
+                        //   );
+                        // } else {
+                        //   controller.login(
+                        //     emailCtrl.text.trim(),
+                        //     passCtrl.text.trim(),
+                        //   );
+                        //}
+                      },
+                    ),
+            ),
+        
+            SizedBox(height: 20.h),
+            _buildSignupText(context),
+            SizedBox(height: 30.h),
+          ],
         ),
       ),
     );
@@ -85,6 +107,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildEmailField() {
     return TextFormField(
       style: const TextStyle(color: Colors.white),
+      controller: emailCtrl,
       decoration: InputDecoration(
         filled: true,
         fillColor: const Color(0xFF1F1F1F),
@@ -103,6 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return TextFormField(
       obscureText: true,
       style: const TextStyle(color: Colors.white),
+      controller: passCtrl,
       decoration: InputDecoration(
         filled: true,
         fillColor: const Color(0xFF1F1F1F),
@@ -117,35 +141,42 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+
+
   Widget _buildOptionsRow(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Obx(
+        () => Row(
           children: [
             Checkbox(
-              value: rememberMe,
-              onChanged: (value) {
-                setState(() => rememberMe = value!);
-              },
+              value: controller.rememberMe.value,
+              onChanged: (val) => controller.rememberMe.value = val ?? false,
               checkColor: Colors.black,
               activeColor: Colors.white,
             ),
-            Text("Remember Me", style: TextStyle(color: Colors.white)),
+            const SizedBox(width: 5),
+            Text(
+              "Remember Me",
+              style: TextStyle(color: Colors.white),
+            ),
           ],
         ),
-        TextButton(
-          onPressed: () {
-            context.push("/forgot_screen");
-          },
-          child: Text(
-            "Forgot Password?",
-            style: TextStyle(color: Colors.grey, fontSize: 13.sp),
-          ),
+      ),
+      TextButton(
+        onPressed: () {
+          context.push("/forgot_screen");
+        },
+        child: Text(
+          "Forgot Password?",
+          style: TextStyle(color: Colors.grey, fontSize: 13.sp),
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
+}
+
 
   Widget _buildSignupText(BuildContext context) {
     return Center(

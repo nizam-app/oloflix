@@ -8,10 +8,17 @@ import 'package:go_router/go_router.dart';
 // Project imports:
 import 'package:Oloflix/features/auth/widgets/custom_buttom.dart';
 
-class ForgotScreen extends StatelessWidget {
+class ForgotScreen extends StatefulWidget {
   const ForgotScreen({super.key});
 
   static final routeName = '/forgot_screen';
+
+  @override
+  State<ForgotScreen> createState() => _ForgotScreenState();
+}
+
+class _ForgotScreenState extends State<ForgotScreen> {
+  final emailCtrl = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -25,12 +32,12 @@ class ForgotScreen extends StatelessWidget {
               SizedBox(height: 50),
               _TitleText(),
               SizedBox(height: 30),
-              _EmailInputField(),
+              EmailInputField(controller: emailCtrl,),
               SizedBox(height: 30),
               CustomButtom(
                 text: "RESET PASSWORD",
                 onTap: () {
-                  context.push('/login_screen');
+                  context.push('/otp');
                 },
               ),
               SizedBox(height: 20),
@@ -59,20 +66,22 @@ class _TitleText extends StatelessWidget {
     );
   }
 }
+class EmailInputField extends StatelessWidget {
+  final TextEditingController controller;
 
-class _EmailInputField extends StatelessWidget {
-  const _EmailInputField();
+  const EmailInputField({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       style: const TextStyle(color: Colors.white),
+      controller: controller, // Use the passed controller
       decoration: InputDecoration(
         filled: true,
         fillColor: const Color(0xFF1F1F1F),
         hintText: "Email",
         prefixIcon: const Icon(Icons.email_outlined, color: Colors.grey),
-        hintStyle: TextStyle(color: Colors.grey),
+        hintStyle: const TextStyle(color: Colors.grey),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8.r),
           borderSide: BorderSide.none,
@@ -110,3 +119,4 @@ class _SignupText extends StatelessWidget {
     );
   }
 }
+

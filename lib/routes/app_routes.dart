@@ -1,4 +1,6 @@
 // Flutter imports:
+import 'package:Oloflix/features/auth/screens/otp_screen.dart';
+import 'package:Oloflix/features/auth/screens/reset_password.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -82,6 +84,17 @@ final GoRouter router = GoRouter(
       builder: (context, state) => ForgotScreen(),
     ),
 
+    GoRoute(
+      path: OtpScreen.routeName,
+      name: "otp",
+      builder: (context, state) => OtpScreen(),
+    ),
+
+    GoRoute(
+      path: ResetPassword.routeName,
+      name: "reset_password",
+      builder: (context, state) => ResetPassword(),
+    ), 
     GoRoute(
       path: BottomNavBar.routeName,
       name: BottomNavBar.routeName,
