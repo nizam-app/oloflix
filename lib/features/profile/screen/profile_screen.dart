@@ -1,7 +1,12 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:market_jango/features/home/widgets/aboute_fooder.dart';
+
+// Project imports:
+import 'package:Oloflix/core/widget/aboute_fooder.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -10,10 +15,10 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     backgroundColor: Color(0xFF171029),
+      backgroundColor: Color(0xFF171029),
       body: SafeArea(
         child: SingleChildScrollView(
-         // padding: EdgeInsets.symmetric(horizontal: 20.w),
+          // padding: EdgeInsets.symmetric(horizontal: 20.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -26,11 +31,9 @@ class ProfileScreen extends StatelessWidget {
               customField(context, label: "Address", hint: "Dhaka, Bangladesh"),
               SizedBox(height: 10.h),
               imageUpload(),
-               SizedBox(height: 10.h),
-               FooterSection()
-
+              SizedBox(height: 10.h),
+              FooterSection(),
             ],
-
           ),
         ),
       ),
@@ -82,7 +85,7 @@ class ProfileScreen extends StatelessWidget {
                   },
                   child: Text(
                     "Dashboard",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, ),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
                 SizedBox(width: 5),
@@ -90,7 +93,7 @@ class ProfileScreen extends StatelessWidget {
                 SizedBox(width: 5),
                 InkWell(
                   onTap: () {
-                   // context.push("/profile");
+                    // context.push("/profile");
                   },
                   child: Text(
                     "Edit Profile ",
@@ -154,7 +157,7 @@ Widget imageUpload() {
           "Profile Image ",
           style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
         ),
-        SizedBox(height: 10.h,), 
+        SizedBox(height: 10.h),
         Container(
           padding: EdgeInsets.all(8),
           decoration: BoxDecoration(
@@ -173,7 +176,6 @@ Widget imageUpload() {
                       ),
                     ),
                     Container(
-                   
                       padding: EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 8,

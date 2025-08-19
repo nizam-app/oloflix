@@ -1,7 +1,12 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:market_jango/features/auth/widgets/custom_buttom.dart';
+
+// Project imports:
+import 'package:Oloflix/features/auth/widgets/custom_buttom.dart';
 
 class ForgotScreen extends StatelessWidget {
   const ForgotScreen({super.key});
