@@ -1,5 +1,8 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:market_jango/routes/app_routes.dart';
+
+// Project imports:
+import 'package:Oloflix/routes/app_routes.dart';
 import 'core/theme/light_dark_theme.dart';
 
 class App extends StatefulWidget {
@@ -19,4 +22,3 @@ class _AppState extends State<App> {
     );
   }
 }
-

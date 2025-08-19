@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+
+// Package imports:
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
@@ -12,13 +15,13 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   @override
-void initState() {
-  super.initState();
+  void initState() {
+    super.initState();
 
-  Future.delayed(const Duration(seconds: 3), () {
-    context.go('/login_screen'); // GoRouter navigation
-  });
-}
+    Future.delayed(const Duration(seconds: 3), () {
+      context.go('/login_screen'); // GoRouter navigation
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -1,4 +1,7 @@
+// Flutter imports:
 import 'package:flutter/material.dart';
+import 'package:Oloflix/core/widget/base_widget_tupper_botton.dart';
+import 'package:Oloflix/core/widget/movie_and_promotion/move_fildering.dart';
 
 class TvShowsScreen extends StatelessWidget {
   const TvShowsScreen({super.key});
@@ -6,10 +9,6 @@ class TvShowsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text("TvShowsScreen"),
-      ),
-    );
+    return BaseWidgetTupperBotton(child:FilterDropdownSection(),);
   }
 }
