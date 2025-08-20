@@ -81,7 +81,7 @@ class ProfileScreen extends StatelessWidget {
                 SizedBox(width: 5),
                 InkWell(
                   onTap: () {
-                    context.push("/dashboard");
+                    context.push("/dashboardScreen");
                   },
                   child: Text(
                     "Dashboard",

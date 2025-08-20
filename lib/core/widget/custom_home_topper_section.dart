@@ -18,7 +18,6 @@ import 'package:Oloflix/features/profile/screen/profile_screen.dart';
 import 'package:Oloflix/features/subscription/screen/subscription_plan_screen.dart';
 import 'package:Oloflix/features/watchlist/screen/my_watchlist_screen.dart';
 
-import 'bottom_nav_bar/screen/bottom_nav_bar.dart';
 
 class CustomHomeTopperSection extends StatelessWidget {
   CustomHomeTopperSection({super.key});
