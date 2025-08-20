@@ -8,7 +8,7 @@ class LiveScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BaseWidgetTupperBotton(child:
+    return BaseWidgetTupperBotton(child2:
     SingleChildScrollView(
       child: Column(
         children: [

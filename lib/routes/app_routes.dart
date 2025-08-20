@@ -1,6 +1,7 @@
 // Flutter imports:
 import 'package:Oloflix/features/auth/screens/otp_screen.dart';
 import 'package:Oloflix/features/auth/screens/reset_password.dart';
+import 'package:Oloflix/features/movies_details/movies_detail_screen.dart';
 import 'package:Oloflix/features/subscription/payment.dart';
 import 'package:flutter/material.dart';
 
@@ -166,6 +167,10 @@ final GoRouter router = GoRouter(
       path: DeleteAccountScreen.routeName,
       name: DeleteAccountScreen.routeName,
       builder: (context, state) => DeleteAccountScreen(),
+    ),  GoRoute(
+      path: MoviesDetailScreen.routeName,
+      name: MoviesDetailScreen.routeName,
+      builder: (context, state) => MoviesDetailScreen(),
     ),
   ],
 );

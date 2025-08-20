@@ -7,6 +7,7 @@ class AllColor {
   static final orange = Colors.orange;
   static final green500 = Colors.green.shade500;
   static final yellow = Colors.yellow;
+  static final yellow300 = Colors.yellow.shade300;
   static final white70 = Colors.white70;
   static final white = Colors.white;
   static final blue = Colors.blue;
