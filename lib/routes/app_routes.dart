@@ -170,7 +170,10 @@ final GoRouter router = GoRouter(
     ),  GoRoute(
       path: MoviesDetailScreen.routeName,
       name: MoviesDetailScreen.routeName,
-      builder: (context, state) => MoviesDetailScreen(),
+
+      builder: (context, state) {
+        final id = state.pathParameters['id'];
+        return MoviesDetailScreen(Id: id);}
     ),
   ],
 );

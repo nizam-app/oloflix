@@ -3,7 +3,8 @@ import 'package:Oloflix/core/widget/base_widget_tupper_botton.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 class MoviesDetailScreen extends StatelessWidget {
-  const MoviesDetailScreen({super.key});
+  const MoviesDetailScreen({super.key, required this.Id});
+ final dynamic Id;
   static const String routeName = '/moviesDetailScreen';
   @override
   Widget build(BuildContext context) {
