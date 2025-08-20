@@ -9,59 +9,47 @@ class LoginController extends GetxController {
   var isLoading = false.obs; 
 
   Future<void> login(String email, String password) async {
-    try {
-      isLoading.value = true;
+  try {
+    isLoading.value = true;
 
-      var url = Uri.parse(" "); 
-      var response = await http.post(url, body: {
+    var url = Uri.parse("http://103.145.138.111:8000/api/login");
+
+    var response = await http.post(
+      url,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
         "email": email,
         "password": password,
-      });
+      }),
+    );
 
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
 
-        
-        String token = data["token"];
+      // ✅ ধরলাম API token ফেরত দেয়
+      String token = data["token"] ?? "";
 
-        isLoggedIn.value = true;
-
-        if (rememberMe.value) {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setString("email", email);
-          await prefs.setString("password", password);
-          await prefs.setString("token", token);
-        }
-
-        
-        Get.offAllNamed("/homePage");
-      } else {
-        Get.snackbar("Error", "Invalid email or password");
-      }
-    } catch (e) {
-      Get.snackbar("Error", e.toString());
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<void> logout() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-    isLoggedIn.value = false;
-    Get.offAllNamed("/login");
-  }
-
-  Future<void> checkLogin() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? email = prefs.getString("email");
-    String? password = prefs.getString("password");
-
-    if (email != null && password != null) {
       isLoggedIn.value = true;
-      Get.offAllNamed("/homePage"); 
+
+      // Save credentials only if "remember me" is checked
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString("email", email);
+      if (rememberMe.value) {
+        await prefs.setString("password", password);
+      }
+      if (token.isNotEmpty) {
+        await prefs.setString("token", token);
+      }
+
+      Get.offAllNamed("/homePage");
     } else {
-      Get.offAllNamed("/login");
+      var data = jsonDecode(response.body);
+      Get.snackbar("Error", data["message"] ?? "Invalid email or password");
     }
+  } catch (e) {
+    Get.snackbar("Error", e.toString());
+  } finally {
+    isLoading.value = false;
   }
+}
 }

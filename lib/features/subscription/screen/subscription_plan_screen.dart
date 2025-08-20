@@ -1,9 +1,20 @@
 // Flutter imports:
+import 'package:Oloflix/core/widget/aboute_fooder.dart';
+import 'package:Oloflix/features/auth/widgets/custom_buttom.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 
-class SubscriptionPlanScreen extends StatelessWidget {
+class SubscriptionPlanScreen extends StatefulWidget {
   const SubscriptionPlanScreen({super.key});
   static final routeName = "/subscriptionPlanScreen";
+
+  @override
+  State<SubscriptionPlanScreen> createState() => _SubscriptionPlanScreenState();
+}
+
+class _SubscriptionPlanScreenState extends State<SubscriptionPlanScreen> {
+  final textCtrl = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -40,25 +51,61 @@ class SubscriptionPlanScreen extends StatelessWidget {
             ),
             const SizedBox(height: 30),
             Container(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               width: double.infinity,
               decoration: BoxDecoration(
                 color: const Color(0xFF1A093F),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Center(
-                child: Text(
-                  "I Have Coupon Code",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    decoration: TextDecoration.underline,
+              child: Column(
+                children: [
+                  const Center(
+                    child: Text(
+                      "I Have Coupon Code",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
                   ),
-                ),
+                  Container(
+                    alignment: Alignment.center,
+                    height: 4,
+                    width: 40,
+                    color: Colors.red,
+                  ),
+                  const SizedBox(height: 30),
+                  _buildEmailField(),
+                  SizedBox(height: 20.h),
+                  CustomButtom(
+                    text: "APPLY COUPON",
+                    onTap: () => context.push("/"),
+                  ),
+                  SizedBox(height: 10.h),
+                ],
               ),
             ),
+            SizedBox(height: 30.h),
+            FooterSection(),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmailField() {
+    return TextFormField(
+      style: const TextStyle(color: Colors.white),
+      controller: textCtrl,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: const Color(0xFF1F1F1F),
+        hintStyle: TextStyle(color: Colors.grey),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.r),
+          borderSide: BorderSide.none,
         ),
       ),
     );
@@ -117,7 +164,9 @@ class SubscriptionPlanScreen extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                context.push("/payment"); 
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
                 foregroundColor: Colors.white,
@@ -131,3 +180,4 @@ class SubscriptionPlanScreen extends StatelessWidget {
     );
   }
 }
+

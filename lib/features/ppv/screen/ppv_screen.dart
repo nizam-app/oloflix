@@ -98,7 +98,7 @@ Widget _buildPpvMovieList() {
 }
 
 /// A custom card widget to display a single movie poster with overlay text and an icon.
-///
+
 /// This widget includes the image, a gradient overlay with the movie title, and a crown icon.
 class _PpvMovieCard extends StatelessWidget {
   final String image;
@@ -131,8 +131,6 @@ class _PpvMovieCard extends StatelessWidget {
     );
   }
 }
-
-
 
 // New Screen Example
 class MovieDetails extends StatelessWidget {
