@@ -75,7 +75,7 @@ class EmailInputField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextFormField(
       style: const TextStyle(color: Colors.white),
-      controller: controller, // Use the passed controller
+      controller: controller, 
       decoration: InputDecoration(
         filled: true,
         fillColor: const Color(0xFF1F1F1F),

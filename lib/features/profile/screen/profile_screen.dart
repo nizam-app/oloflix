@@ -1,4 +1,6 @@
 // Flutter imports:
+import 'package:Oloflix/core/constants/image_control/image_path.dart';
+import 'package:Oloflix/core/widget/custom_home_topper_section.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -22,6 +24,7 @@ class ProfileScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              CustomHomeTopperSection(),
               profileTextImages(context),
               SizedBox(height: 20.h),
               customField(context, label: "Name", hint: "John Doe"),
@@ -43,19 +46,20 @@ class ProfileScreen extends StatelessWidget {
   Widget profileTextImages(BuildContext context) {
     return SafeArea(
       child: Container(
-        height: 200.h,
+        height: 160.h,
         width: double.infinity,
         decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage("assets/images/background.png"),
-            fit: BoxFit.cover,
-          ),
+        image: DecorationImage(
+          image: AssetImage(ImagePath.Mbackground),
+          opacity: 0.3,
+          fit: BoxFit.cover, // Adjust the fit as needed
         ),
+      ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(height: 40.h),
+            
             Text(
               "Edit Profile",
               style: TextStyle(

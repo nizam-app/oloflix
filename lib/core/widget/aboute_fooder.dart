@@ -20,6 +20,19 @@ import 'package:url_launcher/url_launcher.dart';
 class FooterSection extends StatelessWidget {
   const FooterSection({super.key});
 
+
+  // ✅ URL ওপেন করার ফাংশন
+  Future<void> _launchURL(String url) async {
+  final Uri uri = Uri.parse(url);
+  if (!await launchUrl(
+    uri,
+    mode: LaunchMode.externalApplication, // ✅ force external browser
+  )) {
+    throw "Could not launch $url";
+  }
+}
+
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -88,24 +101,28 @@ class FooterSection extends StatelessWidget {
           SizedBox(height: 10.h),
           Row(
             children: [
-              buildCircleAvatar(onTap: () {goToTwitter();}, icon: FontAwesomeIcons.twitter),
+              buildCircleAvatar(onTap: () {
+                _launchURL("https://x.com/oloflix");
+              }, icon: FontAwesomeIcons.twitter),
 
               SizedBox(width: 10.w),
-              buildCircleAvatar(onTap: () {}, icon: FontAwesomeIcons.instagram),
+              buildCircleAvatar(onTap: () {
+                _launchURL("https://www.instagram.com/oloflix/?igsh=cXJ4dzEyaDloc2E%3D#");
+              }, icon: FontAwesomeIcons.instagram),
             ],
           ),
         ],
       ),
     );
   }
-  void goToTwitter() async {
-  final Uri url = Uri.parse("https://x.com/oloflix");
-  if (await canLaunchUrl(url)) {
-  await launchUrl(url, mode: LaunchMode.externalApplication);
-  } else {
-  print('Could not launch $url');
-  }
-}
+  // void goToTwitter() async {
+  // final Uri url = Uri.parse("https://x.com/oloflix");
+  // if (await canLaunchUrl(url)) {
+  // await launchUrl(url, mode: LaunchMode.externalApplication);
+  // } else {
+  // print('Could not launch $url');
+  // }
+// }
 
   InkWell buildCircleAvatar({
     required VoidCallback onTap,

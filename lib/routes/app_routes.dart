@@ -1,6 +1,7 @@
 // Flutter imports:
 import 'package:Oloflix/features/auth/screens/otp_screen.dart';
 import 'package:Oloflix/features/auth/screens/reset_password.dart';
+import 'package:Oloflix/features/subscription/payment.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -59,6 +60,12 @@ final GoRouter router = GoRouter(
       name: SubscriptionPlanScreen.routeName,
       builder: (context, state) => const SubscriptionPlanScreen(),
     ),
+
+    GoRoute(
+      path: PaymentMethod.routeName,
+      name: PaymentMethod.routeName,
+      builder: (context, state) => const PaymentMethod(),
+    ), 
 
     GoRoute(
       path: SplashScreen.routeName,

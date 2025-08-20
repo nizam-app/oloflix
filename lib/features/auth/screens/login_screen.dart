@@ -48,19 +48,19 @@ class _LoginScreenState extends State<LoginScreen> {
                   : CustomButtom(
                       text: "LOGIN",
                       onTap: () {
-                      context.push('/bottomNavBar');
-                        // if (emailCtrl.text.trim().isEmpty ||
-                        //     passCtrl.text.trim().isEmpty) {
-                        //   Get.snackbar(
-                        //     "Error",
-                        //     "Pleae valid Email or Password ",
-                        //   );
-                        // } else {
-                        //   controller.login(
-                        //     emailCtrl.text.trim(),
-                        //     passCtrl.text.trim(),
-                        //   );
-                        //}
+                     
+                        if (emailCtrl.text.trim().isEmpty ||
+                            passCtrl.text.trim().isEmpty) {
+                          Get.snackbar(
+                            "Error",
+                            "Pleae valid Email or Password ",
+                          );
+                        } else {
+                          controller.login(
+                            emailCtrl.text.trim(),
+                            passCtrl.text.trim(),
+                          );
+                        }
                       },
                     ),
             ),
@@ -140,8 +140,6 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-
-
 
   Widget _buildOptionsRow(BuildContext context) {
   return Row(
