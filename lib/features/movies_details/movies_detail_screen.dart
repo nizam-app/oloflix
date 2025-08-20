@@ -1,31 +1,50 @@
+import 'package:Oloflix/%20business_logic/models/movie_details_model.dart';
 import 'package:Oloflix/core/constants/color_control/all_color.dart';
 import 'package:Oloflix/core/widget/base_widget_tupper_botton.dart';
+import 'package:Oloflix/features/movies_details/logic/get_movie_details.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-class MoviesDetailScreen extends StatelessWidget {
-  const MoviesDetailScreen({super.key, required this.Id});
- final dynamic Id;
+
+class MoviesDetailScreen extends ConsumerWidget {
+  const MoviesDetailScreen({super.key, required this.id});
+  final int id;
+
   static const String routeName = '/moviesDetailScreen';
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // get movie by id
+    final movie = ref.watch(AllMovieDetails.movieByIdProvider(id));
+
+    if (movie == null) {
+      return const Scaffold(
+        body: Center(child: Text("Movie not found")),
+      );
+    }
+
     return BaseWidgetTupperBotton(
-      child1: DateilsImage(),
-      child2: CustomDescription(),
+      child1: DateilsImage(imageUrl: movie.videoImageThumb ?? ''),
+      child2: CustomDescription(
+        title: movie.videoTitle ?? '',
+        language: movie.movieLangId.toString() ?? '',
+        rating: movie.duration ?? '',
+        description: movie.videoDescription ?? '',
+      ),
     );
   }
 }
 
 class CustomDescription extends StatelessWidget {
-  const CustomDescription({super.key});
-
+  const CustomDescription({super.key, required this.title, required this.language, required this.rating, required this.description});
+  final String title ;
+  final String language ;
+  final String rating ;
+  final  String description ;
   @override
   Widget build(BuildContext context) {
     // Hard-coded data (replace later with API)
-    String title = "Never Enough";
-    String language = "English";
-    String rating = "10";
-    String description =
-        "NEVER ENOUGH - After breaking up with her rich boyfriend, Anderson sets a new mission to outdo Lemmy. Dora decides to take up an extravagant lifestyle to surpass her ex and make him jealous.";
+
     
 
     return Column(
@@ -97,9 +116,9 @@ class CustomDescription extends StatelessWidget {
 
 class DateilsImage extends StatelessWidget {
   const DateilsImage({
-    super.key,
-  
+    super.key, required this.imageUrl,
   });
+  final String imageUrl ;
 
 
 
@@ -110,7 +129,7 @@ class DateilsImage extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.vertical(top: Radius.circular(12.r)),
           child: Image.network(
-            "https://www.themoviedb.org/t/p/w600_and_h900_bestv2/fiVW06jE7z9YnO4trhaMEdclSiC.jpg",
+            "${imageUrl}",
             fit: BoxFit.cover,
             width: double.infinity,
             height: 200.h,

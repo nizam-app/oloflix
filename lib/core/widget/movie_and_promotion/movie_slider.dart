@@ -54,7 +54,7 @@ class MovieSlider extends ConsumerWidget {
                               children: [
                                 const Icon(Icons.play_arrow),
                               GestureDetector(
-                                onTap: () => goToDetailsScreen(context),
+                                onTap: () => goToDetailsScreen(context, slider.postId),
                                   child: Text("Watch")),
                               ],
                             ),
@@ -119,8 +119,8 @@ class MovieSlider extends ConsumerWidget {
       error: (err, stack) => Center(child: Text("Error: $err")),
     );
   }
-     void goToDetailsScreen(BuildContext context) {
-                        context.push(MoviesDetailScreen.routeName);
+     void goToDetailsScreen(BuildContext context, dynamic id) {
+                        context.push("${MoviesDetailScreen.routeName}?id=$id");
      }
   void watch() {}
 
