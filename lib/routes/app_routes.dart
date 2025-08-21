@@ -1,6 +1,7 @@
 // Flutter imports:
 import 'package:Oloflix/features/auth/screens/otp_screen.dart';
 import 'package:Oloflix/features/auth/screens/reset_password.dart';
+import 'package:Oloflix/features/movies_details/movies_detail_screen.dart';
 import 'package:Oloflix/features/subscription/payment.dart';
 import 'package:flutter/material.dart';
 
@@ -28,6 +29,9 @@ import 'package:Oloflix/features/subscription/screen/subscription_plan_screen.da
 import 'package:Oloflix/features/terms_of/screen/terms_of_use_screen.dart';
 import 'package:Oloflix/features/tv_shows/screen/tv_shows_screen.dart';
 import 'package:Oloflix/features/watchlist/screen/my_watchlist_screen.dart';
+import 'package:logger/logger.dart';
+
+import '../features/video_show/video_show_screen.dart';
 
 final GoRouter router = GoRouter(
   initialLocation: SplashScreen.routeName,
@@ -166,6 +170,23 @@ final GoRouter router = GoRouter(
       path: DeleteAccountScreen.routeName,
       name: DeleteAccountScreen.routeName,
       builder: (context, state) => DeleteAccountScreen(),
+    ),  
+    GoRoute(
+        path: '${MoviesDetailScreen.routeName}/:id',
+      name: MoviesDetailScreen.routeName,
+      builder: (context, state) {
+        final  id = state.pathParameters['id'];
+
+        return MoviesDetailScreen(id: id!,);}
+    ),
+    // route
+    GoRoute(
+      path: VideoShowScreen.routeName,
+      name: VideoShowScreen.routeName,
+      builder: (context, state) {
+        final videoUrl = state.uri.queryParameters['url'];
+        return VideoShowScreen(videoUrl: videoUrl!);
+      },
     ),
   ],
 );
