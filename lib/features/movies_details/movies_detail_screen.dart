@@ -265,7 +265,7 @@ class DateilsImage extends StatelessWidget {
     );
   }
   void playVideo(BuildContext context, String videoUrl) {
-    context.go("${VideoShowScreen.routeName}?url=$videoUrl");
+    context.push("${VideoShowScreen.routeName}?url=$videoUrl");
 
   }
 }
