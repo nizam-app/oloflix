@@ -42,7 +42,7 @@ class MovieSlider extends ConsumerWidget {
                     ),
                     Positioned(
                       bottom: 0.h,
-                      left: 2.w,
+                      left: 5.w,
                       child: Row(
                         children: [
                           ElevatedButton(
