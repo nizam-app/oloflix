@@ -1,102 +1,70 @@
+// Flutter imports:
+import 'package:Oloflix/core/widget/custom_category_name.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:market_jango/core/constants/color_control/all_color.dart';
-import 'package:market_jango/core/constants/color_control/theme_color_controller.dart';
-import 'package:market_jango/core/constants/image_control/image_path.dart';
+// Project imports:
+import 'package:Oloflix/core/constants/color_control/all_color.dart';
+import 'package:Oloflix/core/widget/aboute_fooder.dart';
+import 'package:Oloflix/core/widget/app_drawer.dart';
+import 'package:Oloflix/core/widget/custom_home_topper_section.dart';
 
-class HomePage extends StatelessWidget {
-  static final routeName ="/homePage";
+import 'package:Oloflix/core/widget/movie_and_promotion/custom_movie_card.dart';
+import 'package:Oloflix/core/widget/movie_and_promotion/movie_slider.dart';
+import 'package:Oloflix/core/widget/movie_and_promotion/promosion_slider.dart';
+class HomeScreen extends StatelessWidget {
+  static final routeName = "/homePage";
+
+  const HomeScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
+      endDrawer: AppDrawer(),
+
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             children: [
-              CustomTopperLogo(),
-              FeaturedMovieSection(),
+              CustomHomeTopperSection(),
+              MovieSlider(),
               PPVNoticeSection(),
-              SponsorBanner(),
-              RecentlyWatchedSection(),
-              PPVMoviesSection(),
+              PromosionSlider(),
+              CustomCategoryName(context: context, text: "Pay-Per-View Movies (PPV)", onPressed: () {
+                  goToPPVScreen();
+                }),
+              CustomCard(),
+              CustomCategoryName(context: context, text: "Nollywood & African Movies", onPressed: () {
+                  goToNollywoodScreen();
+                }),
+              CustomCard(),
+              CustomCategoryName(context: context, text: "Music Video", onPressed: () {
+                  goToMosicVideoScreen();
+                }),
+              CustomCard(),
+              CustomCategoryName(context: context, text: "Talk Shows & Podcasts", onPressed: () {
+                  goToMosicVideoScreen();
+                }),
+              CustomCard(),
+              FooterSection(),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: buildBottomNavigationBar(),
+      //bottomNavigationBar: buildBottomNavigationBar(),
     );
   }
+
+  void goToPPVScreen() {}
+
+  void goToNollywoodScreen() {}
+
+  void goToMosicVideoScreen() {}
 }
-class CustomTopperLogo extends StatelessWidget {
-   CustomTopperLogo({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Image.asset("${ImagePath.logo}",
-            width: 80.w,),
-            Spacer(),
-            InkWell(
-              onTap: (){
-                goToSearch(context);
-              },
-              child: CircleAvatar(
-                radius: 14.r,
-                  backgroundColor: AllColor.red,
-                  child: Icon(Icons.search,color: ThemeColorController.white,)),
-            ),
-            SizedBox(width: 12.w),
-            Container(
-                width: 26.w,
-                height: 26.h,
-                decoration: BoxDecoration(
-        color: AllColor.amber,
-                  borderRadius: BorderRadius.all(Radius.circular(5.r)),),
 
-                child: Icon(Icons.workspace_premium), ),
-            // Crown
-            SizedBox(width: 12.w),
-            Stack(
-              children: [
-                Icon(Icons.account_circle),
-                Positioned(
-                  top:0,
-                  right: 0,
-                  child: CircleAvatar(
-                    backgroundColor: AllColor.green500,
-                    radius: 4.r,
-                  ),
-                )
-              ],
-            ),
-            SizedBox(width: 12.w),
-          ],
-        ),
-        SizedBox(height: 20.h,)
-      ],
 
-    );
-  }
-  final List<String> items = [
-    'Apple',
-    'Banana',
-    'Mango',
-    'Orange',
-    'Pineapple',
-    'Watermelon',
-    'Grapes',
-    'Strawberry'
-  ];
- void goToSearch(BuildContext context){
-    showSearch(context: context, delegate: CustomSearchDelegate(items));
 
-  }
 
-}
 class CustomSearchDelegate extends SearchDelegate {
   final List<String> searchList;
 
@@ -112,7 +80,7 @@ class CustomSearchDelegate extends SearchDelegate {
             query = '';
             showSuggestions(context);
           },
-        )
+        ),
     ];
   }
 
@@ -161,55 +129,44 @@ class CustomSearchDelegate extends SearchDelegate {
 }
 
 
+class CustomCard extends StatelessWidget {
+  const CustomCard({super.key});
 
-class FeaturedMovieSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Image.network(
-          'https://buzznigeria.com/wp-content/uploads/2022/10/ireti.jpg', // Replace with actual image
-          height: 200,
-          width: double.infinity,
-          fit: BoxFit.cover,
-        ),
-        Positioned(
-          bottom: 10,
-          left: 10,
-          child: Row(
-            children: [
-              ElevatedButton(
-                onPressed: () {},
-                child: Text('WATCH'),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-              ),
-              SizedBox(width: 10),
-              ElevatedButton(
-                onPressed: () {},
-                child: Text('BUY PLAN'),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              ),
-            ],
-          ),
-        ),
-      ],
+    return SizedBox(
+      height: 200.h,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: 10,
+        itemBuilder: (context, index) {
+          return CustomMoviCard();
+        },
+      ),
     );
   }
 }
+
+
+
 class PPVNoticeSection extends StatelessWidget {
+  const PPVNoticeSection({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(12),
       child: Text(
-        'We are Glad to announce that our PAY-PER-VIEW movies are now available. '
-            'These Premium Movies are highly curated and are independent of your current subscription plan...',
-        style: TextStyle(color: Colors.white70),
+        "We are Glad to announce that our PAY-PER-VIEW movies_music_video are now available. These Premium Movies are highly curated and are independent of your current subscription plan. You're required to Pay and View each movies_music_video separately. Click on any PPV movies_music_video to view its cost and access period",
+        style: TextStyle(color: AllColor.white70),
       ),
     );
   }
 }
+
 class SponsorBanner extends StatelessWidget {
+  const SponsorBanner({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -222,7 +179,7 @@ class SponsorBanner extends StatelessWidget {
             style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
           ),
           Text(
-            'The Energy Solution\nTEL: 08057046430, 08069715701',
+            'The Energy Solution\nTEL: 0**********, 0*********',
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.black),
           ),
@@ -231,7 +188,10 @@ class SponsorBanner extends StatelessWidget {
     );
   }
 }
+
 class RecentlyWatchedSection extends StatelessWidget {
+  const RecentlyWatchedSection({super.key});
+
   @override
   Widget build(BuildContext context) {
     return buildHorizontalList(
@@ -243,7 +203,10 @@ class RecentlyWatchedSection extends StatelessWidget {
     );
   }
 }
+
 class PPVMoviesSection extends StatelessWidget {
+  const PPVMoviesSection({super.key});
+
   @override
   Widget build(BuildContext context) {
     return buildHorizontalList(
@@ -255,13 +218,20 @@ class PPVMoviesSection extends StatelessWidget {
     );
   }
 }
-Widget buildHorizontalList({required String title, required List<String> images}) {
+
+Widget buildHorizontalList({
+  required String title,
+  required List<String> images,
+}) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Padding(
         padding: EdgeInsets.all(12),
-        child: Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        child: Text(
+          title,
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
       ),
       SizedBox(
         height: 150,
@@ -279,6 +249,7 @@ Widget buildHorizontalList({required String title, required List<String> images}
     ],
   );
 }
+
 BottomNavigationBar buildBottomNavigationBar() {
   return BottomNavigationBar(
     backgroundColor: Colors.black,
@@ -288,8 +259,10 @@ BottomNavigationBar buildBottomNavigationBar() {
       BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
       BottomNavigationBarItem(icon: Icon(Icons.lock), label: 'PPV'),
       BottomNavigationBarItem(icon: Icon(Icons.live_tv), label: 'Live'),
-      BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Account'),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.account_circle),
+        label: 'Account',
+      ),
     ],
   );
 }
-
