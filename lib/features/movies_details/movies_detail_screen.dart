@@ -265,8 +265,8 @@ class DateilsImage extends StatelessWidget {
     );
   }
   void playVideo(BuildContext context, String videoUrl) {
-    // Navigate to video player screen
-    context.push("${VideoShowScreen.routeName}/$videoUrl");
+    context.go("${VideoShowScreen.routeName}?url=$videoUrl");
+
   }
 }
 class CustomElevatedbutton extends StatelessWidget {

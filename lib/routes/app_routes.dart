@@ -178,12 +178,15 @@ final GoRouter router = GoRouter(
         final  id = state.pathParameters['id'];
 
         return MoviesDetailScreen(id: id!,);}
-    ),  GoRoute(
-        path: '${VideoShowScreen.routeName}/:videoUrl',
+    ),
+    // route
+    GoRoute(
+      path: VideoShowScreen.routeName,
       name: VideoShowScreen.routeName,
       builder: (context, state) {
-        final  videoUrl = state.pathParameters['videoUrl'];
-        return VideoShowScreen(videoUrl: videoUrl!,);}
+        final videoUrl = state.uri.queryParameters['url'];
+        return VideoShowScreen(videoUrl: videoUrl!);
+      },
     ),
   ],
 );
