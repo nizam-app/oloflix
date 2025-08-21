@@ -42,20 +42,22 @@ class SignupScreen extends StatelessWidget {
               confirmPasswordField(confirmPassCtrl),
               SizedBox(height: 30.h),
               Obx(
-                () => controller.isLoading.value
-                    ? const Center(child: CircularProgressIndicator())
-                    : CustomButtom(
-                        text: "SIGN UP",
-                        onTap: () {
-                          controller.signup(
-                            nameCtrl.text,
-                            emailCtrl.text,
-                            passCtrl.text,
-                            confirmPassCtrl.text,
-                          );
-                        },
-                      ),
-              ),
+  () => controller.isLoading.value
+      ? const Center(child: CircularProgressIndicator())
+      : CustomButtom(
+          text: "SIGN UP",
+          onTap: () {
+            controller.signup(
+              context,
+              nameCtrl.text.trim(),
+              emailCtrl.text.trim(),
+              passCtrl.text.trim(),
+              confirmPassCtrl.text.trim(),
+            );
+          },
+        ),
+),
+
               SizedBox(height: 20.h),
               signupBottomText(context),
               SizedBox(height: 30.h),
