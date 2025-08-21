@@ -1,45 +1,69 @@
-import 'package:Oloflix/%20business_logic/models/movie_details_model.dart';
+
+import 'package:Oloflix/core/constants/api_control/global_api.dart';
 import 'package:Oloflix/core/constants/color_control/all_color.dart';
 import 'package:Oloflix/core/widget/base_widget_tupper_botton.dart';
+import 'package:Oloflix/core/widget/custom_category_name.dart';
+import 'package:Oloflix/core/widget/movie_and_promotion/custom_movie_card.dart';
 import 'package:Oloflix/features/movies_details/logic/get_movie_details.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
+
 
 class MoviesDetailScreen extends ConsumerWidget {
   const MoviesDetailScreen({super.key, required this.id});
-  final int id;
+  final String id;
 
   static const String routeName = '/moviesDetailScreen';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // get movie by id
     final movie = ref.watch(AllMovieDetails.movieByIdProvider(id));
 
-    if (movie == null) {
-      return const Scaffold(
-        body: Center(child: Text("Movie not found")),
-      );
-    }
+    return movie.when(
+      data: (movie) {
+        if (movie == null) {
+          return const Scaffold(
+            body: Center(child: Text("Movie not found")),
+          );
+        }
 
-    return BaseWidgetTupperBotton(
-      child1: DateilsImage(imageUrl: movie.videoImageThumb ?? ''),
-      child2: CustomDescription(
-        title: movie.videoTitle ?? '',
-        language: movie.movieLangId.toString() ?? '',
-        rating: movie.duration ?? '',
-        description: movie.videoDescription ?? '',
+        return BaseWidgetTupperBotton(
+          child1: DateilsImage(imageUrl: "${api}${movie.videoImage}"??'', date: '${movie.releaseDate}', duration: '${movie.duration}',),
+          child2: Column(
+            children: [
+              CustomDescription(
+                title: movie.videoTitle ?? '',
+                language: "English",
+                age: '18+',
+                description: movie.videoDescription ?? '',
+              ),
+              CustomCategoryName(context: context, text: "You May Also Like", onPressed: (){}) ,
+              CustomCard() ,
+              SizedBox(height: 20.h,),
+
+            ],
+          ),
+        );
+      },
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      ),
+      error: (err, stack) => Scaffold(
+        body: Center(child: Text("Error: $err")),
       ),
     );
   }
+
 }
 
 class CustomDescription extends StatelessWidget {
-  const CustomDescription({super.key, required this.title, required this.language, required this.rating, required this.description});
+  const CustomDescription({super.key, required this.title, required this.language, required this.age, required this.description});
   final String title ;
   final String language ;
-  final String rating ;
+  final String age ;
   final  String description ;
   @override
   Widget build(BuildContext context) {
@@ -81,7 +105,7 @@ class CustomDescription extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20.r), // pill shape
                   ),
                   child: Text(
-                    rating,
+                    age,
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 13.sp,
@@ -116,14 +140,17 @@ class CustomDescription extends StatelessWidget {
 
 class DateilsImage extends StatelessWidget {
   const DateilsImage({
-    super.key, required this.imageUrl,
+    super.key, required this.imageUrl, required this.date, required this.duration,
   });
   final String imageUrl ;
+  final String date;
+  final String duration ; // Hard-coded duration, replace later with API
 
 
 
   @override
   Widget build(BuildContext context) {
+ 
     return Stack(
       children: [
         ClipRRect(
@@ -147,7 +174,56 @@ class DateilsImage extends StatelessWidget {
                 color: Colors.white, size: 20.sp),
           ),
         ),
-    
+        Positioned(
+          bottom: 48.h,
+          left: 3.w,
+          child: Row(
+            children: [
+              // 📅 Date
+              Row(
+                children: [
+                  Icon(
+                    FontAwesomeIcons.solidCalendarDays,
+                    size: 16.sp,
+                    color: Colors.white,
+                  ),
+                  SizedBox(width: 6.w),
+                  Text(
+                    DateFormat('dd MMM yyyy, hh:mm a')
+                        .format(DateTime.parse(date)),
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(width: 16.w),
+
+              // ⏰ Duration
+              Row(
+                children: [
+                  Icon(
+                    FontAwesomeIcons.clock,
+                    size: 16.sp,
+                    color: Colors.white,
+                  ),
+                  SizedBox(width: 6.w),
+                  Text(
+                    "$duration",
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ) ,
         // Buttons over poster bottom
         Positioned(
           bottom: 3.h,
@@ -206,6 +282,23 @@ class CustomElevatedbutton extends StatelessWidget {
         "$title",
         style:
         TextStyle(color: AllColor.white, fontSize: 13.sp),
+      ),
+    );
+  }
+}
+class CustomCard extends StatelessWidget {
+  const CustomCard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 200.h,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: 10,
+        itemBuilder: (context, index) {
+          return CustomMoviCard();
+        },
       ),
     );
   }

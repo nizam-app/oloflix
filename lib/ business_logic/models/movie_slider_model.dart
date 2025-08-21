@@ -3,7 +3,7 @@ class MovieSliderModel {
   final String title;
   final String image;
   final String type;
-  final int? postId;
+  final int postId;
   final String? displayOn;
   final String? url;
   final int? status;
@@ -13,7 +13,7 @@ class MovieSliderModel {
     required this.title,
     required this.image,
     required this.type,
-    this.postId,
+    required this.postId,
     this.displayOn,
     this.url,
     this.status,
@@ -25,7 +25,7 @@ class MovieSliderModel {
       title: json['slider_title']?.toString() ?? '',
       image: json['slider_image']?.toString() ?? '',
       type: json['slider_type']?.toString() ?? '',
-      postId: (json['slider_post_id'] as num?)?.toInt(),
+      postId: (json['slider_post_id']?.toInt() ?? 0),
       displayOn: json['slider_display_on']?.toString(),
       url: json['slider_url'] as String?,
       status: (json['status'] as num?)?.toInt(),

@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:Oloflix/core/constants/color_control/all_color.dart';
 import 'package:go_router/go_router.dart';
+import 'package:logger/logger.dart';
 
 class MovieSlider extends ConsumerWidget {
 
@@ -21,6 +22,7 @@ class MovieSlider extends ConsumerWidget {
 
     return sliderData.when(
       data: (sliders) {
+
         return Column(
           children: [
             CarouselSlider.builder(
@@ -54,7 +56,7 @@ class MovieSlider extends ConsumerWidget {
                               children: [
                                 const Icon(Icons.play_arrow),
                               GestureDetector(
-                                onTap: () => goToDetailsScreen(context, slider.postId),
+                                onTap: () => goToDetailsScreen(context:context,id: slider.postId,),
                                   child: Text("Watch")),
                               ],
                             ),
@@ -115,12 +117,13 @@ class MovieSlider extends ConsumerWidget {
           ],
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () =>  Center(child: CircularProgressIndicator(color: AllColor.blue,)),
       error: (err, stack) => Center(child: Text("Error: $err")),
     );
   }
-     void goToDetailsScreen(BuildContext context, dynamic id) {
-                        context.push("${MoviesDetailScreen.routeName}?id=$id");
+     void goToDetailsScreen({required BuildContext context, required int id}) {
+                        context.push("${MoviesDetailScreen.routeName}/$id");
+                      
      }
   void watch() {}
 

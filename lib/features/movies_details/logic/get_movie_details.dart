@@ -2,28 +2,39 @@
 import 'package:Oloflix/core/utils/global_get_data_frame.dart';
 import 'package:Oloflix/%20business_logic/models/movie_details_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logger/logger.dart';
 
 class AllMovieDetails {
- static final MovieDetailsProvider = FutureProvider<List<MovieDetailsModel>>((
-      ref) async {
-    return GlobalGetDataFrame.getDataFrame<MovieDetailsModel>(
-      "${SliderApi.sliderMovie}",
-      key: "movies",
-      fromJson: (map) => MovieDetailsModel.fromJson(map),
-    );
-  });
- 
-
- static final movieByIdProvider = Provider.family<MovieDetailsModel?, int>((ref, id) {
-    final movies = ref.watch(MovieDetailsProvider).maybeWhen(
-      data: (data) => data,
-      orElse: () => [],
-    );
-
+  static final movieDetailsProvider = FutureProvider<List<MovieDetailsModel>>((ref) async {
     try {
-      return movies.firstWhere((movie) => movie.id == id);
+      final data = await GlobalGetDataFrame.getDataFrame<MovieDetailsModel>(
+        "${SliderApi.sliderMovie}",
+        key: "movies",
+        fromJson: (map) => MovieDetailsModel.fromJson(map),
+      );
+
+      return data;
     } catch (e) {
-      return null; // যদি না মেলে
+      print("Error fetching movies: $e");
+      return [];
     }
   });
+
+
+
+  static final movieByIdProvider = FutureProvider.family<MovieDetailsModel?,String>((ref, id) async {
+    final movies = await ref.watch(movieDetailsProvider.future); // future থেকে data আনুন
+                 print("Fetching movie by: ${movies.length}");
+    try {
+      final movie = movies.firstWhere((m) => m.id == id);
+      print(movie.id);
+      return movie;
+    } catch (e) {
+      print("Error fetching movie by id: $e");
+      return null;
+    }
+  });
+
+
+ 
 }

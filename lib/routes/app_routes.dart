@@ -29,6 +29,7 @@ import 'package:Oloflix/features/subscription/screen/subscription_plan_screen.da
 import 'package:Oloflix/features/terms_of/screen/terms_of_use_screen.dart';
 import 'package:Oloflix/features/tv_shows/screen/tv_shows_screen.dart';
 import 'package:Oloflix/features/watchlist/screen/my_watchlist_screen.dart';
+import 'package:logger/logger.dart';
 
 final GoRouter router = GoRouter(
   initialLocation: SplashScreen.routeName,
@@ -167,13 +168,14 @@ final GoRouter router = GoRouter(
       path: DeleteAccountScreen.routeName,
       name: DeleteAccountScreen.routeName,
       builder: (context, state) => DeleteAccountScreen(),
-    ),  GoRoute(
-      path: MoviesDetailScreen.routeName,
+    ),  
+    GoRoute(
+        path: '${MoviesDetailScreen.routeName}/:id',
       name: MoviesDetailScreen.routeName,
-
       builder: (context, state) {
-        final id = state.pathParameters['id'];
-        return MoviesDetailScreen(Id: id);}
+        final  id = state.pathParameters['id'];
+
+        return MoviesDetailScreen(id: id!,);}
     ),
   ],
 );

@@ -1,8 +1,7 @@
 // Flutter imports:
+import 'package:Oloflix/core/widget/custom_category_name.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 // Project imports:
 import 'package:Oloflix/core/constants/color_control/all_color.dart';
 import 'package:Oloflix/core/widget/aboute_fooder.dart';
@@ -30,37 +29,21 @@ class HomeScreen extends StatelessWidget {
               MovieSlider(),
               PPVNoticeSection(),
               PromosionSlider(),
-              buildLIstName(
-                context: context,
-                text: "Pay-Per-View Movies (PPV)",
-                onPressed: () {
+              CustomCategoryName(context: context, text: "Pay-Per-View Movies (PPV)", onPressed: () {
                   goToPPVScreen();
-                },
-              ),
+                }),
               CustomCard(),
-              buildLIstName(
-                context: context,
-                text: "Nollywood & African Movies",
-                onPressed: () {
+              CustomCategoryName(context: context, text: "Nollywood & African Movies", onPressed: () {
                   goToNollywoodScreen();
-                },
-              ),
+                }),
               CustomCard(),
-              buildLIstName(
-                context: context,
-                text: "Music Video",
-                onPressed: () {
+              CustomCategoryName(context: context, text: "Music Video", onPressed: () {
                   goToMosicVideoScreen();
-                },
-              ),
+                }),
               CustomCard(),
-              buildLIstName(
-                context: context,
-                text: "Talk Shows & Podcasts",
-                onPressed: () {
+              CustomCategoryName(context: context, text: "Talk Shows & Podcasts", onPressed: () {
                   goToMosicVideoScreen();
-                },
-              ),
+                }),
               CustomCard(),
               FooterSection(),
             ],
@@ -76,35 +59,9 @@ class HomeScreen extends StatelessWidget {
   void goToNollywoodScreen() {}
 
   void goToMosicVideoScreen() {}
-
-  Padding buildLIstName({
-    required BuildContext context,
-    required String text,
-    required VoidCallback onPressed,
-  }) {
-    return Padding(
-      padding: EdgeInsets.all(8.0.sp),
-      child: Column(
-        children: [
-          SizedBox(height: 10.h),
-          Row(
-            children: [
-              Text(text, style: Theme.of(context).textTheme.titleLarge),
-              Spacer(),
-              TextButton(
-                onPressed: onPressed,
-                child: Text(
-                  "See All",
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 }
+
+
 
 
 
