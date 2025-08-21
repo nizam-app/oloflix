@@ -31,6 +31,8 @@ import 'package:Oloflix/features/tv_shows/screen/tv_shows_screen.dart';
 import 'package:Oloflix/features/watchlist/screen/my_watchlist_screen.dart';
 import 'package:logger/logger.dart';
 
+import '../features/video_show/video_show_screen.dart';
+
 final GoRouter router = GoRouter(
   initialLocation: SplashScreen.routeName,
   errorBuilder: (context, state) =>
@@ -176,6 +178,12 @@ final GoRouter router = GoRouter(
         final  id = state.pathParameters['id'];
 
         return MoviesDetailScreen(id: id!,);}
+    ),  GoRoute(
+        path: '${VideoShowScreen.routeName}/:videoUrl',
+      name: VideoShowScreen.routeName,
+      builder: (context, state) {
+        final  videoUrl = state.pathParameters['videoUrl'];
+        return VideoShowScreen(videoUrl: videoUrl!,);}
     ),
   ],
 );

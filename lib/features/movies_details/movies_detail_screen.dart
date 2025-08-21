@@ -5,10 +5,12 @@ import 'package:Oloflix/core/widget/base_widget_tupper_botton.dart';
 import 'package:Oloflix/core/widget/custom_category_name.dart';
 import 'package:Oloflix/core/widget/movie_and_promotion/custom_movie_card.dart';
 import 'package:Oloflix/features/movies_details/logic/get_movie_details.dart';
+import 'package:Oloflix/features/video_show/video_show_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 
@@ -31,7 +33,7 @@ class MoviesDetailScreen extends ConsumerWidget {
         }
 
         return BaseWidgetTupperBotton(
-          child1: DateilsImage(imageUrl: "${api}${movie.videoImage}"??'', date: '${movie.releaseDate}', duration: '${movie.duration}',),
+          child1: DateilsImage(imageUrl: "${api}${movie.videoImage}"??'', date: '${movie.releaseDate}', duration: '${movie.duration}', videoUrl: '${movie.videoUrl}',),
           child2: Column(
             children: [
               CustomDescription(
@@ -140,9 +142,10 @@ class CustomDescription extends StatelessWidget {
 
 class DateilsImage extends StatelessWidget {
   const DateilsImage({
-    super.key, required this.imageUrl, required this.date, required this.duration,
+    super.key, required this.imageUrl, required this.date, required this.duration, required this.videoUrl,
   });
   final String imageUrl ;
+  final String videoUrl ;
   final String date;
   final String duration ; // Hard-coded duration, replace later with API
 
@@ -167,11 +170,16 @@ class DateilsImage extends StatelessWidget {
         Positioned(
           right: 8.w,
           top: 8.h,
-          child: CircleAvatar(
-            radius: 18.r,
-            backgroundColor: Colors.red,
-            child: Icon(Icons.play_arrow,
-                color: Colors.white, size: 20.sp),
+          child: InkWell(
+            onTap: (){
+              playVideo(context, videoUrl);
+            },
+            child: CircleAvatar(
+              radius: 18.r,
+              backgroundColor: Colors.red,
+              child: Icon(Icons.play_arrow,
+                  color: Colors.white, size: 20.sp),
+            ),
           ),
         ),
         Positioned(
@@ -256,8 +264,11 @@ class DateilsImage extends StatelessWidget {
       ],
     );
   }
+  void playVideo(BuildContext context, String videoUrl) {
+    // Navigate to video player screen
+    context.push("${VideoShowScreen.routeName}/$videoUrl");
+  }
 }
-
 class CustomElevatedbutton extends StatelessWidget {
   const CustomElevatedbutton({
     super.key, required this.title, required this.color, this.onPressed,
