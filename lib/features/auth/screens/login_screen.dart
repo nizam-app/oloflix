@@ -24,7 +24,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final LoginController controller = Get.put(LoginController());
   final emailCtrl = TextEditingController();
   final passCtrl = TextEditingController();
-  bool rememberMe = false;
+    
+  
 
   @override
   Widget build(BuildContext context) {
@@ -43,28 +44,20 @@ class _LoginScreenState extends State<LoginScreen> {
             _buildOptionsRow(context),
             SizedBox(height: 30.h),
             Obx(
-              () => controller.isLoading.value
-                  ? CircularProgressIndicator()
-                  : CustomButtom(
-                      text: "LOGIN",
-                      onTap: () {
-                     
-                        if (emailCtrl.text.trim().isEmpty ||
-                            passCtrl.text.trim().isEmpty) {
-                          Get.snackbar(
-                            "Error",
-                            "Pleae valid Email or Password ",
-                          );
-                        } else {
-                          controller.login(
-                            emailCtrl.text.trim(),
-                            passCtrl.text.trim(),
-                          );
-                        }
-                      },
-                    ),
-            ),
-        
+  () => controller.isLoading.value
+      ? const Center(child: CircularProgressIndicator())
+      : CustomButtom(
+          text: "LOGIN",
+          onTap: () {
+            controller.login(
+              context,
+              emailCtrl.text.trim(),
+              passCtrl.text.trim(),
+            );
+          },
+        ),
+),
+
             SizedBox(height: 20.h),
             _buildSignupText(context),
             SizedBox(height: 30.h),
@@ -142,39 +135,35 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildOptionsRow(BuildContext context) {
-  return Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Obx(
+  () => Row(
     children: [
-      Obx(
-        () => Row(
-          children: [
-            Checkbox(
-              value: controller.rememberMe.value,
-              onChanged: (val) => controller.rememberMe.value = val ?? false,
-              checkColor: Colors.black,
-              activeColor: Colors.white,
-            ),
-            const SizedBox(width: 5),
-            Text(
-              "Remember Me",
-              style: TextStyle(color: Colors.white),
-            ),
-          ],
-        ),
+      Checkbox(
+        value: controller.rememberMe.value,
+        onChanged: (val) => controller.rememberMe.value = val ?? false,
+        checkColor: Colors.black,
+        activeColor: Colors.white,
       ),
-      TextButton(
-        onPressed: () {
-          context.push("/forgot_screen");
-        },
-        child: Text(
-          "Forgot Password?",
-          style: TextStyle(color: Colors.grey, fontSize: 13.sp),
-        ),
-      ),
+      const SizedBox(width: 5),
+      Text("Remember Me", style: TextStyle(color: Colors.white)),
     ],
-  );
-}
-
+  ),
+),
+        TextButton(
+          onPressed: () {
+            context.push("/forgot_screen");
+          },
+          child: Text(
+            "Forgot Password?",
+            style: TextStyle(color: Colors.grey, fontSize: 13.sp),
+          ),
+        ),
+      ],
+    );
+  }
 
   Widget _buildSignupText(BuildContext context) {
     return Center(

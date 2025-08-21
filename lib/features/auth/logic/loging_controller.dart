@@ -1,55 +1,55 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginController extends GetxController {
-  var isLoggedIn = false.obs;
-  var rememberMe = false.obs;
-  var isLoading = false.obs; 
+  var isLoading = false.obs;
+   var rememberMe = false.obs;
 
-  Future<void> login(String email, String password) async {
-  try {
+
+  Future<void> login(BuildContext context, String email, String password) async {
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter Email and Password")),
+      );
+      return;
+    }
+
     isLoading.value = true;
 
-    var url = Uri.parse("http://103.145.138.111:8000/api/login");
+    try {
+      var url = Uri.parse("http://103.145.138.111:8000/api/login");
+      var response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"email": email, "password": password}),
+      );
 
-    var response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "email": email,
-        "password": password,
-      }),
-    );
-
-    if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
 
-      // ✅ ধরলাম API token ফেরত দেয়
-      String token = data["token"] ?? "";
+      if (response.statusCode == 200) {
+        String token = data["token"] ?? "";
 
-      isLoggedIn.value = true;
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString("email", email);
+        if (token.isNotEmpty) await prefs.setString("token", token);
 
-      // Save credentials only if "remember me" is checked
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString("email", email);
-      if (rememberMe.value) {
-        await prefs.setString("password", password);
+        // ✅ Navigate to Home Page
+        GoRouter.of(context).go("/homePage");
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data["message"] ?? "Invalid email or password")),
+        );
       }
-      if (token.isNotEmpty) {
-        await prefs.setString("token", token);
-      }
-
-      Get.offAllNamed("/homePage");
-    } else {
-      var data = jsonDecode(response.body);
-      Get.snackbar("Error", data["message"] ?? "Invalid email or password");
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
+    } finally {
+      isLoading.value = false;
     }
-  } catch (e) {
-    Get.snackbar("Error", e.toString());
-  } finally {
-    isLoading.value = false;
   }
-}
 }
