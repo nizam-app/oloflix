@@ -6,6 +6,7 @@ import 'package:Oloflix/core/widget/custom_category_name.dart';
 import 'package:Oloflix/core/widget/movie_and_promotion/custom_movie_card.dart';
 import 'package:Oloflix/features/home/logic/cetarory_fiend_controller.dart';
 import 'package:Oloflix/features/movies_details/logic/get_movie_details.dart';
+import 'package:Oloflix/features/subscription/screen/subscription_plan_screen.dart';
 import 'package:Oloflix/features/video_show/video_show_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,7 +37,7 @@ class MoviesDetailScreen extends ConsumerWidget {
         }
 
         return BaseWidgetTupperBotton(
-          child1: DateilsImage(imageUrl: "${api}${movie.videoImage}"??'', date: '${movie.releaseDate}', duration: '${movie.duration}', videoUrl: '${movie.videoUrl}',),
+          child1: DetailsImage(imageUrl: "${api}${movie.videoImage}"??'', date: '${movie.releaseDate}', duration: '${movie.duration}', videoUrl: '${movie.videoUrl}',checkPaid: "${movie.videoAccess}",),
           child2: Column(
             children: [
               CustomDescription(
@@ -147,14 +148,15 @@ class CustomDescription extends StatelessWidget {
   }
 }
 
-class DateilsImage extends StatelessWidget {
-  const DateilsImage({
-    super.key, required this.imageUrl, required this.date, required this.duration, required this.videoUrl,
+class DetailsImage extends StatelessWidget {
+  const DetailsImage({
+    super.key, required this.imageUrl, required this.date, required this.duration, required this.videoUrl, required this.checkPaid,
   });
   final String imageUrl ;
   final String videoUrl ;
   final String date;
   final String duration ; // Hard-coded duration, replace later with API
+  final String checkPaid;
 
 
 
@@ -179,7 +181,10 @@ class DateilsImage extends StatelessWidget {
           top: 8.h,
           child: InkWell(
             onTap: (){
-              playVideo(context, videoUrl);
+              if (checkPaid == "Paid") {
+                   context.push(SubscriptionPlanScreen.routeName);
+              }  else{
+              playVideo(context, videoUrl);     }
             },
             child: CircleAvatar(
               radius: 18.r,
