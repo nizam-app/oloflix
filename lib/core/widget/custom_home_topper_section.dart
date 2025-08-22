@@ -1,4 +1,5 @@
 // Flutter imports:
+import 'package:Oloflix/features/auth/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -17,6 +18,7 @@ import 'package:Oloflix/features/home/screens/home_screen.dart';
 import 'package:Oloflix/features/profile/screen/profile_screen.dart';
 import 'package:Oloflix/features/subscription/screen/subscription_plan_screen.dart';
 import 'package:Oloflix/features/watchlist/screen/my_watchlist_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class CustomHomeTopperSection extends StatelessWidget {
@@ -180,7 +182,7 @@ class _UserMenu extends StatelessWidget {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: AllColor.red),
                 onPressed: () {
-                  context.pop();
+                  logout(context);
                   ScaffoldMessenger.of(
                     context,
                   ).showSnackBar(const SnackBar(content: Text(" LogOut Done")));
@@ -193,6 +195,17 @@ class _UserMenu extends StatelessWidget {
       );
     }
   }
+
+    Future<void> logout(BuildContext context) async {
+      final prefs = await SharedPreferences.getInstance();
+
+      // সব ডেটা clear করো
+      await prefs.clear();
+
+      // login screen এ redirect করো
+      context.go(LoginScreen.routeName);
+    }
+
 }
 
 class _MenuItem {
