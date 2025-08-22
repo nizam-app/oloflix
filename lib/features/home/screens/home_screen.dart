@@ -1,6 +1,9 @@
 // Flutter imports:
+import 'package:Oloflix/%20business_logic/models/movie_details_model.dart';
 import 'package:Oloflix/core/widget/custom_category_name.dart';
+import 'package:Oloflix/features/home/logic/cetarory_fiend_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 // Project imports:
 import 'package:Oloflix/core/constants/color_control/all_color.dart';
@@ -11,16 +14,21 @@ import 'package:Oloflix/core/widget/custom_home_topper_section.dart';
 import 'package:Oloflix/core/widget/movie_and_promotion/custom_movie_card.dart';
 import 'package:Oloflix/core/widget/movie_and_promotion/movie_slider.dart';
 import 'package:Oloflix/core/widget/movie_and_promotion/promosion_slider.dart';
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   static final routeName = "/homePage";
 
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Example: তিনটা আলাদা category থেকে আলাদা data আনব
+    final ppvMoviesAsync = ref.watch(CategoryFindController.PayPerViewFiendProvider("ppv"));
+    final nollywoodMoviesAsync = ref.watch(CategoryFindController.categoryFiendProvider("1"));
+    final musicMoviesAsync = ref.watch(CategoryFindController.categoryFiendProvider("14"));
+    final talkShows = ref.watch(CategoryFindController.categoryFiendProvider("3"));
+
     return Scaffold(
       endDrawer: AppDrawer(),
-
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -29,37 +37,68 @@ class HomeScreen extends StatelessWidget {
               MovieSlider(),
               PPVNoticeSection(),
               PromosionSlider(),
-              CustomCategoryName(context: context, text: "Pay-Per-View Movies (PPV)", onPressed: () {
-                  goToPPVScreen();
-                }),
-              CustomCard(),
-              CustomCategoryName(context: context, text: "Nollywood & African Movies", onPressed: () {
-                  goToNollywoodScreen();
-                }),
-              CustomCard(),
-              CustomCategoryName(context: context, text: "Music Video", onPressed: () {
-                  goToMosicVideoScreen();
-                }),
-              CustomCard(),
-              CustomCategoryName(context: context, text: "Talk Shows & Podcasts", onPressed: () {
-                  goToMosicVideoScreen();
-                }),
-              CustomCard(),
+
+              // PPV Movies
+              CustomCategoryName(
+                context: context,
+                text: "Pay-Per-View Movies (PPV)",
+                onPressed: () => goToPPVScreen(),
+              ),
+              ppvMoviesAsync.when(
+                data: (movies) => CustomCard(movies: movies,),
+                loading: () => const CircularProgressIndicator(),
+                error: (e, _) => Text("Error: $e"),
+              ),
+
+              // Nollywood Movies
+              CustomCategoryName(
+                context: context,
+                text: "Nollywood & African Movies",
+                onPressed: () => goToNollywoodScreen(),
+              ),
+              nollywoodMoviesAsync.when(
+                data: (movies) => CustomCard(movies: movies,),
+                loading: () => const CircularProgressIndicator(),
+                error: (e, _) => Text("Error: $e"),
+              ),
+
+              // Music Videos
+              CustomCategoryName(
+                context: context,
+                text: "Music Video",
+                onPressed: () => goToMosicVideoScreen(),
+              ),
+              musicMoviesAsync.when(
+                data: (movies) => CustomCard(movies: movies, ),
+                loading: () => const CircularProgressIndicator(),
+                error: (e, _) => Text("Error: $e"),
+              ),
+
+              CustomCategoryName(
+                context: context,
+                text: "Talk Shows & Podcasts",
+                onPressed: () => goToTalkVideoScreen(),
+              ),
+              talkShows.when(
+                data: (movies) => CustomCard(movies: movies,),
+                loading: () => const CircularProgressIndicator(),
+                error: (e, _) => Text("Error: $e"),
+              ),
+
               FooterSection(),
             ],
           ),
         ),
       ),
-      //bottomNavigationBar: buildBottomNavigationBar(),
     );
   }
 
   void goToPPVScreen() {}
-
   void goToNollywoodScreen() {}
-
   void goToMosicVideoScreen() {}
+  void goToTalkVideoScreen() {}
 }
+
 
 
 
@@ -130,7 +169,12 @@ class CustomSearchDelegate extends SearchDelegate {
 
 
 class CustomCard extends StatelessWidget {
-  const CustomCard({super.key});
+  final List<MovieDetailsModel> movies; // 👉 movie লিস্ট নেবে
+
+  const CustomCard({
+    super.key,
+    required this.movies,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -138,14 +182,16 @@ class CustomCard extends StatelessWidget {
       height: 200.h,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: 10,
+        itemCount: movies.length,
         itemBuilder: (context, index) {
-          return CustomMoviCard();
+          final movie = movies[index];
+          return CustomMoviCard(movie: movie); // movie object পাঠাচ্ছি
         },
       ),
     );
   }
 }
+
 
 
 

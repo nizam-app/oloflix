@@ -1,5 +1,6 @@
 // Flutter imports:
 import 'package:Oloflix/core/constants/image_control/image_path.dart';
+import 'package:Oloflix/core/widget/aboute_backgrount_image.dart';
 import 'package:Oloflix/core/widget/custom_home_topper_section.dart';
 import 'package:flutter/material.dart';
 
@@ -25,7 +26,15 @@ class ProfileScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CustomHomeTopperSection(),
-              profileTextImages(context),
+              AbouteBackgrountImage(screenName: "Profile"),
+              SizedBox(height: 25.h,) ,
+              Center(
+                child: CircleAvatar(
+                  radius: 40.r,
+                  backgroundColor: Colors.grey[700],
+                  child: Icon(Icons.person, color: Colors.white),
+                ),
+              ),
               SizedBox(height: 20.h),
               customField(context, label: "Name", hint: "John Doe"),
               customField(context, label: "Email", hint: "example@gmail.com"),
@@ -43,74 +52,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget profileTextImages(BuildContext context) {
-    return SafeArea(
-      child: Container(
-        height: 160.h,
-        width: double.infinity,
-        decoration: BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage(ImagePath.Mbackground),
-          opacity: 0.3,
-          fit: BoxFit.cover, // Adjust the fit as needed
-        ),
-      ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            
-            Text(
-              "Edit Profile",
-              style: TextStyle(
-                fontSize: 30.sp,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(height: 10.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                InkWell(
-                  onTap: () => context.push("/homePage"),
-                  child: Text(
-                    "Home",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                SizedBox(width: 5),
-                Icon(Icons.arrow_right, size: 20),
-                SizedBox(width: 5),
-                InkWell(
-                  onTap: () {
-                    context.push("/dashboardScreen");
-                  },
-                  child: Text(
-                    "Dashboard",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                SizedBox(width: 5),
-                Icon(Icons.arrow_right, size: 20),
-                SizedBox(width: 5),
-                InkWell(
-                  onTap: () {
-                    // context.push("/profile");
-                  },
-                  child: Text(
-                    "Edit Profile ",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget customField(
     BuildContext context, {
@@ -201,12 +142,7 @@ Widget imageUpload() {
             ],
           ),
         ),
-        SizedBox(height: 16.h),
-        CircleAvatar(
-          radius: 20,
-          backgroundColor: Colors.grey[700],
-          child: Icon(Icons.person, color: Colors.white),
-        ),
+        SizedBox(height: 25.h),
         SizedBox(height: 16.h),
         Container(
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),

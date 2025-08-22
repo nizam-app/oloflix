@@ -1,6 +1,7 @@
 // Flutter imports:
 import 'package:Oloflix/%20business_logic/models/movie_details_model.dart';
 import 'package:Oloflix/features/home/logic/cetarory_fiend_controller.dart';
+import 'package:Oloflix/features/movies_details/logic/get_movie_details.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,10 +18,10 @@ import 'package:Oloflix/core/widget/movie_and_promotion/promosion_slider.dart';
 
 
 
-class MoviesScreen extends StatelessWidget {
-  const MoviesScreen({super.key, });
-       
-  static final String routeName = "/moviesScreen";
+class AllMoviesScreen extends StatelessWidget {
+  const AllMoviesScreen({super.key, });
+
+  static final String routeName = "/AllMoviesScreen";
 
   @override
   Widget build(BuildContext context) {
@@ -32,8 +33,8 @@ class MoviesScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-               CustomHomeTopperSection(),
-               MovieSlider(),
+              CustomHomeTopperSection(),
+              MovieSlider(),
               SizedBox(height: 16.h), // Add some spacing
               const FilterDropdownSection(),
               // <-- Add this new custom widget call
@@ -43,9 +44,9 @@ class MoviesScreen extends StatelessWidget {
               // Add some spacing
               Consumer(
                 builder: (context, ref, child) {
-                  final musicVideo = ref.watch(CategoryFindController.categoryFiendProvider("14"));
+                  final allMovie = ref.watch(MovieDetailsController.movieDetailsProvider);
 
-                  return musicVideo.when(
+                  return allMovie.when(
                     data: (movies) => _CustomMovieGrid(movies: movies),
                     loading: () => const Center(child: CircularProgressIndicator()),
                     error: (e, _) => Text("Error: $e"),
@@ -87,21 +88,21 @@ class _CustomMovieGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-       // Assuming PromosionSlider should be above the grid
+        // Assuming PromosionSlider should be above the grid
         GridView.builder(
-          shrinkWrap: true, // Important: Allow GridView to size itself based on content
-          physics: const NeverScrollableScrollPhysics(), // Disable GridView's own scrolling
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2, // Number of columns
-            childAspectRatio: 0.99, // Adjust as needed for card aspect ratio
-            crossAxisSpacing: 0.w,
-            mainAxisSpacing: 10.h,
-          ),
-          itemCount: movies.length, // Replace with your actual item count
-          itemBuilder: (context, index) {
-            final movie = movies[index] ;
-            
-         return CustomMoviCard(movie: movie,);}
+            shrinkWrap: true, // Important: Allow GridView to size itself based on content
+            physics: const NeverScrollableScrollPhysics(), // Disable GridView's own scrolling
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2, // Number of columns
+              childAspectRatio: 0.99, // Adjust as needed for card aspect ratio
+              crossAxisSpacing: 0.w,
+              mainAxisSpacing: 10.h,
+            ),
+            itemCount: movies.length, // Replace with your actual item count
+            itemBuilder: (context, index) {
+              final movie = movies[index] ;
+
+              return CustomMoviCard(movie: movie,);}
         ),
       ],
     );
@@ -120,39 +121,39 @@ class _PaginationExampleState extends State<PaginationExample> {
     return SizedBox(
       height: 60.h, // Adjust height as needed
       child: Center(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Previous Button
-              _buildCircleButton(
-                icon: Icons.arrow_left,
-                onTap: () {
-                  if (currentPage > 1) {
-                    setState(() => currentPage--);
-                  }
-                },
-              ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Previous Button
+            _buildCircleButton(
+              icon: Icons.arrow_left,
+              onTap: () {
+                if (currentPage > 1) {
+                  setState(() => currentPage--);
+                }
+              },
+            ),
 
+            const SizedBox(width: 8),
+
+            // Page Numbers
+            for (int i = 1; i <= 3; i++) ...[
+              _buildPageNumber(i),
               const SizedBox(width: 8),
-
-              // Page Numbers
-              for (int i = 1; i <= 3; i++) ...[
-                _buildPageNumber(i),
-                const SizedBox(width: 8),
-              ],
-
-              // Next Button
-              _buildCircleButton(
-                icon: Icons.arrow_right,
-                onTap: () {
-                  if (currentPage < 3) {
-                    setState(() => currentPage++);
-                  }
-                },
-              ),
             ],
-          ),
+
+            // Next Button
+            _buildCircleButton(
+              icon: Icons.arrow_right,
+              onTap: () {
+                if (currentPage < 3) {
+                  setState(() => currentPage++);
+                }
+              },
+            ),
+          ],
         ),
+      ),
     );
   }
 

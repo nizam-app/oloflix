@@ -1,16 +1,17 @@
 // Flutter imports:
+import 'package:Oloflix/core/widget/movie_and_promotion/custom_movie_card.dart';
+import 'package:Oloflix/features/home/logic/cetarory_fiend_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Package imports:
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:Oloflix/core/constants/color_control/all_color.dart';
 
 // Project imports:
 import 'package:Oloflix/core/widget/aboute_fooder.dart';
 import 'package:Oloflix/core/widget/app_drawer.dart';
 import 'package:Oloflix/core/widget/custom_home_topper_section.dart';
-import 'package:Oloflix/core/widget/custom_primium_button.dart';
+
 
 class PpvScreen extends StatelessWidget {
   const PpvScreen({super.key});
@@ -29,7 +30,18 @@ class PpvScreen extends StatelessWidget {
               SizedBox(height: 20.h),
               _buildPayPerViewHeader(),
               SizedBox(height: 20.h),
-              _buildPpvMovieList(),
+              Consumer(
+                builder: (context, ref, child) {
+                  final ppv = ref.watch(CategoryFindController.PayPerViewFiendProvider("ppv"));
+
+                  return ppv.when(
+                    data: (movies) => _buildPpvMovieList(movies),
+                    loading: () => const Center(child: CircularProgressIndicator()),
+                    error: (e, _) => Text("Error: $e"),
+                  );
+                },
+              ),
+            
               SizedBox(height: 60.h),
               FooterSection(),
             ],
@@ -71,14 +83,7 @@ Widget _buildPayPerViewHeader() {
 /// Builds the grid list of Pay Per View movies_music_video.
 ///
 /// This widget handles the layout and data for the movie posters.
-Widget _buildPpvMovieList() {
-  final List<String> images = [
-    "assets/images/movie1.png",
-    "assets/images/movie2.png",
-    "assets/images/movie3.png",
-    "assets/images/movie4.png",
-    "assets/images/movie5.png",
-  ];
+Widget _buildPpvMovieList(movies) {
 
   return GridView.builder(
     shrinkWrap: true,
@@ -90,9 +95,10 @@ Widget _buildPpvMovieList() {
       mainAxisSpacing: 15.h, // Use .h for responsive spacing
       childAspectRatio: 0.75, // Adjust as needed for aspect ratio
     ),
-    itemCount: images.length,
+    itemCount: movies.length,
     itemBuilder: (context, index) {
-      return _PpvMovieCard(image: images[index]);
+      final movie =movies[index] ;
+      return CustomMoviCard(movie: movie);
     },
   );
 }
@@ -100,37 +106,37 @@ Widget _buildPpvMovieList() {
 /// A custom card widget to display a single movie poster with overlay text and an icon.
 
 /// This widget includes the image, a gradient overlay with the movie title, and a crown icon.
-class _PpvMovieCard extends StatelessWidget {
-  final String image;
-  const _PpvMovieCard({super.key, required this.image});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-      },
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.r), // Use .r for responsive radius
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
-            Positioned.fill(
-              child: Image.asset(image, fit: BoxFit.cover),
-            ),
-            Positioned(
-              top: 8.h,
-              right: 8.w,
-                child: CustomPrimiumButton()),
-            
-          ],
-        ),
-      ),
-    );
-  }
-}
+// class _PpvMovieCard extends StatelessWidget {
+//   final String image;
+//   const _PpvMovieCard({super.key, required this.image});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return GestureDetector(
+//       onTap: () {
+//       },
+//       child: Card(
+//         shape: RoundedRectangleBorder(
+//           borderRadius: BorderRadius.circular(12.r), // Use .r for responsive radius
+//         ),
+//         clipBehavior: Clip.antiAlias,
+//         child: Stack(
+//           alignment: Alignment.bottomCenter,
+//           children: [
+//             Positioned.fill(
+//               child: Image.asset(image, fit: BoxFit.cover),
+//             ),
+//             Positioned(
+//               top: 8.h,
+//               right: 8.w,
+//                 child: CustomPrimiumButton()),
+//
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 // New Screen Example
 class MovieDetails extends StatelessWidget {

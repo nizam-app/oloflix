@@ -4,6 +4,7 @@ import 'package:Oloflix/core/constants/color_control/all_color.dart';
 import 'package:Oloflix/core/widget/base_widget_tupper_botton.dart';
 import 'package:Oloflix/core/widget/custom_category_name.dart';
 import 'package:Oloflix/core/widget/movie_and_promotion/custom_movie_card.dart';
+import 'package:Oloflix/features/home/logic/cetarory_fiend_controller.dart';
 import 'package:Oloflix/features/movies_details/logic/get_movie_details.dart';
 import 'package:Oloflix/features/video_show/video_show_screen.dart';
 import 'package:flutter/material.dart';
@@ -16,13 +17,15 @@ import 'package:intl/intl.dart';
 
 class MoviesDetailScreen extends ConsumerWidget {
   const MoviesDetailScreen({super.key, required this.id});
-  final String id;
+  final int id;
 
   static const String routeName = '/moviesDetailScreen';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final movie = ref.watch(AllMovieDetails.movieByIdProvider(id));
+    final movie = ref.watch(MovieDetailsController.movieByIdProvider(id));
+    final youMayAlsoLike = ref.watch(CategoryFindController.categoryFiendProvider("5")) ;
+   
 
     return movie.when(
       data: (movie) {
@@ -43,7 +46,11 @@ class MoviesDetailScreen extends ConsumerWidget {
                 description: movie.videoDescription ?? '',
               ),
               CustomCategoryName(context: context, text: "You May Also Like", onPressed: (){}) ,
-              CustomCard() ,
+          youMayAlsoLike.when(
+            data: (movies) => CustomCard(movies: movies,),
+            loading: () => const CircularProgressIndicator(),
+            error: (e, _) => Text("Error: $e"),
+          ),
               SizedBox(height: 20.h,),
 
             ],
@@ -297,18 +304,20 @@ class CustomElevatedbutton extends StatelessWidget {
     );
   }
 }
-class CustomCard extends StatelessWidget {
-  const CustomCard({super.key});
-
+class CustomCard extends ConsumerWidget {
+  const CustomCard({super.key, required this.movies});
+  final dynamic movies;
   @override
-  Widget build(BuildContext context) {
-    return SizedBox(
+  Widget build(BuildContext context, WidgetRef ref) {
+          return SizedBox(
       height: 200.h,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: 10,
+        itemCount: movies.length,
         itemBuilder: (context, index) {
-          return CustomMoviCard();
+          final movie = movies [index];
+          return   CustomMoviCard(movie: movie,) ;
+
         },
       ),
     );

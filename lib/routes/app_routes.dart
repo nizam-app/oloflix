@@ -1,7 +1,8 @@
 // Flutter imports:
+import 'package:Oloflix/features/all_movie/screen/all_movies_screen/all_movie.dart';
 import 'package:Oloflix/features/auth/screens/otp_screen.dart';
 import 'package:Oloflix/features/auth/screens/reset_password.dart';
-import 'package:Oloflix/features/movies_details/movies_detail_screen.dart';
+import 'package:Oloflix/features/movies_details/screen/movies_detail_screen.dart';
 import 'package:Oloflix/features/subscription/payment.dart';
 import 'package:flutter/material.dart';
 
@@ -170,14 +171,18 @@ final GoRouter router = GoRouter(
       path: DeleteAccountScreen.routeName,
       name: DeleteAccountScreen.routeName,
       builder: (context, state) => DeleteAccountScreen(),
-    ),  
+    ), GoRoute(
+      path: AllMoviesScreen.routeName,
+      name: AllMoviesScreen.routeName,
+      builder: (context, state) => AllMoviesScreen(),
+    ),
     GoRoute(
-        path: '${MoviesDetailScreen.routeName}/:id',
+      path: '${MoviesDetailScreen.routeName}/:id',
       name: MoviesDetailScreen.routeName,
       builder: (context, state) {
-        final  id = state.pathParameters['id'];
-
-        return MoviesDetailScreen(id: id!,);}
+        final id = int.parse(state.pathParameters['id']!);
+        return MoviesDetailScreen(id: id);
+      },
     ),
     // route
     GoRoute(

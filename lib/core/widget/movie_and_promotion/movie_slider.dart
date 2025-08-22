@@ -1,6 +1,7 @@
 import 'package:Oloflix/core/constants/api_control/global_api.dart';
+import 'package:Oloflix/core/utils/movies/go_to_details_screen.dart';
 import 'package:Oloflix/core/utils/movies/slider_control.dart';
-import 'package:Oloflix/features/movies_details/movies_detail_screen.dart';
+import 'package:Oloflix/features/movies_details/screen/movies_detail_screen.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -121,11 +122,9 @@ class MovieSlider extends ConsumerWidget {
       error: (err, stack) => Center(child: Text("Error: $err")),
     );
   }
-     void goToDetailsScreen({required BuildContext context, required int id}) {
-                        context.push("${MoviesDetailScreen.routeName}/$id");
+    
                       
      }
   void watch() {}
 
   void buyPlan() {}
-}
