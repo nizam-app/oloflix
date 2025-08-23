@@ -16,15 +16,119 @@ import 'package:Oloflix/core/widget/aboute_fooder.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
-  static final routeName = '/profile';
+  static final routeName = '/profileScreen';
 
   @override
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
-  File? _pickedImage;
+  late TextEditingController nameController;
+  late TextEditingController emailController;
+  late TextEditingController phoneController;
+  late TextEditingController addressController;
 
+  void clear (){
+    nameController.clear();
+    emailController.clear();
+    phoneController.clear();
+    addressController.clear();
+  }
+
+  File? _pickedImage;
+  bool _isInitialized = false; // 🔑 যোগ করা হলো
+
+  @override
+  void initState() {
+    super.initState();
+    nameController = TextEditingController();
+    emailController = TextEditingController();
+    phoneController = TextEditingController();
+    addressController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    phoneController.dispose();
+    addressController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final profileAsync = ref.watch(ProfileDataController.profileProvider);
+
+    return Scaffold(
+      body: SafeArea(
+        child: profileAsync.when(
+          data: (profile) {
+            final user = profile.user;
+
+            // ✅ শুধু একবারই initial data বসবে
+            if (!_isInitialized) {
+              nameController.text = user.name ?? "";
+              emailController.text = user.email ?? "";
+              phoneController.text = user.phone ?? "";
+              addressController.text = user.userAddress ?? "";
+              _isInitialized = true;
+            }
+
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CustomHomeTopperSection(),
+                  AbouteBackgrountImage(screenName: "Profile"),
+                  SizedBox(height: 25.h),
+
+                  /// Avatar
+                  Center(
+                    child: GestureDetector(
+                      onTap: _showPickerOptions,
+                      child: CircleAvatar(
+                        radius: 40.r,
+                        backgroundColor: Colors.grey[700],
+                        backgroundImage: _pickedImage != null
+                            ? FileImage(_pickedImage!)
+                            : (user.userImage != null
+                            ? NetworkImage(user.userImage!)
+                            : null) as ImageProvider<Object>?,
+                        child: (_pickedImage == null && user.userImage == null)
+                            ? const Icon(Icons.person, color: Colors.white)
+                            : null,
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: 20.h),
+
+                  /// Fields
+                  customField(context, label: "Name", controller: nameController),
+                  customField(context, label: "Email", controller: emailController),
+                  customField(context, label: "Phone", controller: phoneController),
+                  customField(context, label: "Address", controller: addressController),
+
+                  SizedBox(height: 10.h),
+
+                  /// Upload + Update Button
+                  imageUpload(),
+
+                  SizedBox(height: 10.h),
+                  FooterSection(),
+                ],
+              ),
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, _) => Center(child: Text("Error loading profile: $err")),
+        ),
+      ),
+    );
+  }
+
+  /// ---------- IMAGE PICKER ----------
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
     final pickedFile =
@@ -67,89 +171,31 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final profileAsync = ref.watch(ProfileDataController.profileProvider);
-
-    return Scaffold(
-      body: SafeArea(
-        child: profileAsync.when(
-          data: (profile) {
-            final user = profile.user;
-
-            return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CustomHomeTopperSection(),
-                  AbouteBackgrountImage(screenName: "Profile"),
-                  SizedBox(height: 25.h),
-                  Center(
-                    child: GestureDetector(
-                      onTap: _showPickerOptions,
-                      child: CircleAvatar(
-                        radius: 40.r,
-                        backgroundColor: Colors.grey[700],
-                        backgroundImage: _pickedImage != null
-                            ? FileImage(_pickedImage!)
-                            : (user.userImage != null
-                            ? NetworkImage(user.userImage!)
-                            : null) as ImageProvider<Object>?,
-                        child: (_pickedImage == null && user.userImage == null)
-                            ? const Icon(Icons.person, color: Colors.white)
-                            : null,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20.h),
-                  customField(context, label: "Name", hint: user.name),
-                  customField(context, label: "Email", hint: user.email),
-                  customField(context,
-                      label: "Phone", hint: user.phone ?? "Not Available"),
-                  customField(context,
-                      label: "Address", hint: "Dhaka, Bangladesh"),
-                  SizedBox(height: 10.h),
-                  imageUpload(name: '', email: '', phone: '', address: ''),
-                  SizedBox(height: 10.h),
-                  FooterSection(),
-                ],
-              ),
-            );
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, _) =>
-              Center(child: Text("Error loading profile: $err")),
-        ),
-      ),
-    );
-  }
-
+  /// ---------- CUSTOM FIELD ----------
   Widget customField(
       BuildContext context, {
         required String label,
-        required String hint,
+        required TextEditingController controller,
       }) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 14.sp,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          Text(label,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.bold,
+              )),
           SizedBox(height: 8.h),
           TextFormField(
             style: const TextStyle(color: Colors.white),
-            initialValue: hint,
+            controller: controller,
             decoration: InputDecoration(
               filled: true,
               fillColor: const Color(0xFF1F1F1F),
-              hintText: hint,
+              hintText: "Enter $label",
               hintStyle: const TextStyle(color: Colors.grey),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.r),
@@ -162,19 +208,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget imageUpload({ required String name, required String email, required String phone, required String address ,}) {
+  /// ---------- IMAGE UPLOAD + UPDATE ----------
+  Widget imageUpload() {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Profile Image ",
-            style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.bold,
-                color: Colors.white),
-          ),
+          Text("Profile Image",
+              style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white)),
           SizedBox(height: 10.h),
           Container(
             padding: const EdgeInsets.all(8),
@@ -195,49 +240,65 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 GestureDetector(
                   onTap: _showPickerOptions,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
                         colors: [Colors.orange, Colors.red],
                       ),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: const Text(
-                      "BROWSE",
-                      style: TextStyle(color: Colors.white),
-                    ),
+                    child: const Text("BROWSE",
+                        style: TextStyle(color: Colors.white)),
                   ),
                 ),
               ],
             ),
           ),
           SizedBox(height: 25.h),
-          InkWell(
-            onTap: (){
-              ref.read(profileUpdateController.notifier).updateProfile(
-                name: name,
-                email: email,
-                phone: phone,
-                address: address,
-                imageFile: _pickedImage, // CircleAvatar থেকে আসা File
-              );
+      InkWell(
+        onTap: () async {
+          try {
+            await ref
+                .read(ProfileDataController.profileUpdateController.notifier)
+                .updateProfile(
+              name: nameController.text,
+              email: emailController.text,
+              phone: phoneController.text,
+              address: addressController.text,
+              imageFile: _pickedImage,
+            );
 
-              },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                gradient:
-                const LinearGradient(colors: [Colors.orange, Colors.red]),
-                borderRadius: BorderRadius.circular(4),
+            // 🔑 Update successful হলে আবার profile provider refresh করো
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("Profile updated successfully"),
+                backgroundColor: Colors.green,
               ),
-              child: const Text("UPDATE",
-                  style: TextStyle(color: Colors.white)),
-            ),
+            );
+          } catch (e) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("Update failed: $e"),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(colors: [Colors.orange, Colors.red]),
+            borderRadius: BorderRadius.circular(4),
           ),
+          child: const Text("UPDATE", style: TextStyle(color: Colors.white)),
+        ),
+      ),
+
+      
         ],
       ),
     );
-  } }
+  }
+}

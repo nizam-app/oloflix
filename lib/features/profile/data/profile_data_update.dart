@@ -1,68 +1,61 @@
-import 'dart:convert';
-import 'dart:io';
 
+
+import 'dart:io';
 import 'package:Oloflix/core/constants/api_control/auth_api.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
-final profileUpdateController =
-StateNotifierProvider<ProfileUpdateNotifier, AsyncValue<Map<String, dynamic>>>(
-      (ref) => ProfileUpdateNotifier(),
-);
 
-class ProfileUpdateNotifier extends StateNotifier<AsyncValue<Map<String, dynamic>>> {
-  ProfileUpdateNotifier() : super(const AsyncValue.data({}));
+
+class ProfileUpdateController extends StateNotifier<AsyncValue<void>> {
+  ProfileUpdateController() : super(const AsyncData(null));
 
   Future<void> updateProfile({
     required String name,
     required String email,
-    String? phone,
-    String? address,
+    required String phone,
+    required String address,
     File? imageFile,
   }) async {
+    state = const AsyncLoading();
     try {
-      state = const AsyncValue.loading();
-
-      // 🔹 টোকেন লোড করা
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString("token");
+      final token = prefs.getString("token"); // token sharedPref এ সেভ করা আছে
 
       if (token == null) {
-        state = const AsyncValue.error("No Token Found", StackTrace.empty);
-        return;
+        throw Exception("Token not found!");
       }
 
-      // 🔹 API URL
-      final url = Uri.parse("${AuthAPIController.profile}");
+      var uri = Uri.parse("${AuthAPIController.profile}"); // তোমার API endpoint
+      var request = http.MultipartRequest("POST", uri);
 
-      // 🔹 multipart request তৈরি
-      var request = http.MultipartRequest("POST", url);
+      // Header এ bearer token
       request.headers["Authorization"] = "Bearer $token";
 
+      // Body data
       request.fields["name"] = name;
       request.fields["email"] = email;
-      if (phone != null) request.fields["phone"] = phone;
-      if (address != null) request.fields["user_address"] = address;
+      request.fields["phone"] = phone;
+      request.fields["address"] = address;
 
-      // যদি ছবি থাকে তবে যোগ করো
+      // Image থাকলে upload
       if (imageFile != null) {
-        request.files.add(await http.MultipartFile.fromPath("user_image", imageFile.path));
+        request.files.add(await http.MultipartFile.fromPath(
+          "image",
+          imageFile.path,
+        ));
       }
 
-      // 🔹 request পাঠানো
-      var streamedResponse = await request.send();
-      var response = await http.Response.fromStream(streamedResponse);
+      final response = await request.send();
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        state = AsyncValue.data(data);
+        state = const AsyncData(null);
       } else {
-        state = AsyncValue.error(
-            "Error: ${response.statusCode} - ${response.body}", StackTrace.empty);
+        throw Exception("Failed with status: ${response.statusCode}");
       }
     } catch (e, st) {
-      state = AsyncValue.error(e.toString(), st);
+      state = AsyncError(e, st);
     }
   }
 }

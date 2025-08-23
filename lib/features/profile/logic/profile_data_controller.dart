@@ -1,4 +1,5 @@
 import 'package:Oloflix/features/profile/data/data%20get.dart';
+import 'package:Oloflix/features/profile/data/profile_data_update.dart';
 import 'package:Oloflix/features/profile/model/profile_data_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,6 +11,10 @@ static final profileProvider = FutureProvider<ProfileResponse>((ref) async {
   final repo = ref.read(profileRepositoryProvider);
   return repo.fetchProfile();
 });
+
+ static final profileUpdateController =
+  StateNotifierProvider<ProfileUpdateController, AsyncValue<void>>(
+          (ref) => ProfileUpdateController());
 
 
 

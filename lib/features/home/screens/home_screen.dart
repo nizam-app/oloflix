@@ -22,10 +22,10 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Example: তিনটা আলাদা category থেকে আলাদা data আনব
-    final ppvMoviesAsync = ref.watch(CategoryFindController.PayPerViewFiendProvider("ppv"));
-    final nollywoodMoviesAsync = ref.watch(CategoryFindController.categoryFiendProvider("1"));
-    final musicMoviesAsync = ref.watch(CategoryFindController.categoryFiendProvider("14"));
-    final talkShows = ref.watch(CategoryFindController.categoryFiendProvider("3"));
+    final ppvMoviesAsync = ref.watch(CategoryFindController.categoryFiendProvider("17"));
+    final nollywoodMoviesAsync = ref.watch(CategoryFindController.categoryFiendProvider("2"));
+    final musicMoviesAsync = ref.watch(CategoryFindController.categoryFiendProvider("15"));
+    final talkShows = ref.watch(CategoryFindController.categoryFiendProvider("12"));
 
     return Scaffold(
       endDrawer: AppDrawer(),
@@ -63,16 +63,6 @@ class HomeScreen extends ConsumerWidget {
               ),
 
               // Music Videos
-              CustomCategoryName(
-                context: context,
-                text: "Music Video",
-                onPressed: () => goToMosicVideoScreen(),
-              ),
-              musicMoviesAsync.when(
-                data: (movies) => CustomCard(movies: movies, ),
-                loading: () => const CircularProgressIndicator(),
-                error: (e, _) => Text("Error: $e"),
-              ),
 
               CustomCategoryName(
                 context: context,
@@ -81,6 +71,16 @@ class HomeScreen extends ConsumerWidget {
               ),
               talkShows.when(
                 data: (movies) => CustomCard(movies: movies,),
+                loading: () => const CircularProgressIndicator(),
+                error: (e, _) => Text("Error: $e"),
+              ),
+              CustomCategoryName(
+                context: context,
+                text: "Music Video",
+                onPressed: () => goToMosicVideoScreen(),
+              ),
+              musicMoviesAsync.when(
+                data: (movies) => CustomCard(movies: movies, ),
                 loading: () => const CircularProgressIndicator(),
                 error: (e, _) => Text("Error: $e"),
               ),

@@ -59,7 +59,7 @@ class UserModel {
       password: json['password'] ?? '',
       phone: json['phone'],
       userAddress: json['user_address'],
-      userImage: json['user_image'],
+      userImage: json['user_image']??"https://static.vecteezy.com/system/resources/previews/036/594/092/original/man-empty-avatar-photo-placeholder-for-social-networks-resumes-forums-and-dating-sites-male-and-female-no-photo-images-for-unfilled-user-profile-free-vector.jpg",
       status: json['status'] ?? 0,
       planId: json['plan_id'] ?? 0,
       startDate: json['start_date'],

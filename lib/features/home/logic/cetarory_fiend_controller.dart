@@ -9,7 +9,7 @@ class CategoryFindController {
   FutureProvider.family<List<MovieDetailsModel>, String>((ref, id) async {
     final movies = await ref.watch(MovieDetailsController.movieDetailsProvider.future);
     try {
-      final filteredMovies = movies.where((m) => m.categoryId.toString() == "$id").toList();
+      final filteredMovies = movies.where((m) => m.movieGenreId == "$id").toList();
 
       print("Found movies: ${filteredMovies.length}");
       return filteredMovies;
