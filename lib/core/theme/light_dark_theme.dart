@@ -22,7 +22,7 @@ ThemeData themeMood() {
       brightness: brightness,
       primary: _themeController.isDarkMode.value
           ? ThemeColorController.white
-          : ThemeColorController.black,
+          : ThemeColorController.blue,
       onPrimary: _themeController.isDarkMode.value
           ? ThemeColorController.black
           : ThemeColorController.white,

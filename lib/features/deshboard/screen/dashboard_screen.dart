@@ -1,8 +1,14 @@
 // Flutter imports:
+import 'package:Oloflix/features/deshboard/logic/deshboard_reverport.dart';
 import 'package:flutter/material.dart';
 import 'package:Oloflix/core/widget/aboute_backgrount_image.dart';
 import 'package:Oloflix/core/widget/aboute_fooder.dart';
 import 'package:Oloflix/core/widget/custom_home_topper_section.dart';
+
+// NEW: Riverpod imports (ADD)
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+// NEW: Your providers (ADD) - path adjust করো প্রজেক্ট অনুযায়ী
+
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -51,33 +57,46 @@ class AccountContent extends StatelessWidget {
 class UserProfileSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          _buildProfileImage(),
-          const SizedBox(height: 16.0),
-          const Text(
-            "christian onyejiuwa",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+    // ADD: Consumer দিয়ে userProvider observe
+    return Consumer(
+      builder: (context, ref, _) {
+        final user = ref.watch(userProvider);
+
+        final displayName =
+        user?.name?.isNotEmpty == true ? user!.name : "christian onyejiuwa";
+        final displayEmail = user?.email?.isNotEmpty == true
+            ? user!.email
+            : "onyejiuwachristian1@gmail.com";
+
+        return Container(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              _buildProfileImage(),
+              const SizedBox(height: 16.0),
+              Text(
+                displayName,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              Text(
+                displayEmail,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 16.0),
+              _buildEditButton(),
+              const SizedBox(height: 8.0),
+              _buildAccountDeleteButton(),
+            ],
           ),
-          const Text(
-            "onyejiuwachristian1@gmail.com",
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-            ),
-          ),
-          const SizedBox(height: 16.0),
-          _buildEditButton(),
-          const SizedBox(height: 8.0),
-          _buildAccountDeleteButton(),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -85,11 +104,11 @@ class UserProfileSection extends StatelessWidget {
     return Container(
       width: 100,
       height: 100,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white24,
         shape: BoxShape.circle,
       ),
-      child: Icon(
+      child: const Icon(
         Icons.person,
         size: 60,
         color: Colors.white,
@@ -136,31 +155,44 @@ class UserProfileSection extends StatelessWidget {
 class MySubscriptionSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(16.0),
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.white10,
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildSectionTitle("My Subscription"),
-          const SizedBox(height: 16.0),
-          _buildSubscriptionDetail(
-            "Current Plan:",
-            _buildPlanTag("Yearly Plan"),
+    // ADD: Consumer দিয়ে user থেকে plan/exp-date আনছি
+    return Consumer(
+      builder: (context, ref, _) {
+        final user = ref.watch(userProvider);
+        final planText = (user?.planAmount ?? '0') == '0'
+            ? 'Free Plan'
+            : 'Paid Plan (${user?.planAmount})';
+        final expText = (user?.expDate?.isNotEmpty == true)
+            ? user!.expDate!
+            : 'N/A';
+
+        return Container(
+          margin: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: Colors.white10,
+            borderRadius: BorderRadius.circular(15),
           ),
-          const SizedBox(height: 8.0),
-          _buildSubscriptionDetail(
-            "Subscription expires on:",
-            _buildPlanTag("December, 30, 2030"),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSectionTitle("My Subscription"),
+              const SizedBox(height: 16.0),
+              _buildSubscriptionDetail(
+                "Current Plan:",
+                _buildPlanTag(planText), // dynamic
+              ),
+              const SizedBox(height: 8.0),
+              _buildSubscriptionDetail(
+                "Subscription expires on:",
+                _buildPlanTag(expText), // dynamic
+              ),
+              const SizedBox(height: 16.0),
+              _buildUpgradeButton(),
+            ],
           ),
-          const SizedBox(height: 16.0),
-          _buildUpgradeButton(),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -224,23 +256,44 @@ class MySubscriptionSection extends StatelessWidget {
 class LastInvoiceSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(16.0),
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.white10,
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildSectionTitle("Last Invoice"),
-          const SizedBox(height: 16.0),
-          _buildInvoiceDetail("Date:"),
-          _buildInvoiceDetail("Plan:", _buildPlanTag("Yearly Plan")),
-          _buildInvoiceDetail("Amount:"),
-        ],
-      ),
+    // ADD: profile থেকে last invoice info না থাকলে placeholder
+    return Consumer(
+      builder: (context, ref, _) {
+        final profileAsync = ref.watch(profileProvider);
+
+        // এখানে শুধু ডায়নামিক করার জন্য placeholder দেখালাম
+        // real "transactions" থাকলে সেখান থেকে last item দেখাতে পারো
+        String date = '—';
+        String plan = '—';
+        String amount = '—';
+
+        profileAsync.whenData((data) {
+          // যদি future এ transactions আসে, এখানে parse করে set করা যাবে
+          // এখন খালি থাকায় উপরে default-ই থাকবে
+          plan = (data.user.planAmount == '0')
+              ? 'Free Plan'
+              : 'Paid Plan (${data.user.planAmount})';
+        });
+
+        return Container(
+          margin: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: Colors.white10,
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSectionTitle("Last Invoice"),
+              const SizedBox(height: 16.0),
+              _buildInvoiceDetail("Date:"),
+              _buildInvoiceDetail("Plan:", _buildPlanTag(plan)),
+              _buildInvoiceDetail("Amount:"),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -291,7 +344,8 @@ class UserHistorySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+
+      padding: EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
