@@ -80,7 +80,7 @@ Widget _buildPayPerViewHeader() {
   );
 }
 
-/// Builds the grid list of Pay Per View movies_music_video.
+/// Builds the grid list of Pay Per View movies.
 ///
 /// This widget handles the layout and data for the movie posters.
 Widget _buildPpvMovieList(movies) {

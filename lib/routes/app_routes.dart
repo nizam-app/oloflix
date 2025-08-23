@@ -1,7 +1,9 @@
 // Flutter imports:
+import 'package:Oloflix/%20business_logic/models/movie_details_model.dart';
 import 'package:Oloflix/features/all_movie/screen/all_movies_screen/all_movie.dart';
 import 'package:Oloflix/features/auth/screens/otp_screen.dart';
 import 'package:Oloflix/features/auth/screens/reset_password.dart';
+import 'package:Oloflix/features/movies/screen/movies_screen.dart';
 import 'package:Oloflix/features/movies_details/screen/movies_detail_screen.dart';
 import 'package:Oloflix/features/subscription/payment.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +23,6 @@ import 'package:Oloflix/features/delete_account/screen/delete_account_screen.dar
 import 'package:Oloflix/features/deshboard/screen/dashboard_screen.dart';
 import 'package:Oloflix/features/home/screens/home_screen.dart';
 import 'package:Oloflix/features/live/screen/live_screen.dart';
-import 'package:Oloflix/features/movies_music_video/screen/movies_screen.dart';
 import 'package:Oloflix/features/ppv/screen/ppv_screen.dart';
 import 'package:Oloflix/features/pricing_refunds/screen/pricing_refunds_screen.dart';
 import 'package:Oloflix/features/privacy_policy/screen/privacy_policy_screen.dart';
@@ -30,7 +31,6 @@ import 'package:Oloflix/features/subscription/screen/subscription_plan_screen.da
 import 'package:Oloflix/features/terms_of/screen/terms_of_use_screen.dart';
 import 'package:Oloflix/features/tv_shows/screen/tv_shows_screen.dart';
 import 'package:Oloflix/features/watchlist/screen/my_watchlist_screen.dart';
-import 'package:logger/logger.dart';
 
 import '../features/video_show/video_show_screen.dart';
 
@@ -131,11 +131,8 @@ final GoRouter router = GoRouter(
       builder: (context, state) => DashboardScreen(),
     ),
 
-    GoRoute(
-      path: MoviesScreen.routeName,
-      name: MoviesScreen.routeName,
-      builder: (context, state) => MoviesScreen(),
-    ),
+    // GoRoute setup
+
     GoRoute(
       path: TvShowsScreen.routeName,
       name: TvShowsScreen.routeName,
@@ -182,6 +179,14 @@ final GoRouter router = GoRouter(
       builder: (context, state) {
         final id = int.parse(state.pathParameters['id']!);
         return MoviesDetailScreen(id: id);
+      },
+    ),
+    GoRoute(
+      path: '${MoviesScreen.routeName}/:id',
+      name: MoviesScreen.routeName,
+      builder: (context, state) {
+        final id = int.parse(state.pathParameters['id']!);
+        return MoviesScreen( movie: id,);
       },
     ),
     // route

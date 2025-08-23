@@ -24,8 +24,8 @@ class HomeScreen extends ConsumerWidget {
     // Example: তিনটা আলাদা category থেকে আলাদা data আনব
     final ppvMoviesAsync = ref.watch(CategoryFindController.categoryFiendProvider("17"));
     final nollywoodMoviesAsync = ref.watch(CategoryFindController.categoryFiendProvider("2"));
-    final musicMoviesAsync = ref.watch(CategoryFindController.categoryFiendProvider("15"));
-    final talkShows = ref.watch(CategoryFindController.categoryFiendProvider("12"));
+    final musicMoviesAsync = ref.watch(CategoryFindController.categoryFiendProvider("12"));
+    final talkShows = ref.watch(CategoryFindController.categoryFiendProvider("15"));
 
     return Scaffold(
       endDrawer: AppDrawer(),
@@ -104,68 +104,7 @@ class HomeScreen extends ConsumerWidget {
 
 
 
-class CustomSearchDelegate extends SearchDelegate {
-  final List<String> searchList;
 
-  CustomSearchDelegate(this.searchList);
-
-  @override
-  List<Widget>? buildActions(BuildContext context) {
-    return [
-      if (query.isNotEmpty)
-        IconButton(
-          icon: Icon(Icons.clear),
-          onPressed: () {
-            query = '';
-            showSuggestions(context);
-          },
-        ),
-    ];
-  }
-
-  @override
-  Widget? buildLeading(BuildContext context) {
-    return IconButton(
-      icon: Icon(Icons.arrow_back),
-      onPressed: () => close(context, null),
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    final results = searchList
-        .where((item) => item.toLowerCase().contains(query.toLowerCase()))
-        .toList();
-
-    return ListView.builder(
-      itemCount: results.length,
-      itemBuilder: (context, index) => ListTile(
-        title: Text(results[index]),
-        onTap: () {
-          close(context, results[index]);
-        },
-      ),
-    );
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    final suggestions = searchList
-        .where((item) => item.toLowerCase().startsWith(query.toLowerCase()))
-        .toList();
-
-    return ListView.builder(
-      itemCount: suggestions.length,
-      itemBuilder: (context, index) => ListTile(
-        title: Text(suggestions[index]),
-        onTap: () {
-          query = suggestions[index];
-          showResults(context);
-        },
-      ),
-    );
-  }
-}
 
 
 class CustomCard extends StatelessWidget {
@@ -203,7 +142,7 @@ class PPVNoticeSection extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.all(12),
       child: Text(
-        "We are Glad to announce that our PAY-PER-VIEW movies_music_video are now available. These Premium Movies are highly curated and are independent of your current subscription plan. You're required to Pay and View each movies_music_video separately. Click on any PPV movies_music_video to view its cost and access period",
+        "We are Glad to announce that our PAY-PER-VIEW movies are now available. These Premium Movies are highly curated and are independent of your current subscription plan. You're required to Pay and View each movies separately. Click on any PPV movies to view its cost and access period",
         style: TextStyle(color: AllColor.white70),
       ),
     );

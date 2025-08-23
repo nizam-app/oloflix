@@ -1,5 +1,9 @@
 // Flutter imports:
+import 'package:Oloflix/%20business_logic/models/movie_details_model.dart';
+import 'package:Oloflix/core/widget/movie_and_promotion/custom_movie_card.dart';
+import 'package:Oloflix/features/watchlist/logic/watchlist_list_revarpot.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Package imports:
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -55,20 +59,30 @@ class WatchlistContent extends StatelessWidget {
 }
 
 /// Displays the "Movies" section with a list of movie posters.
-class MoviesSection extends StatelessWidget {
+class MoviesSection extends ConsumerWidget {
   const MoviesSection({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle("Movies"),
-        SizedBox(height: 10.h),
-        _buildMovieGrid(),
-      ],
+  Widget build(BuildContext context, WidgetRef ref) {
+    final movieAsync = ref.watch(filteredWatchlistMoviesProvider);
+
+    return movieAsync.when(
+      data: (movie) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionTitle("Movies"),
+            SizedBox(height: 10.h),
+           if (movie.length >= 0)
+            CustomCard(movies: movie) // movies list pass করলাম
+          ],
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text("Error: $e")),
     );
   }
+  
 
   Widget _buildSectionTitle(String title) {
     return Text(
@@ -128,6 +142,29 @@ class MoviesSection extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+class CustomCard extends StatelessWidget {
+  final List<MovieDetailsModel> movies; // 👉 movie লিস্ট নেবে
+
+  const CustomCard({
+    super.key,
+    required this.movies,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 200.h,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: movies.length,
+        itemBuilder: (context, index) {
+          final movie = movies[index];
+          return CustomMoviCard(movie: movie); // movie object পাঠাচ্ছি
+        },
+      ),
     );
   }
 }

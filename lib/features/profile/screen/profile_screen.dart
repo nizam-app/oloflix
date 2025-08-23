@@ -1,6 +1,7 @@
 // Flutter imports:
 import 'dart:io';
 import 'package:Oloflix/core/widget/aboute_backgrount_image.dart';
+import 'package:Oloflix/core/widget/app_drawer.dart';
 import 'package:Oloflix/core/widget/custom_home_topper_section.dart';
 import 'package:Oloflix/features/profile/data/profile_data_update.dart';
 import 'package:Oloflix/features/profile/logic/profile_data_controller.dart';
@@ -61,6 +62,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final profileAsync = ref.watch(ProfileDataController.profileProvider);
 
     return Scaffold(
+      endDrawer: AppDrawer(),
       body: SafeArea(
         child: profileAsync.when(
           data: (profile) {

@@ -1,5 +1,5 @@
 import 'package:Oloflix/features/all_movie/screen/all_movies_screen/all_movie.dart';
-import 'package:Oloflix/features/movies_music_video/screen/movies_screen.dart';
+import 'package:Oloflix/features/movies/screen/movies_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -56,17 +56,17 @@ class AppDrawer extends ConsumerWidget {
           ListTile(
             leading: const Icon(Icons.music_video),
             title: const Text('Music video'),
-            onTap: () => context.push(MoviesScreen.routeName),
+            onTap: () { context.push("${MoviesScreen.routeName}/12");}
           ),
           ListTile(
             leading: const Icon(Icons.theater_comedy),
             title: const Text('Shows Comedy'),
-            onTap: () => context.push(MoviesScreen.routeName),
+            onTap: ()  { context.push("${MoviesScreen.routeName}/14");},
           ),
           ListTile(
             leading: const Icon(Icons.movie),
             title: const Text('Nollywood & African Movies'),
-            onTap: () => context.push(MoviesScreen.routeName),
+            onTap: () { context.push("${MoviesScreen.routeName}/2");},
           ),
         ],
       ),

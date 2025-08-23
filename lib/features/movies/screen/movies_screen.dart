@@ -18,7 +18,9 @@ import 'package:Oloflix/core/widget/movie_and_promotion/promosion_slider.dart';
 
 
 class MoviesScreen extends StatelessWidget {
-  const MoviesScreen({super.key, });
+  const MoviesScreen({super.key, required this.movie, });
+  final  int movie;
+
        
   static final String routeName = "/moviesScreen";
 
@@ -43,9 +45,9 @@ class MoviesScreen extends StatelessWidget {
               // Add some spacing
               Consumer(
                 builder: (context, ref, child) {
-                  final musicVideo = ref.watch(CategoryFindController.categoryFiendProvider("14"));
-
-                  return musicVideo.when(
+                  String movieID = movie.toString();
+                  final video = ref.watch(CategoryFindController.categoryFiendProvider(movieID));
+                  return video.when(
                     data: (movies) => _CustomMovieGrid(movies: movies),
                     loading: () => const Center(child: CircularProgressIndicator()),
                     error: (e, _) => Text("Error: $e"),
