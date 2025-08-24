@@ -6,15 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
-class SubscriptionPlanScreen extends StatefulWidget {
-  const SubscriptionPlanScreen({super.key});
-  static final routeName = "/subscriptionPlanScreen";
+class PPVSubscriptionPlanScreen extends StatefulWidget {
+  const PPVSubscriptionPlanScreen({super.key});
+  static final routeName = "/PPVSubscriptionPlanScreen";
 
   @override
-  State<SubscriptionPlanScreen> createState() => _SubscriptionPlanScreenState();
+  State<PPVSubscriptionPlanScreen> createState() => _PPVSubscriptionPlanScreenState();
 }
 
-class _SubscriptionPlanScreenState extends State<SubscriptionPlanScreen> {
+class _PPVSubscriptionPlanScreenState extends State<PPVSubscriptionPlanScreen> {
   final textCtrl = TextEditingController();
 
   @override
@@ -32,64 +32,16 @@ class _SubscriptionPlanScreenState extends State<SubscriptionPlanScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CustomHomeTopperSection()       ,
-            
+
             planCard(
-              title: "Yearly Plan",
-              price: "₦ 15,000.00",
-              duration: "1 Year(s)",
-              deviceLimit: "1000000",
+              title: "ELENIYAN - The return of the King [PART 2]",
+              price: "₦ 1500",
+              duration: "3 Days",
               gradient: const LinearGradient(
                 colors: [Colors.orange, Colors.red],
               ),
             ),
-            const SizedBox(height: 20),
-            planCard(
-              title: "Yearly Plan (\$) (International)",
-              price: "\$ 25.00",
-              duration: "1 Year(s)",
-              deviceLimit: "1000000",
-              gradient: const LinearGradient(
-                colors: [Colors.orange, Colors.red],
-              ),
-            ),
-            const SizedBox(height: 30),
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1A093F),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                children: [
-                  const Center(
-                    child: Text(
-                      "I Have Coupon Code",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                  Container(
-                    alignment: Alignment.center,
-                    height: 4,
-                    width: 40,
-                    color: Colors.red,
-                  ),
-                  const SizedBox(height: 30),
-                  _buildEmailField(),
-                  SizedBox(height: 20.h),
-                  CustomButtom(
-                    text: "APPLY COUPON",
-                    onTap: () => context.push("/"),
-                  ),
-                  SizedBox(height: 10.h),
-                ],
-              ),
-            ),
+           
             SizedBox(height: 30.h),
             FooterSection(),
           ],
@@ -98,27 +50,12 @@ class _SubscriptionPlanScreenState extends State<SubscriptionPlanScreen> {
     );
   }
 
-  Widget _buildEmailField() {
-    return TextFormField(
-      style: const TextStyle(color: Colors.white),
-      controller: textCtrl,
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: const Color(0xFF1F1F1F),
-        hintStyle: TextStyle(color: Colors.grey),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8.r),
-          borderSide: BorderSide.none,
-        ),
-      ),
-    );
-  }
+
 
   Widget planCard({
     required String title,
     required String price,
     required String duration,
-    required String deviceLimit,
     required Gradient gradient,
   }) {
     return Container(
@@ -158,11 +95,6 @@ class _SubscriptionPlanScreenState extends State<SubscriptionPlanScreen> {
           ),
           const SizedBox(height: 4),
           Text(duration, style: const TextStyle(color: Colors.white70)),
-          const SizedBox(height: 4),
-          Text(
-            "Device Limit - $deviceLimit",
-            style: const TextStyle(color: Colors.white70),
-          ),
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,

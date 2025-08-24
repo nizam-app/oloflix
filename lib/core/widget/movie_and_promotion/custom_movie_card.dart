@@ -1,6 +1,7 @@
 import 'package:Oloflix/%20business_logic/models/movie_details_model.dart';
 import 'package:Oloflix/core/constants/api_control/global_api.dart';
 import 'package:Oloflix/core/utils/movies/go_to_details_screen.dart';
+import 'package:Oloflix/features/subscription/screen/ppv_subscription.dart';
 import 'package:Oloflix/features/subscription/screen/subscription_plan_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -50,7 +51,7 @@ class CustomMoviCard extends StatelessWidget {
           right: 18.w,
           child: GestureDetector(
               onTap: () {
-                context.push(SubscriptionPlanScreen.routeName);
+                context.push(PPVSubscriptionPlanScreen.routeName);
               },
               child: CustomPrimiumButton()),
         ),
