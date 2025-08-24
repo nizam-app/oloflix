@@ -17,12 +17,30 @@ import 'package:Oloflix/core/widget/movie_and_promotion/promosion_slider.dart';
 
 
 
-class MoviesScreen extends StatelessWidget {
-  const MoviesScreen({super.key, required this.movie, });
-  final  int movie;
+class MoviesScreen extends StatefulWidget {
+  const MoviesScreen({super.key, required this.movie});
+  final int movie;
 
-       
   static final String routeName = "/moviesScreen";
+
+  @override
+  State<MoviesScreen> createState() => _MoviesScreenState();
+}
+
+class _MoviesScreenState extends State<MoviesScreen> {
+  late String selectedMovieId;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedMovieId = widget.movie.toString(); // initial value
+  }
+
+  void updateMovieId(String newId) {
+    setState(() {
+      selectedMovieId = newId;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,33 +49,29 @@ class MoviesScreen extends StatelessWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-               CustomHomeTopperSection(),
-               MovieSlider(),
-              SizedBox(height: 16.h), // Add some spacing
-              const FilterDropdownSection(),
-              // <-- Add this new custom widget call
+              CustomHomeTopperSection(),
+              MovieSlider(),
+              SizedBox(height: 16.h),
+              // Pass callback to filter
+              FilterDropdownSection(onGenreSelected: updateMovieId),
               SizedBox(height: 16.h),
               PromosionSlider(),
-              SizedBox(height: 16.h), // Add some spacing
-              // Add some spacing
+              SizedBox(height: 16.h),
               Consumer(
                 builder: (context, ref, child) {
-                  String movieID = movie.toString();
-                  final video = ref.watch(CategoryFindController.categoryFiendProvider(movieID));
+                  final video = ref.watch(
+                    CategoryFindController.categoryFiendProvider(selectedMovieId),
+                  );
                   return video.when(
                     data: (movies) => _CustomMovieGrid(movies: movies),
                     loading: () => const Center(child: CircularProgressIndicator()),
                     error: (e, _) => Text("Error: $e"),
                   );
                 },
-              ), // <-- Add this custom widget
-              SizedBox(height: 16.h), // Add some spacing
-              // Footer section if needed
-              // PaginationExample(), // Uncomment if you have pagination
-              FooterSection(), // Uncomment if you have a footer section
+              ),
+              SizedBox(height: 16.h),
+              FooterSection(),
             ],
           ),
         ),
@@ -65,6 +79,7 @@ class MoviesScreen extends StatelessWidget {
     );
   }
 }
+
 
 // --------------------------- Custom Codebase ---------------------------
 

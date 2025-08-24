@@ -1,9 +1,14 @@
+import 'dart:math' as math;
+import 'package:Oloflix/features/auth/screens/login_screen.dart';
+import 'package:Oloflix/features/profile/logic/login_check.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
+
 import 'package:Oloflix/core/constants/color_control/all_color.dart';
 import 'package:Oloflix/core/widget/bottom_nav_bar/controller/bottom_controller.dart';
 import 'package:Oloflix/features/home/screens/home_screen.dart';
@@ -11,8 +16,6 @@ import 'package:Oloflix/features/live/screen/live_screen.dart';
 import 'package:Oloflix/features/ppv/screen/ppv_screen.dart';
 import 'package:Oloflix/features/profile/screen/profile_screen.dart';
 
-
-// This is the main page where the custom navigation bar is used.
 class BottomNavBar extends ConsumerStatefulWidget {
   static const String routeName = "/bottomNavBar";
   @override
@@ -20,51 +23,73 @@ class BottomNavBar extends ConsumerStatefulWidget {
 }
 
 class _BottomNavBarState extends ConsumerState<BottomNavBar> {
-  // We'll use a GlobalKey to access the state of the navigation bar.
   final GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
-  // int _selectedIndex = 0; // Start with the "Scan" icon selected
 
-  // This is a simple list of widgets to display based on the selected index.
-  static final List<Widget> _widgetOptions = <Widget>[
+  static final List<Widget> _pages = <Widget>[
     const HomeScreen(),
     const PpvScreen(),
     const LiveScreen(),
-    const ProfileScreen()
-
+    const ProfileScreen(),
   ];
+
+  Widget _navItem(IconData icon, String label, bool isActive) {
+    final color = isActive ? AllColor.white : AllColor.white.withOpacity(0.7);
+    return Padding(
+      padding:  EdgeInsets.all(3.0.r),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 18.sp, color: color),
+          SizedBox(height: 3.h),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10.sp, // ছোট রাখো যাতে 75 এর মধ্যে ফিট করে
+              color: color,
+              fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+              height: 1.0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final int _selectedIndex = ref.watch(selectedIndexProvider);
+    final int selectedIndex = ref.watch(selectedIndexProvider);
+    final double navHeight = math.min(70.h, 75.0); // টেক্সট রাখায় একটু বেশি, তবু ≤ 75
+
     return Scaffold(
-      body: _widgetOptions.elementAt(_selectedIndex),
+      body: _pages.elementAt(selectedIndex),
       bottomNavigationBar: CurvedNavigationBar(
         key: _bottomNavigationKey,
-        index: _selectedIndex,
-        height: 60.0.h,
+        index: selectedIndex,
+        height: navHeight,
         items: <Widget>[
-          Center(child: Icon(FontAwesomeIcons.homeUser, size: 25.sp, color: AllColor.white)),
-          Icon(FontAwesomeIcons.eye,
-              size: 25.sp, color: AllColor.white),
-          Icon(Icons.live_tv,
-              size: 25.sp, color: AllColor.white),
-          Icon(CupertinoIcons.profile_circled,
-              size: 25.sp, color: AllColor.white),
+          _navItem(FontAwesomeIcons.homeUser, "Home", selectedIndex == 0),
+          _navItem(FontAwesomeIcons.eye,       "PPV",  selectedIndex == 1),
+          _navItem(Icons.live_tv,              "Live", selectedIndex == 2),
+          _navItem(CupertinoIcons.profile_circled, "Account", selectedIndex == 3),
         ],
-
-        color: AllColor.black, // The color of the navigation bar itself.
-        buttonBackgroundColor: AllColor.orange, // Color of the selected button.
-        
-        backgroundColor: AllColor.white, // Background color of the Scaffold behind the nav bar.
+        color: AllColor.black,
+        buttonBackgroundColor: AllColor.orange,
+        backgroundColor: AllColor.white,
         animationCurve: Curves.easeInOut,
         animationDuration: const Duration(milliseconds: 600),
-        onTap: (index) {
+
+        onTap: (index) async {
+          // শুধু Account (index 3) এর জন্য login guard
+          if (index == 3) {
+            final loggedIn = await AuthHelper.isLoggedIn();
+            if (!loggedIn) {
+              if (mounted) context.push(LoginScreen.routeName);
+              return; // index change হবে না
+            }
+          }
           ref.read(selectedIndexProvider.notifier).state = index;
         },
-        letIndexChange: (index) => true,
       ),
     );
   }
 }
-
-// Class to hold all image paths as static final strings.

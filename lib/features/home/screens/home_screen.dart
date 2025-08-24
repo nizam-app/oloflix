@@ -1,7 +1,9 @@
 // Flutter imports:
 import 'package:Oloflix/%20business_logic/models/movie_details_model.dart';
+import 'package:Oloflix/core/widget/bottom_nav_bar/controller/bottom_controller.dart';
 import 'package:Oloflix/core/widget/custom_category_name.dart';
 import 'package:Oloflix/features/home/logic/cetarory_fiend_controller.dart';
+import 'package:Oloflix/features/movies/screen/movies_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -14,6 +16,7 @@ import 'package:Oloflix/core/widget/custom_home_topper_section.dart';
 import 'package:Oloflix/core/widget/movie_and_promotion/custom_movie_card.dart';
 import 'package:Oloflix/core/widget/movie_and_promotion/movie_slider.dart';
 import 'package:Oloflix/core/widget/movie_and_promotion/promosion_slider.dart';
+import 'package:go_router/go_router.dart';
 class HomeScreen extends ConsumerWidget {
   static final routeName = "/homePage";
 
@@ -42,7 +45,8 @@ class HomeScreen extends ConsumerWidget {
               CustomCategoryName(
                 context: context,
                 text: "Pay-Per-View Movies (PPV)",
-                onPressed: () => goToPPVScreen(),
+                onPressed: () => goToPPVScreen(   ref
+                ),
               ),
               ppvMoviesAsync.when(
                 data: (movies) => CustomCard(movies: movies,),
@@ -54,7 +58,7 @@ class HomeScreen extends ConsumerWidget {
               CustomCategoryName(
                 context: context,
                 text: "Nollywood & African Movies",
-                onPressed: () => goToNollywoodScreen(),
+                onPressed: () => goToNollywoodScreen(context),
               ),
               nollywoodMoviesAsync.when(
                 data: (movies) => CustomCard(movies: movies,),
@@ -67,7 +71,7 @@ class HomeScreen extends ConsumerWidget {
               CustomCategoryName(
                 context: context,
                 text: "Talk Shows & Podcasts",
-                onPressed: () => goToTalkVideoScreen(),
+                onPressed: () => goToTalkVideoScreen(context),
               ),
               talkShows.when(
                 data: (movies) => CustomCard(movies: movies,),
@@ -77,7 +81,7 @@ class HomeScreen extends ConsumerWidget {
               CustomCategoryName(
                 context: context,
                 text: "Music Video",
-                onPressed: () => goToMosicVideoScreen(),
+                onPressed: () => goToMosicVideoScreen(context),
               ),
               musicMoviesAsync.when(
                 data: (movies) => CustomCard(movies: movies, ),
@@ -93,10 +97,19 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  void goToPPVScreen() {}
-  void goToNollywoodScreen() {}
-  void goToMosicVideoScreen() {}
-  void goToTalkVideoScreen() {}
+  void goToPPVScreen(WidgetRef ref) {
+           goToPPvScreen(ref) ;
+    
+  }
+  void goToNollywoodScreen(BuildContext context) {
+    context.push("${MoviesScreen.routeName}/2");
+  }
+  void goToMosicVideoScreen(BuildContext context) {
+    context.push("${MoviesScreen.routeName}/12");
+  }
+  void goToTalkVideoScreen(BuildContext context) {
+    context.push("${MoviesScreen.routeName}/15");
+  }
 }
 
 

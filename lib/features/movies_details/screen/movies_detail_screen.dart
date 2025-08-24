@@ -4,12 +4,17 @@ import 'package:Oloflix/core/constants/api_control/global_api.dart';
 import 'package:Oloflix/core/constants/color_control/all_color.dart';
 import 'package:Oloflix/core/widget/base_widget_tupper_botton.dart';
 import 'package:Oloflix/core/widget/custom_category_name.dart';
+import 'package:Oloflix/core/widget/custom_snackbar.dart';
 import 'package:Oloflix/core/widget/movie_and_promotion/custom_movie_card.dart';
+import 'package:Oloflix/features/auth/screens/login_screen.dart';
 import 'package:Oloflix/features/home/logic/cetarory_fiend_controller.dart';
 import 'package:Oloflix/features/movies_details/logic/get_movie_details.dart';
+import 'package:Oloflix/features/movies_details/logic/related_movie_show_revarpod.dart';
+import 'package:Oloflix/features/profile/logic/login_check.dart';
 import 'package:Oloflix/features/subscription/screen/subscription_plan_screen.dart';
 import 'package:Oloflix/features/video_show/video_show_screen.dart';
 import 'package:Oloflix/features/watchlist/logic/watchlist_add_revarpot.dart';
+import 'package:Oloflix/features/watchlist/logic/watchlist_list_revarpot.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,11 +32,9 @@ class MoviesDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final movie = ref.watch(MovieDetailsController.movieByIdProvider(id));
-    final youMayAlsoLike = ref.watch(CategoryFindController.categoryFiendProvider("5")) ;
-   
+    final movieAsync = ref.watch(MovieDetailsController.movieByIdProvider(id));
 
-    return movie.when(
+    return movieAsync.when(
       data: (movie) {
         if (movie == null) {
           return const Scaffold(
@@ -39,10 +42,20 @@ class MoviesDetailScreen extends ConsumerWidget {
           );
         }
 
+        // slug + id দিয়ে related movies ফেচ
+        final relatedAsync = ref.watch(
+          relatedMoviesProvider((slug: movie.videoSlug ?? '', id: movie.id ?? 0)),
+        );
+
         return BaseWidgetTupperBotton(
-          child1: DetailsImage(imageUrl: "${api}${movie.videoImage}"??'', date: '${movie.releaseDate}',
-            duration: '${movie.duration}', videoUrl: '${movie.videoUrl}',checkPaid: "${movie.videoAccess}",
-            postID: movie.id ?? 0,),
+          child1: DetailsImage(
+            imageUrl: "${api}${movie.videoImage}",
+            date: '${movie.releaseDate}',
+            duration: '${movie.duration}',
+            videoUrl: '${movie.videoUrl}',
+            checkPaid: "${movie.videoAccess}",
+            postID: movie.id ?? 0,
+          ),
           child2: Column(
             children: [
               CustomDescription(
@@ -51,14 +64,20 @@ class MoviesDetailScreen extends ConsumerWidget {
                 age: '18+',
                 description: movie.videoDescription ?? '',
               ),
-              CustomCategoryName(context: context, text: "You May Also Like", onPressed: (){}) ,
-          youMayAlsoLike.when(
-            data: (movies) => CustomCard(movies: movies,),
-            loading: () => const CircularProgressIndicator(),
-            error: (e, _) => Text("Error: $e"),
-          ),
-              SizedBox(height: 20.h,),
+              CustomCategoryName(
+                context: context,
+                text: "You May Also Like",
+                onPressed: () {},
+              ),
 
+              // আগের youMayAlsoLike.when(...) এর জায়গায়:
+              relatedAsync.when(
+                data: (movies) => CustomCard(movies: movies),
+                loading: () => const CircularProgressIndicator(),
+                error: (e, _) => Text("Error: $e"),
+              ),
+
+              SizedBox(height: 20.h),
             ],
           ),
         );
@@ -71,7 +90,6 @@ class MoviesDetailScreen extends ConsumerWidget {
       ),
     );
   }
-
 }
 
 class CustomDescription extends StatelessWidget {
@@ -183,10 +201,7 @@ class DetailsImage extends ConsumerWidget {
           top: 8.h,
           child: InkWell(
             onTap: (){
-              if (checkPaid == "Paid") {
-                   context.push(SubscriptionPlanScreen.routeName);
-              }  else{
-              playVideo(context, videoUrl);     }
+              videoPlayButtonLogic(context) ;
             },
             child: CircleAvatar(
               radius: 18.r,
@@ -262,11 +277,34 @@ class DetailsImage extends ConsumerWidget {
                   padding: EdgeInsets.symmetric(
                       horizontal: 12.w, vertical: 8.h),
                 ),
-                onPressed: () {
-                  ref
-                      .read(watchlistAddControllerProvider.notifier)
-                      .addMovie(AuthAPIController.addWatchlist,
-                      postID, "Movies");
+                onPressed: () async{
+                  try {
+                    await ref.read(watchlistAddControllerProvider.notifier)
+                        .addMovie(AuthAPIController.addWatchlist, postID, "Movies");
+
+                    ref.invalidate(watchlistProvider);
+                    ref.invalidate(filteredWatchlistMoviesProvider);
+
+                    if (context.mounted) {
+                      showCustomSnackBar(
+                        context,
+                        message: "Added to Watchlist",
+                        bgColor: Colors.green,
+                        icon: Icons.check_circle,
+                      );
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      showCustomSnackBar(
+                        context,
+                        message: "Failed: $e",
+                        bgColor: Colors.red,
+                        icon: Icons.error_outline,
+                        duration: const Duration(seconds: 3),
+                      );
+                    }
+                  }
+
                 },
                 icon: Icon(Icons.add, color: Colors.white, size: 18.sp),
                 label: Text(
@@ -285,6 +323,29 @@ class DetailsImage extends ConsumerWidget {
       ],
     );
   }
+  Future<void> videoPlayButtonLogic(BuildContext context) async {
+    final loggedIn = await AuthHelper.isLoggedIn();
+
+    if (!loggedIn) {
+      // লগইন না থাকলে login page এ পাঠাও
+      context.push(LoginScreen.routeName);
+      return;
+    }
+
+    // লগইন আছে → Paid check
+    if (checkPaid?.toString() == "Paid") {
+      if (videoUrl != null && videoUrl!.isNotEmpty) {
+        playVideo(context, videoUrl);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Video URL not found")),
+        );
+      }
+    } else {
+      context.push(SubscriptionPlanScreen.routeName);
+    }
+  }
+
   void playVideo(BuildContext context, String videoUrl) {
     context.push("${VideoShowScreen.routeName}?url=$videoUrl");
 

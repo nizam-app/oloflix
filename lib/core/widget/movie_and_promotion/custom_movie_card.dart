@@ -45,6 +45,15 @@ class CustomMoviCard extends StatelessWidget {
             },
               child: CustomPrimiumButton()),
         ),
+        if (movie.videoAccess == "ppv")Positioned(
+          top: 8.h,
+          right: 18.w,
+          child: GestureDetector(
+              onTap: () {
+                context.push(SubscriptionPlanScreen.routeName);
+              },
+              child: CustomPrimiumButton()),
+        ),
       ],
     );
   }
