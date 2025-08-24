@@ -1,5 +1,11 @@
 // Flutter imports:
+import 'package:Oloflix/%20business_logic/models/movie_details_model.dart';
+import 'package:Oloflix/core/constants/api_control/global_api.dart';
+import 'package:Oloflix/features/auth/screens/login_screen.dart';
+import 'package:Oloflix/features/movies_details/logic/get_movie_details.dart';
+import 'package:Oloflix/features/movies_details/screen/movies_detail_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Package imports:
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -17,13 +23,14 @@ import 'package:Oloflix/features/home/screens/home_screen.dart';
 import 'package:Oloflix/features/profile/screen/profile_screen.dart';
 import 'package:Oloflix/features/subscription/screen/subscription_plan_screen.dart';
 import 'package:Oloflix/features/watchlist/screen/my_watchlist_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
-class CustomHomeTopperSection extends StatelessWidget {
+class CustomHomeTopperSection extends ConsumerWidget {
   CustomHomeTopperSection({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
     return Column(
       children: [
         Row(
@@ -34,16 +41,22 @@ class CustomHomeTopperSection extends StatelessWidget {
               },
                 child: Image.asset(ImagePath.logo, width: 80.w)),
             Spacer(),
-            InkWell(
-              onTap: () {
-                goToSearch(context);
-              },
-              child: CircleAvatar(
-                radius: 14.r,
-                backgroundColor: AllColor.red,
-                child: Icon(Icons.search, color: ThemeColorController.white),
-              ),
-            ),
+    ref.watch( MovieDetailsController.movieDetailsProvider).when(
+    data: (movies) {
+    return  InkWell(
+      onTap: () {
+        goToSearch(context,movies);
+      },
+      child: CircleAvatar(
+        radius: 14.r,
+        backgroundColor: AllColor.red,
+        child: Icon(Icons.search, color: ThemeColorController.white),
+      ),
+    );
+    },
+    loading: () => const CircularProgressIndicator(),
+    error: (e, _) => Text("Error: $e"),
+    ),
             SizedBox(width: 20.w),
             InkWell(
               onTap: () {
@@ -94,14 +107,85 @@ class CustomHomeTopperSection extends StatelessWidget {
     'Grapes',
     'Strawberry',
   ];
-  void goToSearch(BuildContext context) {
-    showSearch(context: context, delegate: CustomSearchDelegate(items));
+  void goToSearch(BuildContext context, List<MovieDetailsModel> movies) {
+    showSearch(
+      context: context,
+      delegate: CustomSearchDelegate(movies),
+    ).then((selectedMovie) {
+      if (selectedMovie != null) {
+        // এখানে তুমি ডিটেইলস স্ক্রিনে যেতে পারবা
+        print("Selected Movie: ${selectedMovie.videoTitle}");
+      }
+    });
   }
 
   void goToSubscriptionScreen(BuildContext context) {
     context.push(SubscriptionPlanScreen.routeName);
   }
 }
+class CustomSearchDelegate extends SearchDelegate<MovieDetailsModel?> {
+  final List<MovieDetailsModel> movies;
+
+  CustomSearchDelegate(this.movies);
+
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    return [
+      if (query.isNotEmpty)
+        IconButton(
+          icon: const Icon(Icons.clear),
+          onPressed: () {
+            query = '';
+            showSuggestions(context);
+          },
+        ),
+    ];
+  }
+
+  @override
+  Widget? buildLeading(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () => close(context, null),
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    final results = movies.where((movie) =>
+        movie.videoTitle.toLowerCase().contains(query.toLowerCase())
+    ).toList();
+
+    return _buildMovieList(results);
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    final suggestions = movies.where((movie) =>
+        movie.videoTitle.toLowerCase().startsWith(query.toLowerCase())
+    ).toList();
+
+    return _buildMovieList(suggestions);
+  }
+
+  Widget _buildMovieList(List<MovieDetailsModel> list) {
+    return ListView.builder(
+      itemCount: list.length,
+      itemBuilder: (context, index) {
+        final movie = list[index];
+        return ListTile(
+          leading: Image.network("${api}${movie.videoImageThumb}", width: 50, fit: BoxFit.cover),
+          title: Text(movie.videoTitle),
+          subtitle: Text(movie.duration),
+          onTap: () {
+            context.push("${MoviesDetailScreen.routeName}/${movie.id}"); // movie select করলে return হবে
+          },
+        );
+      },
+    );
+  }
+}
+
 
 class _UserMenu extends StatelessWidget {
   final List<_MenuItem> menuItems;
@@ -180,7 +264,7 @@ class _UserMenu extends StatelessWidget {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: AllColor.red),
                 onPressed: () {
-                  context.pop();
+                  logout(context);
                   ScaffoldMessenger.of(
                     context,
                   ).showSnackBar(const SnackBar(content: Text(" LogOut Done")));
@@ -193,6 +277,17 @@ class _UserMenu extends StatelessWidget {
       );
     }
   }
+
+    Future<void> logout(BuildContext context) async {
+      final prefs = await SharedPreferences.getInstance();
+
+      // সব ডেটা clear করো
+      await prefs.clear();
+
+      // login screen এ redirect করো
+      context.go(LoginScreen.routeName);
+    }
+
 }
 
 class _MenuItem {

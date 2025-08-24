@@ -84,7 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             TextButton(
               onPressed: () {
-                context.push(BottomNavBar.routeName);
+                context.go(BottomNavBar.routeName);
               },
               child: Text(
                 "Skip",

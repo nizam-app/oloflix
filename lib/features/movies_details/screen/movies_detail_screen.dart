@@ -1,12 +1,17 @@
 
+import 'package:Oloflix/core/constants/api_control/auth_api.dart';
 import 'package:Oloflix/core/constants/api_control/global_api.dart';
 import 'package:Oloflix/core/constants/color_control/all_color.dart';
 import 'package:Oloflix/core/widget/base_widget_tupper_botton.dart';
 import 'package:Oloflix/core/widget/custom_category_name.dart';
 import 'package:Oloflix/core/widget/movie_and_promotion/custom_movie_card.dart';
+import 'package:Oloflix/features/home/logic/cetarory_fiend_controller.dart';
 import 'package:Oloflix/features/movies_details/logic/get_movie_details.dart';
+import 'package:Oloflix/features/subscription/screen/subscription_plan_screen.dart';
 import 'package:Oloflix/features/video_show/video_show_screen.dart';
+import 'package:Oloflix/features/watchlist/logic/watchlist_add_revarpot.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -16,13 +21,15 @@ import 'package:intl/intl.dart';
 
 class MoviesDetailScreen extends ConsumerWidget {
   const MoviesDetailScreen({super.key, required this.id});
-  final String id;
+  final int id;
 
   static const String routeName = '/moviesDetailScreen';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final movie = ref.watch(AllMovieDetails.movieByIdProvider(id));
+    final movie = ref.watch(MovieDetailsController.movieByIdProvider(id));
+    final youMayAlsoLike = ref.watch(CategoryFindController.categoryFiendProvider("5")) ;
+   
 
     return movie.when(
       data: (movie) {
@@ -33,7 +40,9 @@ class MoviesDetailScreen extends ConsumerWidget {
         }
 
         return BaseWidgetTupperBotton(
-          child1: DateilsImage(imageUrl: "${api}${movie.videoImage}"??'', date: '${movie.releaseDate}', duration: '${movie.duration}', videoUrl: '${movie.videoUrl}',),
+          child1: DetailsImage(imageUrl: "${api}${movie.videoImage}"??'', date: '${movie.releaseDate}',
+            duration: '${movie.duration}', videoUrl: '${movie.videoUrl}',checkPaid: "${movie.videoAccess}",
+            postID: movie.id ?? 0,),
           child2: Column(
             children: [
               CustomDescription(
@@ -43,7 +52,11 @@ class MoviesDetailScreen extends ConsumerWidget {
                 description: movie.videoDescription ?? '',
               ),
               CustomCategoryName(context: context, text: "You May Also Like", onPressed: (){}) ,
-              CustomCard() ,
+          youMayAlsoLike.when(
+            data: (movies) => CustomCard(movies: movies,),
+            loading: () => const CircularProgressIndicator(),
+            error: (e, _) => Text("Error: $e"),
+          ),
               SizedBox(height: 20.h,),
 
             ],
@@ -122,16 +135,11 @@ class CustomDescription extends StatelessWidget {
               color: AllColor.orange,
               onPressed: () {},
             ) ,
-
             // Description
-            Text(
-              description,
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 14.sp,
-                height: 1.4,
-              ),
-            ),
+            Html(
+             data: description,
+            
+            )
           ],
         ),
         SizedBox(height: 20.h),
@@ -140,19 +148,22 @@ class CustomDescription extends StatelessWidget {
   }
 }
 
-class DateilsImage extends StatelessWidget {
-  const DateilsImage({
-    super.key, required this.imageUrl, required this.date, required this.duration, required this.videoUrl,
+class DetailsImage extends ConsumerWidget {
+  const DetailsImage({
+    super.key, required this.imageUrl, required this.date,
+    required this.duration, required this.videoUrl, required this.checkPaid,      required this.postID
   });
   final String imageUrl ;
   final String videoUrl ;
   final String date;
   final String duration ; // Hard-coded duration, replace later with API
+  final String checkPaid;
+  final int postID ;
 
 
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ref) {
  
     return Stack(
       children: [
@@ -172,7 +183,10 @@ class DateilsImage extends StatelessWidget {
           top: 8.h,
           child: InkWell(
             onTap: (){
-              playVideo(context, videoUrl);
+              if (checkPaid == "Paid") {
+                   context.push(SubscriptionPlanScreen.routeName);
+              }  else{
+              playVideo(context, videoUrl);     }
             },
             child: CircleAvatar(
               radius: 18.r,
@@ -248,7 +262,12 @@ class DateilsImage extends StatelessWidget {
                   padding: EdgeInsets.symmetric(
                       horizontal: 12.w, vertical: 8.h),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  ref
+                      .read(watchlistAddControllerProvider.notifier)
+                      .addMovie(AuthAPIController.addWatchlist,
+                      postID, "Movies");
+                },
                 icon: Icon(Icons.add, color: Colors.white, size: 18.sp),
                 label: Text(
                   "Add to Watchlist",
@@ -257,7 +276,9 @@ class DateilsImage extends StatelessWidget {
                 ),
               ),
               SizedBox(width: 12.w),
-              CustomElevatedbutton(title: 'Watch Trailer', color: AllColor.blue,onPressed: (){},),
+              CustomElevatedbutton(title: 'Watch', color: AllColor.blue,onPressed: (){
+
+                },),
             ],
           ),
         ),
@@ -265,7 +286,7 @@ class DateilsImage extends StatelessWidget {
     );
   }
   void playVideo(BuildContext context, String videoUrl) {
-    context.go("${VideoShowScreen.routeName}?url=$videoUrl");
+    context.push("${VideoShowScreen.routeName}?url=$videoUrl");
 
   }
 }
@@ -297,18 +318,20 @@ class CustomElevatedbutton extends StatelessWidget {
     );
   }
 }
-class CustomCard extends StatelessWidget {
-  const CustomCard({super.key});
-
+class CustomCard extends ConsumerWidget {
+  const CustomCard({super.key, required this.movies});
+  final dynamic movies;
   @override
-  Widget build(BuildContext context) {
-    return SizedBox(
+  Widget build(BuildContext context, WidgetRef ref) {
+          return SizedBox(
       height: 200.h,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: 10,
+        itemCount: movies.length,
         itemBuilder: (context, index) {
-          return CustomMoviCard();
+          final movie = movies [index];
+          return   CustomMoviCard(movie: movie,) ;
+
         },
       ),
     );

@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'package:Oloflix/core/constants/api_control/auth_api.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
+import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginController extends GetxController {
@@ -21,7 +23,7 @@ class LoginController extends GetxController {
     isLoading.value = true;
 
     try {
-      var url = Uri.parse("http://103.145.138.111:8000/api/login");
+      var url = Uri.parse(AuthAPIController.login);
       var response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},
@@ -29,9 +31,12 @@ class LoginController extends GetxController {
       );
 
       var data = jsonDecode(response.body);
+      
 
       if (response.statusCode == 200) {
-        String token = data["token"] ?? "";
+        print(response.body);
+        String token = data["data"]["token"] ?? "";
+        print( "this tha token token $token") ;
 
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString("email", email);

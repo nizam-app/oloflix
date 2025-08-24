@@ -1,9 +1,15 @@
 // Flutter imports:
+import 'package:Oloflix/core/constants/color_control/all_color.dart';
+import 'package:Oloflix/core/widget/bottom_nav_bar/screen/bottom_nav_bar.dart';
+import 'package:Oloflix/features/auth/screens/forgod_screen.dart';
+import 'package:Oloflix/features/auth/screens/login_screen.dart';
+import 'package:Oloflix/features/home/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -14,13 +20,26 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  void loginCheck() async{
+    SharedPreferences _pref = await SharedPreferences.getInstance();
+    String? email = await _pref.getString("email");
+    String? token = await _pref.getString("token");
+
+    Future.delayed(const Duration(seconds: 3), () {
+     if (email != null && token != null ) { context.go(BottomNavBar.routeName); }
+     else{
+       context.go(LoginScreen.routeName);
+     }
+     // GoRouter navigation
+    });
+    
+  }
   @override
   void initState() {
     super.initState();
+    loginCheck() ;
 
-    Future.delayed(const Duration(seconds: 3), () {
-      context.go('/login_screen'); // GoRouter navigation
-    });
+
   }
 
   @override
@@ -34,14 +53,11 @@ class _SplashScreenState extends State<SplashScreen> {
               const Spacer(),
               Image.asset("assets/images/Logo.png"),
               SizedBox(height: 10.h),
+              Spacer(),
               const CircularProgressIndicator(),
               SizedBox(height: 10.h),
-              Text(
-                "Oloflix",
-                style: TextStyle(fontSize: 25.sp, color: Colors.white),
-              ),
-
-              const Spacer(),
+              Text("v1.1.0",style: TextStyle(color: AllColor.white70),)     ,
+              SizedBox(height: 20.h,)
             ],
           ),
         ),

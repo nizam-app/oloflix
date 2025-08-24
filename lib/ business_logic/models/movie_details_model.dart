@@ -1,6 +1,6 @@
 class MovieDetailsModel {
-  final String? id;
-  final int? categoryId;
+  final int? id;
+  final String? categoryId;
   final String videoAccess;
   final double? price;
   final int? expDate;
@@ -93,8 +93,8 @@ class MovieDetailsModel {
 
   factory MovieDetailsModel.fromJson(Map<String, dynamic> json) {
     return MovieDetailsModel(
-      id: json['id']?.toString() ?? "",
-      categoryId: json['category_id'],
+      id: json['id']?.toInt() ?? "",
+      categoryId: json['category_id'].toString(),
       videoAccess: json['video_access'] ?? "free",
       price: json['price'] != null ? double.tryParse(json['price'].toString()) : 0.0,
       expDate: json['exp_date'],

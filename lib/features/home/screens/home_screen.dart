@@ -1,6 +1,9 @@
 // Flutter imports:
+import 'package:Oloflix/%20business_logic/models/movie_details_model.dart';
 import 'package:Oloflix/core/widget/custom_category_name.dart';
+import 'package:Oloflix/features/home/logic/cetarory_fiend_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 // Project imports:
 import 'package:Oloflix/core/constants/color_control/all_color.dart';
@@ -11,16 +14,21 @@ import 'package:Oloflix/core/widget/custom_home_topper_section.dart';
 import 'package:Oloflix/core/widget/movie_and_promotion/custom_movie_card.dart';
 import 'package:Oloflix/core/widget/movie_and_promotion/movie_slider.dart';
 import 'package:Oloflix/core/widget/movie_and_promotion/promosion_slider.dart';
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   static final routeName = "/homePage";
 
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Example: তিনটা আলাদা category থেকে আলাদা data আনব
+    final ppvMoviesAsync = ref.watch(CategoryFindController.categoryFiendProvider("17"));
+    final nollywoodMoviesAsync = ref.watch(CategoryFindController.categoryFiendProvider("2"));
+    final musicMoviesAsync = ref.watch(CategoryFindController.categoryFiendProvider("12"));
+    final talkShows = ref.watch(CategoryFindController.categoryFiendProvider("15"));
+
     return Scaffold(
       endDrawer: AppDrawer(),
-
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -29,108 +37,83 @@ class HomeScreen extends StatelessWidget {
               MovieSlider(),
               PPVNoticeSection(),
               PromosionSlider(),
-              CustomCategoryName(context: context, text: "Pay-Per-View Movies (PPV)", onPressed: () {
-                  goToPPVScreen();
-                }),
-              CustomCard(),
-              CustomCategoryName(context: context, text: "Nollywood & African Movies", onPressed: () {
-                  goToNollywoodScreen();
-                }),
-              CustomCard(),
-              CustomCategoryName(context: context, text: "Music Video", onPressed: () {
-                  goToMosicVideoScreen();
-                }),
-              CustomCard(),
-              CustomCategoryName(context: context, text: "Talk Shows & Podcasts", onPressed: () {
-                  goToMosicVideoScreen();
-                }),
-              CustomCard(),
+
+              // PPV Movies
+              CustomCategoryName(
+                context: context,
+                text: "Pay-Per-View Movies (PPV)",
+                onPressed: () => goToPPVScreen(),
+              ),
+              ppvMoviesAsync.when(
+                data: (movies) => CustomCard(movies: movies,),
+                loading: () => const CircularProgressIndicator(),
+                error: (e, _) => Text("Error: $e"),
+              ),
+
+              // Nollywood Movies
+              CustomCategoryName(
+                context: context,
+                text: "Nollywood & African Movies",
+                onPressed: () => goToNollywoodScreen(),
+              ),
+              nollywoodMoviesAsync.when(
+                data: (movies) => CustomCard(movies: movies,),
+                loading: () => const CircularProgressIndicator(),
+                error: (e, _) => Text("Error: $e"),
+              ),
+
+              // Music Videos
+
+              CustomCategoryName(
+                context: context,
+                text: "Talk Shows & Podcasts",
+                onPressed: () => goToTalkVideoScreen(),
+              ),
+              talkShows.when(
+                data: (movies) => CustomCard(movies: movies,),
+                loading: () => const CircularProgressIndicator(),
+                error: (e, _) => Text("Error: $e"),
+              ),
+              CustomCategoryName(
+                context: context,
+                text: "Music Video",
+                onPressed: () => goToMosicVideoScreen(),
+              ),
+              musicMoviesAsync.when(
+                data: (movies) => CustomCard(movies: movies, ),
+                loading: () => const CircularProgressIndicator(),
+                error: (e, _) => Text("Error: $e"),
+              ),
+
               FooterSection(),
             ],
           ),
         ),
       ),
-      //bottomNavigationBar: buildBottomNavigationBar(),
     );
   }
 
   void goToPPVScreen() {}
-
   void goToNollywoodScreen() {}
-
   void goToMosicVideoScreen() {}
+  void goToTalkVideoScreen() {}
 }
 
 
 
 
 
-class CustomSearchDelegate extends SearchDelegate {
-  final List<String> searchList;
 
-  CustomSearchDelegate(this.searchList);
 
-  @override
-  List<Widget>? buildActions(BuildContext context) {
-    return [
-      if (query.isNotEmpty)
-        IconButton(
-          icon: Icon(Icons.clear),
-          onPressed: () {
-            query = '';
-            showSuggestions(context);
-          },
-        ),
-    ];
-  }
-
-  @override
-  Widget? buildLeading(BuildContext context) {
-    return IconButton(
-      icon: Icon(Icons.arrow_back),
-      onPressed: () => close(context, null),
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    final results = searchList
-        .where((item) => item.toLowerCase().contains(query.toLowerCase()))
-        .toList();
-
-    return ListView.builder(
-      itemCount: results.length,
-      itemBuilder: (context, index) => ListTile(
-        title: Text(results[index]),
-        onTap: () {
-          close(context, results[index]);
-        },
-      ),
-    );
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    final suggestions = searchList
-        .where((item) => item.toLowerCase().startsWith(query.toLowerCase()))
-        .toList();
-
-    return ListView.builder(
-      itemCount: suggestions.length,
-      itemBuilder: (context, index) => ListTile(
-        title: Text(suggestions[index]),
-        onTap: () {
-          query = suggestions[index];
-          showResults(context);
-        },
-      ),
-    );
-  }
-}
 
 
 class CustomCard extends StatelessWidget {
-  const CustomCard({super.key});
+  final List<MovieDetailsModel> movies; // 👉 movie লিস্ট নেবে
+
+  const CustomCard({
+    super.key,
+    required this.movies,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -138,14 +121,16 @@ class CustomCard extends StatelessWidget {
       height: 200.h,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: 10,
+        itemCount: movies.length,
         itemBuilder: (context, index) {
-          return CustomMoviCard();
+          final movie = movies[index];
+          return CustomMoviCard(movie: movie); // movie object পাঠাচ্ছি
         },
       ),
     );
   }
 }
+
 
 
 
@@ -157,7 +142,7 @@ class PPVNoticeSection extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.all(12),
       child: Text(
-        "We are Glad to announce that our PAY-PER-VIEW movies_music_video are now available. These Premium Movies are highly curated and are independent of your current subscription plan. You're required to Pay and View each movies_music_video separately. Click on any PPV movies_music_video to view its cost and access period",
+        "We are Glad to announce that our PAY-PER-VIEW movies are now available. These Premium Movies are highly curated and are independent of your current subscription plan. You're required to Pay and View each movies separately. Click on any PPV movies to view its cost and access period",
         style: TextStyle(color: AllColor.white70),
       ),
     );

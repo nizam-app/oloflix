@@ -49,6 +49,8 @@ dependencies:
   pin_code_fields: ^8.0.1
   intl: ^0.20.2
   video_player: ^2.10.0
+  image_picker: ^1.2.0
+  flutter_html: ^3.0.0
 
 
 

@@ -2,9 +2,8 @@
 import 'package:Oloflix/core/utils/global_get_data_frame.dart';
 import 'package:Oloflix/%20business_logic/models/movie_details_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:logger/logger.dart';
 
-class AllMovieDetails {
+class MovieDetailsController {
   static final movieDetailsProvider = FutureProvider<List<MovieDetailsModel>>((ref) async {
     try {
       final data = await GlobalGetDataFrame.getDataFrame<MovieDetailsModel>(
@@ -22,7 +21,7 @@ class AllMovieDetails {
 
 
 
-  static final movieByIdProvider = FutureProvider.family<MovieDetailsModel?,String>((ref, id) async {
+  static final movieByIdProvider = FutureProvider.family<MovieDetailsModel?,int>((ref, int id) async {
     final movies = await ref.watch(movieDetailsProvider.future); // future থেকে data আনুন
                  print("Fetching movie by: ${movies.length}");
     try {
