@@ -4,6 +4,7 @@ import 'package:Oloflix/core/constants/api_control/global_api.dart';
 import 'package:Oloflix/features/auth/screens/login_screen.dart';
 import 'package:Oloflix/features/movies_details/logic/get_movie_details.dart';
 import 'package:Oloflix/features/movies_details/screen/movies_detail_screen.dart';
+import 'package:Oloflix/features/profile/logic/login_check.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -239,35 +240,59 @@ class _UserMenu extends StatelessWidget {
     );
   }
 
-  void goToNextPage(int index, BuildContext context) {
+// আগের onSelected একই থাকবে:
+// onSelected: (index) { goToNextPage(index, context); },
+
+  Future<void> goToNextPage(int index, BuildContext context) async {
+    final bool loggedIn = await AuthHelper.isLoggedIn();
+
     if (index == 0) {
+      // Dashboard
+      if (!loggedIn) {
+        context.push(LoginScreen.routeName);
+        return;
+      }
       context.push(DashboardScreen.routeName);
+
     } else if (index == 1) {
+      // Profile
+      if (!loggedIn) {
+        context.push(LoginScreen.routeName);
+        return;
+      }
       context.push(ProfileScreen.routeName);
+
     } else if (index == 2) {
+      // My Watchlist
+      if (!loggedIn) {
+        context.push(LoginScreen.routeName);
+        return;
+      }
       context.push(MyWatchlistScreen.routeName);
+
     } else if (index == 3) {
+      // Logout (logged-in না থাকলে Login এ নেবে)
+      if (!loggedIn) {
+        context.push(LoginScreen.routeName);
+        return;
+      }
+
       showDialog(
         context: context,
-        builder: (BuildContext context) {
+        builder: (BuildContext ctx) {
           return AlertDialog(
             title: const Text("LogOut"),
             content: Text("Are you sure you want to LogOut ?"),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15.r),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.r)),
             actions: [
-              TextButton(
-                onPressed: () => context.pop(),
-                child: const Text("Cancel"),
-              ),
+              TextButton(onPressed: () => ctx.pop(), child: const Text("Cancel")),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(backgroundColor: AllColor.red),
-                onPressed: () {
-                  logout(context);
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text(" LogOut Done")));
+                onPressed: () async {
+                  await logout(ctx); // তোমার আগের logout() একই আছে
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    const SnackBar(content: Text(" LogOut Done")),
+                  );
                 },
                 child: const Text("LogOut"),
               ),
@@ -277,6 +302,7 @@ class _UserMenu extends StatelessWidget {
       );
     }
   }
+
 
     Future<void> logout(BuildContext context) async {
       final prefs = await SharedPreferences.getInstance();

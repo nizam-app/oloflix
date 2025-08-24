@@ -1,32 +1,41 @@
-// Flutter imports:
-import 'package:Oloflix/features/deshboard/logic/deshboard_reverport.dart';
+// features/deshboard/ui/dashboard_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+
 import 'package:Oloflix/core/widget/aboute_backgrount_image.dart';
 import 'package:Oloflix/core/widget/aboute_fooder.dart';
 import 'package:Oloflix/core/widget/custom_home_topper_section.dart';
 
-// NEW: Riverpod imports (ADD)
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-// NEW: Your providers (ADD) - path adjust করো প্রজেক্ট অনুযায়ী
+import 'package:Oloflix/features/deshboard/logic/deshboard_reverport.dart';
+import 'package:Oloflix/features/deshboard/model/deshboard_model.dart';
 
-
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
   static final routeName = "/dashboardScreen";
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CustomHomeTopperSection(),
-              const AbouteBackgrountImage(screenName: "Dashboard  Screen"),
-              AccountContent(),
-              FooterSection()
-            ],
+        child: RefreshIndicator(
+          onRefresh: () async {
+            // 1) cache drop
+            ref.invalidate(profileProvider);
+            // 2) নতুন ডেটা আসা পর্যন্ত অপেক্ষা
+            await ref.read(profileProvider.future);
+          },
+          child:  SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CustomHomeTopperSection(),
+                AbouteBackgrountImage(screenName: "Dashboard  Screen"),
+                AccountContent(),
+                FooterSection(),
+              ],
+            ),
           ),
         ),
       ),
@@ -34,15 +43,15 @@ class DashboardScreen extends StatelessWidget {
   }
 }
 
+
 // --------------------------- Custom Codebase ---------------------------
 
-/// The main content section for the user's account page.
-///
-/// This widget combines the profile, subscription, invoice, and history sections.
 class AccountContent extends StatelessWidget {
+  const AccountContent({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       children: [
         UserProfileSection(),
         MySubscriptionSection(),
@@ -54,49 +63,43 @@ class AccountContent extends StatelessWidget {
 }
 
 /// Displays the user's profile picture, name, and email.
-class UserProfileSection extends StatelessWidget {
+class UserProfileSection extends ConsumerWidget {
+  const UserProfileSection({super.key});
+
   @override
-  Widget build(BuildContext context) {
-    // ADD: Consumer দিয়ে userProvider observe
-    return Consumer(
-      builder: (context, ref, _) {
-        final user = ref.watch(userProvider);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(userProvider);
 
-        final displayName =
-        user?.name?.isNotEmpty == true ? user!.name : "christian onyejiuwa";
-        final displayEmail = user?.email?.isNotEmpty == true
-            ? user!.email
-            : "onyejiuwachristian1@gmail.com";
+    final displayName = (user?.name.isNotEmpty == true) ? user!.name : "—";
+    final displayEmail = (user?.email.isNotEmpty == true) ? user!.email : "—";
 
-        return Container(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              _buildProfileImage(),
-              const SizedBox(height: 16.0),
-              Text(
-                displayName,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              Text(
-                displayEmail,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                ),
-              ),
-              const SizedBox(height: 16.0),
-              _buildEditButton(),
-              const SizedBox(height: 8.0),
-              _buildAccountDeleteButton(),
-            ],
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          _buildProfileImage(),
+          const SizedBox(height: 16.0),
+          Text(
+            displayName,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
-        );
-      },
+          Text(
+            displayEmail,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 16.0),
+          _buildEditButton(),
+          const SizedBox(height: 8.0),
+          _buildAccountDeleteButton(),
+        ],
+      ),
     );
   }
 
@@ -118,7 +121,9 @@ class UserProfileSection extends StatelessWidget {
 
   Widget _buildEditButton() {
     return ElevatedButton.icon(
-      onPressed: () {},
+      onPressed: () {
+                   
+      },
       icon: const Icon(Icons.edit, color: Colors.black),
       label: const Text(
         "EDIT",
@@ -152,249 +157,234 @@ class UserProfileSection extends StatelessWidget {
 }
 
 /// Displays the user's subscription details.
-class MySubscriptionSection extends StatelessWidget {
+class MySubscriptionSection extends ConsumerWidget {
+  const MySubscriptionSection({super.key});
+
   @override
-  Widget build(BuildContext context) {
-    // ADD: Consumer দিয়ে user থেকে plan/exp-date আনছি
-    return Consumer(
-      builder: (context, ref, _) {
-        final user = ref.watch(userProvider);
-        final planText = (user?.planAmount ?? '0') == '0'
-            ? 'Free Plan'
-            : 'Paid Plan (${user?.planAmount})';
-        final expText = (user?.expDate?.isNotEmpty == true)
-            ? user!.expDate!
-            : 'N/A';
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(userProvider);
+    final planText = planLabelFromId(user?.planId);
+    final expText = _fmtDate(user?.expDate) ?? 'N/A';
 
-        return Container(
-          margin: const EdgeInsets.all(16.0),
-          padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: Colors.white10,
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSectionTitle("My Subscription"),
-              const SizedBox(height: 16.0),
-              _buildSubscriptionDetail(
-                "Current Plan:",
-                _buildPlanTag(planText), // dynamic
-              ),
-              const SizedBox(height: 8.0),
-              _buildSubscriptionDetail(
-                "Subscription expires on:",
-                _buildPlanTag(expText), // dynamic
-              ),
-              const SizedBox(height: 16.0),
-              _buildUpgradeButton(),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-      ),
-    );
-  }
-
-  Widget _buildSubscriptionDetail(String label, Widget value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(color: Colors.white),
-        ),
-        value,
-      ],
-    );
-  }
-
-  Widget _buildPlanTag(String text) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      margin: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.grey[800],
-        borderRadius: BorderRadius.circular(5),
+        color: Colors.white10,
+        borderRadius: BorderRadius.circular(15),
       ),
-      child: Text(
-        text,
-        style: const TextStyle(color: Colors.white),
-      ),
-    );
-  }
-
-  Widget _buildUpgradeButton() {
-    return ElevatedButton(
-      onPressed: () {},
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.red,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        minimumSize: const Size(double.infinity, 50),
-      ),
-      child: const Text(
-        "UPGRADE PLAN",
-        style: TextStyle(color: Colors.white),
-      ),
-    );
-  }
-}
-
-/// Displays the user's last invoice details.
-class LastInvoiceSection extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    // ADD: profile থেকে last invoice info না থাকলে placeholder
-    return Consumer(
-      builder: (context, ref, _) {
-        final profileAsync = ref.watch(profileProvider);
-
-        // এখানে শুধু ডায়নামিক করার জন্য placeholder দেখালাম
-        // real "transactions" থাকলে সেখান থেকে last item দেখাতে পারো
-        String date = '—';
-        String plan = '—';
-        String amount = '—';
-
-        profileAsync.whenData((data) {
-          // যদি future এ transactions আসে, এখানে parse করে set করা যাবে
-          // এখন খালি থাকায় উপরে default-ই থাকবে
-          plan = (data.user.planAmount == '0')
-              ? 'Free Plan'
-              : 'Paid Plan (${data.user.planAmount})';
-        });
-
-        return Container(
-          margin: const EdgeInsets.all(16.0),
-          padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: Colors.white10,
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSectionTitle("Last Invoice"),
-              const SizedBox(height: 16.0),
-              _buildInvoiceDetail("Date:"),
-              _buildInvoiceDetail("Plan:", _buildPlanTag(plan)),
-              _buildInvoiceDetail("Amount:"),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-      ),
-    );
-  }
-
-  Widget _buildInvoiceDetail(String label, [Widget? value]) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(color: Colors.white),
-          ),
-          if (value != null) value,
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPlanTag(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.grey[800],
-        borderRadius: BorderRadius.circular(5),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(color: Colors.white),
-      ),
-    );
-  }
-}
-
-/// Displays a scrollable list of tabs for user history.
-class UserHistorySection extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-
-      padding: EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionTitle("User History"),
+          _sectionTitle("My Subscription"),
           const SizedBox(height: 16.0),
-          _buildHistoryTabs(),
+          _rowDetail("Current Plan:", _pill(planText)),
+          const SizedBox(height: 8.0),
+          _rowDetail("Subscription expires on:", _pill(expText)),
+          const SizedBox(height: 16.0),
+          _upgradeButton(),
         ],
       ),
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
+  static Widget _sectionTitle(String t) => Text(
+    t,
+    style: const TextStyle(
+      color: Colors.white,
+      fontSize: 18,
+      fontWeight: FontWeight.bold,
+    ),
+  );
+
+  static Widget _rowDetail(String label, Widget value) => Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(label, style: const TextStyle(color: Colors.white)),
+      value,
+    ],
+  );
+
+  static Widget _pill(String text) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    decoration: BoxDecoration(
+      color: Colors.grey[800],
+      borderRadius: BorderRadius.circular(5),
+    ),
+    child: Text(text, style: const TextStyle(color: Colors.white)),
+  );
+
+  static Widget _upgradeButton() => ElevatedButton(
+    onPressed: () {},
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Colors.red,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      minimumSize: const Size(double.infinity, 50),
+    ),
+    child: const Text("UPGRADE PLAN", style: TextStyle(color: Colors.white)),
+  );
+}
+
+/// Displays the user's last invoice details.
+class LastInvoiceSection extends ConsumerWidget {
+  const LastInvoiceSection({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final transactions = ref.watch(transactionsProvider);
+
+    String date = '—';
+    String plan = '—';
+    String amount = '—';
+
+    if (transactions.isNotEmpty) {
+      final last = _latestTransaction(transactions);
+      date = _fmtDate(last.date) ?? '—';
+      plan = planLabelFromId(last.planId);
+      amount = last.paymentAmount;
+    }
+
+    return Container(
+      margin: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white10,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _sectionTitle("Last Invoice"),
+          const SizedBox(height: 16.0),
+          _row("Date:", date),
+          _row("Plan:", plan),
+          _row("Amount:", amount),
+        ],
       ),
     );
   }
 
-  Widget _buildHistoryTabs() {
+  static Transaction _latestTransaction(List<Transaction> list) {
+    list.sort((a, b) => b.date.compareTo(a.date));
+    return list.first;
+  }
+
+  static Widget _sectionTitle(String t) => Text(
+    t,
+    style: const TextStyle(
+      color: Colors.white,
+      fontSize: 18,
+      fontWeight: FontWeight.bold,
+    ),
+  );
+
+  static Widget _row(String label, String value) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4.0),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: const TextStyle(color: Colors.white)),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.grey[800],
+            borderRadius: BorderRadius.circular(5),
+          ),
+          child: Text(value, style: const TextStyle(color: Colors.white)),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Shows a nice, scrollable user history table (transactions).
+class UserHistorySection extends ConsumerWidget {
+  const UserHistorySection({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final txns = ref.watch(transactionsProvider);
+
+    return Container(
+      margin: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white10,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _titleRow(),
+          const SizedBox(height: 12),
+          if (txns.isEmpty)
+            const Text("No history found",
+                style: TextStyle(color: Colors.white70))
+          else
+            _historyTable(txns),
+        ],
+      ),
+    );
+  }
+
+  Widget _titleRow() => Row(
+    children: const [
+      Icon(Icons.receipt_long, color: Colors.white),
+      SizedBox(width: 8),
+      Text(
+        "User History",
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    ],
+  );
+
+  Widget _historyTable(List<Transaction> txns) {
+    final rows = txns
+        .map((t) => DataRow(cells: [
+      DataCell(Text(planLabelFromId(t.planId),
+          style: const TextStyle(color: Colors.white))),
+      DataCell(Text(t.paymentAmount,
+          style: const TextStyle(color: Colors.white))),
+      DataCell(Text(t.gateway,
+          style: const TextStyle(color: Colors.white))),
+      DataCell(Text(t.paymentId,
+          style: const TextStyle(color: Colors.white))),
+      DataCell(Text(_fmtDate(t.date) ?? '—',
+          style: const TextStyle(color: Colors.white))),
+    ]))
+        .toList();
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          _buildHistoryTab("Plan"),
-          _buildHistoryTab("Amount"),
-          _buildHistoryTab("Payment Gateway"),
-          _buildHistoryTab("Payment Id"),
-          _buildHistoryTab("Payment Date"),
+      child: DataTable(
+        headingTextStyle: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+        dataTextStyle: const TextStyle(color: Colors.white),
+        columnSpacing: 24,
+        columns: const [
+          DataColumn(label: Text('Plan')),
+          DataColumn(label: Text('Amount')),
+          DataColumn(label: Text('Gateway')),
+          DataColumn(label: Text('Payment Id')),
+          DataColumn(label: Text('Payment Date')),
         ],
+        rows: rows,
       ),
     );
   }
+}
 
-  Widget _buildHistoryTab(String text) {
-    return Container(
-      margin: const EdgeInsets.only(right: 8.0),
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.white, width: 2),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(color: Colors.white),
-      ),
-    );
-  }
+/// ---------- Utils ----------
+
+String? _fmtDate(DateTime? dt) {
+  if (dt == null) return null;
+  return DateFormat('d MMM yyyy').format(dt);
 }

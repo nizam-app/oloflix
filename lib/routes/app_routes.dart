@@ -5,7 +5,8 @@ import 'package:Oloflix/features/auth/screens/otp_screen.dart';
 import 'package:Oloflix/features/auth/screens/reset_password.dart';
 import 'package:Oloflix/features/movies/screen/movies_screen.dart';
 import 'package:Oloflix/features/movies_details/screen/movies_detail_screen.dart';
-import 'package:Oloflix/features/subscription/payment.dart';
+import 'package:Oloflix/features/subscription/screen/payment.dart';
+import 'package:Oloflix/features/subscription/screen/ppv_subscription.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -172,6 +173,10 @@ final GoRouter router = GoRouter(
       path: AllMoviesScreen.routeName,
       name: AllMoviesScreen.routeName,
       builder: (context, state) => AllMoviesScreen(),
+    ), GoRoute(
+      path: PPVSubscriptionPlanScreen.routeName,
+      name: PPVSubscriptionPlanScreen.routeName,
+      builder: (context, state) => PPVSubscriptionPlanScreen(),
     ),
     GoRoute(
       path: '${MoviesDetailScreen.routeName}/:id',

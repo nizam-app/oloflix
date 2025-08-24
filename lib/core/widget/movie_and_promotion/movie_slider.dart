@@ -2,6 +2,7 @@ import 'package:Oloflix/core/constants/api_control/global_api.dart';
 import 'package:Oloflix/core/utils/movies/go_to_details_screen.dart';
 import 'package:Oloflix/core/utils/movies/slider_control.dart';
 import 'package:Oloflix/features/movies_details/screen/movies_detail_screen.dart';
+import 'package:Oloflix/features/subscription/screen/subscription_plan_screen.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -65,7 +66,7 @@ class MovieSlider extends ConsumerWidget {
                           const SizedBox(width: 10),
                           ElevatedButton(
                             onPressed: () {
-                              // 👉 Buy Plan বাটন Action
+                              context.push(SubscriptionPlanScreen.routeName);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AllColor.red,

@@ -1,7 +1,10 @@
 // Flutter imports:
 import 'package:Oloflix/%20business_logic/models/movie_details_model.dart';
+import 'package:Oloflix/core/widget/app_drawer.dart';
+import 'package:Oloflix/core/widget/custom_snackbar.dart';
 import 'package:Oloflix/core/widget/movie_and_promotion/custom_movie_card.dart';
 import 'package:Oloflix/features/watchlist/logic/watchlist_list_revarpot.dart';
+import 'package:Oloflix/features/watchlist/logic/watchlist_remove_revarpot.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -18,13 +21,14 @@ class MyWatchlistScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      endDrawer: AppDrawer(),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CustomHomeTopperSection(),
-              const AbouteBackgrountImage(screenName: "Dashboard  Screen"),
+              const AbouteBackgrountImage(screenName: "Watchlist"),
               WatchlistContent(),
               FooterSection(),
             ],
@@ -145,8 +149,8 @@ class MoviesSection extends ConsumerWidget {
     );
   }
 }
-class CustomCard extends StatelessWidget {
-  final List<MovieDetailsModel> movies; // 👉 movie লিস্ট নেবে
+class CustomCard extends ConsumerWidget {
+  final List<MovieDetailsModel> movies;
 
   const CustomCard({
     super.key,
@@ -154,7 +158,10 @@ class CustomCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final actionState = ref.watch(watchlistControllerProvider);
+    final bool isLoading = actionState.isLoading;
+
     return SizedBox(
       height: 200.h,
       child: ListView.builder(
@@ -162,12 +169,85 @@ class CustomCard extends StatelessWidget {
         itemCount: movies.length,
         itemBuilder: (context, index) {
           final movie = movies[index];
-          return CustomMoviCard(movie: movie); // movie object পাঠাচ্ছি
+
+          // ✅ প্রতিটি আইটেমে key
+          return KeyedSubtree(
+            key: ValueKey(movie.id),
+            child: Stack(
+              children: [
+                CustomMoviCard(movie: movie),
+
+                Positioned(
+                  top: 8.h,
+                  right: 8.w,
+                  child: InkWell(
+                      onTap: isLoading ? null : () async {
+                        if (movie.id == null) {
+                          if (context.mounted) {
+                            showCustomSnackBar(
+                              context,
+                              message: "Invalid movie id",
+                              bgColor: Colors.red,
+                              icon: Icons.error_outline,
+                            );
+                          }
+                          return;
+                        }
+
+                        try {
+                          await ref.read(watchlistControllerProvider.notifier).remove(
+                            postId: movie.id!,
+                            postType: "Movies",
+                          );
+
+                          ref.invalidate(watchlistProvider);
+                          ref.invalidate(filteredWatchlistMoviesProvider);
+                          await ref.refresh(filteredWatchlistMoviesProvider.future);
+
+                          if (context.mounted) {
+                            showCustomSnackBar(
+                              context,
+                              message: "Removed from watchlist",
+                              bgColor: Colors.green,
+                              icon: Icons.check_circle,
+                            );
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            showCustomSnackBar(
+                              context,
+                              message: "Failed: $e",
+                              bgColor: Colors.red,
+                              icon: Icons.error_outline,
+                              duration: const Duration(seconds: 3),
+                            );
+                          }
+                        }
+                      }   ,
+
+                      child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                      decoration: BoxDecoration(
+                        color: Colors.black54,
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      child: Text(
+                        isLoading ? "…" : "Remove",
+                        style: TextStyle(color: Colors.white, fontSize: 12.sp),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
         },
       ),
     );
   }
 }
+
+
 
 /// A generic section for displaying a category title.
 class ShowsSection extends StatelessWidget {

@@ -179,7 +179,7 @@ class BuildContactInformationSection extends StatelessWidget {
     return const BuildContactInformationSection(
       title: "For General Enquiries:",
       phone: "Phone: +1 (416) 276-4403 | +234-904-444-4442",
-      email: "Email: admin@oloflix.com",
+      email: "Email: admin@oloflix.tv",
     );
   }
 
@@ -187,7 +187,7 @@ class BuildContactInformationSection extends StatelessWidget {
     return const BuildContactInformationSection(
       title: "For Sales & Support:",
       phone: "Phone: +1 (416) 276-4403 | +234-904-444-4442",
-      email: "Email: support@oloflix.com",
+      email: "Email: support@oloflix.tv",
     );
   }
 

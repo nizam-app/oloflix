@@ -17,12 +17,6 @@ class AboutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Initialize flutter_screenutil
-    ScreenUtil.init(
-      context,
-      designSize: const Size(360, 690),
-      minTextAdapt: true,
-      splitScreenMode: true,
-    );
 
     return Scaffold(
       // Dark background color

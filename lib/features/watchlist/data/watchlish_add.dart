@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
-class WatchlistRepository {
+class WatchlistAddRepository {
   Future<bool> addToWatchlist(String apiUrl, int postId, String postType) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString("token");
