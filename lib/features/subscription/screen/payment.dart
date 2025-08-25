@@ -46,8 +46,7 @@ class _PaymentMethodState extends ConsumerState<PaymentMethod> {
               SizedBox(height: 10.h),
               paymentMethodSelect(context),
               SizedBox(height: 10.h),
-
-              // ⬇️ ApplePay সেকশন আগের মতোই ব্যবহার করো; শুধু onPressed অ্যাকশন দাও
+              
               ApplePay(context, onPay: () async {
                 final pid = productIdForPlan(isInternational: widget.isInternational);
 
