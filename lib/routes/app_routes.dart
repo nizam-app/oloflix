@@ -70,7 +70,17 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: PaymentMethod.routeName,
       name: PaymentMethod.routeName,
-      builder: (context, state) => const PaymentMethod(),
+
+        builder: (context, state) {
+          final args = state.extra as Map<String, dynamic>?;
+
+          return PaymentMethod(
+            planId: args?['planId'] as int?,
+            amount: args?['amount'] as String?,
+            title: args?['title'] as String?,
+            isInternational: (args?['isInternational'] as bool?) ?? false,
+          );
+        }
     ), 
 
     GoRoute(

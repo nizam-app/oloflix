@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:Oloflix/core/constants/api_control/auth_api.dart';
 import 'package:Oloflix/core/widget/bottom_nav_bar/screen/bottom_nav_bar.dart';
+import 'package:Oloflix/features/profile/logic/profile_data_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get/get.dart';
@@ -10,7 +11,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/widget/bottom_nav_bar/controller/bottom_controller.dart';
 import '../../deshboard/logic/deshboard_reverport.dart';
-
 class LoginController extends GetxController {
   var isLoading = false.obs;
    var rememberMe = false.obs;
@@ -51,9 +51,10 @@ class LoginController extends GetxController {
         final container = ProviderScope.containerOf(context);
 
         // যে যে প্রোভাইডার নতুন ডেটা আনে, সেগুলো invalidate করুন
-        container.invalidate(profileProvider);
         container.invalidate(userProvider);
+        container.invalidate(transactionsProvider);
         container.invalidate(selectedIndexProvider);
+        container.invalidate(ProfileDataController.profileProvider);
 
         // চাইলে প্রোফাইল আগে থেকেই ফেচ করিয়ে নিতে পারেন
         try {

@@ -1,23 +1,40 @@
 import 'package:Oloflix/core/constants/image_control/image_path.dart';
+import 'package:Oloflix/core/utils/logOut_botton.dart';
 import 'package:Oloflix/core/widget/aboute_fooder.dart';
 import 'package:Oloflix/core/widget/custom_home_topper_section.dart';
+import 'package:Oloflix/features/subscription/logic/payment_reverpod.dart';
+import 'package:Oloflix/features/subscription/screen/subscription_plan_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 
-class PaymentMethod extends StatefulWidget {
-  const PaymentMethod({super.key});
+class PaymentMethod extends ConsumerStatefulWidget { // ← আগে StatefulWidget ছিল
+  const PaymentMethod({
+    super.key,
+    required this.planId,
+    required this.amount,
+    required this.title,
+    required this.isInternational,
+  });
+  final int? planId;
+  final String? amount;
+  final String? title;
+  final bool isInternational;
   static final routeName = '/payment';
 
   @override
-  State<PaymentMethod> createState() => _PaymentMethodState();
+  ConsumerState<PaymentMethod> createState() => _PaymentMethodState();
 }
 
-class _PaymentMethodState extends State<PaymentMethod> {
+class _PaymentMethodState extends ConsumerState<PaymentMethod> {
   @override
   Widget build(BuildContext context) {
+    final iapState = ref.watch(iapControllerProvider);
+    final busy = ref.watch(purchaseBusyProvider);
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -29,11 +46,27 @@ class _PaymentMethodState extends State<PaymentMethod> {
               SizedBox(height: 10.h),
               paymentMethodSelect(context),
               SizedBox(height: 10.h),
-              paypalPayment(context),
-              SizedBox(height: 10.h),
-              paystackPayment(context), 
-              SizedBox(height: 10.h),
-              FlutterWavePayment(context), 
+
+              // ⬇️ ApplePay সেকশন আগের মতোই ব্যবহার করো; শুধু onPressed অ্যাকশন দাও
+              ApplePay(context, onPay: () async {
+                final pid = productIdForPlan(isInternational: widget.isInternational);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Processing purchase...')),
+                );
+
+                final ok = await ref.read(iapControllerProvider.notifier).buy(pid);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(ok ? 'Subscription active ✅' : 'Payment failed or canceled')),
+                );
+
+                if (ok) {
+                  // TODO: premium unlock / navigation
+                  // context.go('/homePage');
+                }
+              }, busy: busy),
+
               SizedBox(height: 20.h),
               FooterSection(),
             ],
@@ -43,7 +76,6 @@ class _PaymentMethodState extends State<PaymentMethod> {
     );
   }
 }
-
 Widget dashboardTextImages(BuildContext content) {
   return SafeArea(
     child: Container(
@@ -112,7 +144,7 @@ Widget dashboardTextImages(BuildContext content) {
   );
 }
 
-Widget paymentMethodSelect(BuildContext content) {
+Widget paymentMethodSelect(BuildContext context) {
   return Container(
     padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
     width: double.infinity,
@@ -175,7 +207,9 @@ Widget paymentMethodSelect(BuildContext content) {
                 ),
                 recognizer: TapGestureRecognizer()
                   ..onTap = () {
+
                     Get.snackbar("Logout", "You have been logged out");
+                    showLogOutDialog(context);
                   },
               ),
             ],
@@ -185,7 +219,7 @@ Widget paymentMethodSelect(BuildContext content) {
         SizedBox(height: 10.h),
         InkWell(
           onTap: (){
-
+                context.push(SubscriptionPlanScreen.routeName);
           },
           child: Container(
                 width: 130,
@@ -197,7 +231,7 @@ Widget paymentMethodSelect(BuildContext content) {
                 child:  Text("CHANGE PLAN", style: TextStyle(color: Colors.white)),
               ),
         ),
-    
+
       ],
 
     ),
@@ -205,54 +239,40 @@ Widget paymentMethodSelect(BuildContext content) {
 }
 
 
-Widget paypalPayment(BuildContext content) {
+// আগের ApplePay(...) ফাংশনটাকে এরকম করে নাও:
+Widget ApplePay(BuildContext content, {required VoidCallback onPay, bool busy = false}) {
   return Container(
     padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
     width: double.infinity,
     decoration: BoxDecoration(
       color: const Color(0xFF1A093F),
       borderRadius: BorderRadius.circular(8),
-    ), 
+    ),
     child: Center(
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-          "PayPal ",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
+          const Text(
+            "Apple Pay",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
           ),
-        ),
-        Container(
-          alignment: Alignment.center,
-          height: 4,
-          width: 40,
-          color: Colors.red,
-        ),
-
-         SizedBox(height: 10.h),
-        InkWell(
-          onTap: (){
-
-          },
-          child: Container(
-                  width: 95,
-                padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [Colors.orange, Colors.red]),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child:  Text("PAY NOW", style: TextStyle(color: Colors.white)),
-              ),
-        ),
-
+          Container(
+            margin: const EdgeInsets.only(top: 6),
+            height: 4, width: 44,
+            decoration: BoxDecoration(color: Colors.white54, borderRadius: BorderRadius.circular(2)),
+          ),
+          const SizedBox(height: 12),
+          ApplePayButton(
+            onPressed: busy ? (){} : onPay, // এখানে শুধু কলব্যাক ডাকছি
+            variant: ApplePayButtonVariant.white,
+            label: busy ? 'Processing...' : 'Pay',
+          ),
         ],
       ),
     ),
-    
-    ); 
+  );
 }
+
 
 
 Widget paystackPayment(BuildContext content) {
@@ -262,7 +282,7 @@ Widget paystackPayment(BuildContext content) {
     decoration: BoxDecoration(
       color: const Color(0xFF1A093F),
       borderRadius: BorderRadius.circular(8),
-    ), 
+    ),
     child: Center(
       child: Column(
         children: [
@@ -272,7 +292,7 @@ Widget paystackPayment(BuildContext content) {
             color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 20,
-            
+
           ),
         ),
         Container(
@@ -285,7 +305,7 @@ Widget paystackPayment(BuildContext content) {
          SizedBox(height: 10.h),
         InkWell(
           onTap: (){
-            
+
           },
           child: Container(
                    width: 95,
@@ -301,9 +321,9 @@ Widget paystackPayment(BuildContext content) {
         ],
       ),
     ),
-    
-    ); 
-} 
+
+    );
+}
 
 
 Widget FlutterWavePayment(BuildContext content) {
@@ -313,19 +333,19 @@ Widget FlutterWavePayment(BuildContext content) {
     decoration: BoxDecoration(
       color: const Color(0xFF1A093F),
       borderRadius: BorderRadius.circular(8),
-    ), 
+    ),
     child: Center(
       child: Column(
         children: [
-          Align(alignment: Alignment.center,),  
+          Align(alignment: Alignment.center,),
           Text(
-            
+
           "Flutterwave -(Pay with Card, Bank, Transfer, USSD)",
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 20,
-           
+
           ),
         ),
         Container(
@@ -338,7 +358,7 @@ Widget FlutterWavePayment(BuildContext content) {
          SizedBox(height: 10.h),
         InkWell(
           onTap: (){
-            
+
           },
           child: Container(
                 width: 95,
@@ -354,6 +374,71 @@ Widget FlutterWavePayment(BuildContext content) {
         ],
       ),
     ),
-    
-    ); 
-}  
+
+    );
+}
+class ApplePayButton extends StatelessWidget {
+  const ApplePayButton({
+    super.key,
+    required this.onPressed,
+    this.variant = ApplePayButtonVariant.black,
+    this.label = 'Pay',
+    this.height = 48,
+    this.borderRadius = 10,
+  });
+
+  final VoidCallback onPressed;
+  final ApplePayButtonVariant variant;
+  final String label;
+  final double height;
+  final double borderRadius;
+
+  @override
+  Widget build(BuildContext context) {
+    final isBlack = variant == ApplePayButtonVariant.black;
+    final isWhite = variant == ApplePayButtonVariant.white;
+    final bg = isBlack
+        ? Colors.black
+        : isWhite
+        ? Colors.white
+        : Colors.transparent;
+    final fg = isBlack ? Colors.white : Colors.black;
+
+    return SizedBox(
+      height: height,
+      child: Material(
+        color: bg,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(borderRadius),
+          side: isWhite || variant == ApplePayButtonVariant.outline
+              ? BorderSide(color: Colors.black, width: 1)
+              : BorderSide.none,
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(borderRadius),
+          onTap: onPressed,
+          child: Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.apple, color: fg, size: 22),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: fg,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+enum ApplePayButtonVariant { black, white, outline }
