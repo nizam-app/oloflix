@@ -79,7 +79,24 @@ class _BottomNavBarState extends ConsumerState<BottomNavBar> {
         animationDuration: const Duration(milliseconds: 600),
 
         onTap: (index) async {
-          // শুধু Account (index 3) এর জন্য login guard
+          // A) Live tab (index 2) → plan_id 8/12 দরকার
+          if (index == 2) {
+            final premium = hasPremium(ref);
+            if (!premium) {
+              if (mounted) {
+                ScaffoldMessenger.of(context)
+                  ..clearSnackBars()
+                  ..showSnackBar(
+                    const SnackBar(
+                      content: Text("Please purchase the YEARLY subscription to view page!!"),
+                    ),
+                  );
+              }
+              return; // index change হবে না
+            }
+          }
+
+          // B) Account tab (index 3) → login দরকার
           if (index == 3) {
             final loggedIn = await AuthHelper.isLoggedIn();
             if (!loggedIn) {
@@ -87,6 +104,8 @@ class _BottomNavBarState extends ConsumerState<BottomNavBar> {
               return; // index change হবে না
             }
           }
+
+          // অনুমোদিত হলে ট্যাব বদলান
           ref.read(selectedIndexProvider.notifier).state = index;
         },
       ),

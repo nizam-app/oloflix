@@ -7,6 +7,7 @@ import 'package:Oloflix/core/widget/custom_category_name.dart';
 import 'package:Oloflix/core/widget/custom_snackbar.dart';
 import 'package:Oloflix/core/widget/movie_and_promotion/custom_movie_card.dart';
 import 'package:Oloflix/features/auth/screens/login_screen.dart';
+import 'package:Oloflix/features/deshboard/model/deshboard_model.dart';
 import 'package:Oloflix/features/home/logic/cetarory_fiend_controller.dart';
 import 'package:Oloflix/features/movies_details/logic/get_movie_details.dart';
 import 'package:Oloflix/features/movies_details/logic/related_movie_show_revarpod.dart';
@@ -22,6 +23,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:logger/logger.dart';
+
+import '../../deshboard/logic/deshboard_reverport.dart';
 
 
 class MoviesDetailScreen extends ConsumerWidget {
@@ -169,7 +173,7 @@ class CustomDescription extends StatelessWidget {
 class DetailsImage extends ConsumerWidget {
   const DetailsImage({
     super.key, required this.imageUrl, required this.date,
-    required this.duration, required this.videoUrl, required this.checkPaid,      required this.postID
+    required this.duration, required this.videoUrl, required this.checkPaid,      required this.postID  ,
   });
   final String imageUrl ;
   final String videoUrl ;
@@ -201,7 +205,7 @@ class DetailsImage extends ConsumerWidget {
           top: 8.h,
           child: InkWell(
             onTap: (){
-              videoPlayButtonLogic(context) ;
+              videoPlayButtonLogic(context, ref) ;
             },
             child: CircleAvatar(
               radius: 18.r,
@@ -323,17 +327,26 @@ class DetailsImage extends ConsumerWidget {
       ],
     );
   }
-  Future<void> videoPlayButtonLogic(BuildContext context) async {
-    final loggedIn = await AuthHelper.isLoggedIn();
+// common helper
+  static Set<int> premiumPlanIds = {8, 12};
+  bool hasPremium(User? u) => u != null && premiumPlanIds.contains(u.planId);
 
+// =======================
+// A) Recommend: pass ref
+// =======================
+  Future<void> videoPlayButtonLogic(BuildContext context, WidgetRef ref) async {
+    final loggedIn = await AuthHelper.isLoggedIn();
     if (!loggedIn) {
-      // লগইন না থাকলে login page এ পাঠাও
       context.push(LoginScreen.routeName);
       return;
     }
 
-    // লগইন আছে → Paid check
-    if (checkPaid?.toString() == "Paid") {
+    final user = ref.read(userProvider);
+    final isPremium = hasPremium(user);
+    final isPaidFlag = (checkPaid?.toString().toLowerCase() == 'paid');
+         Logger().e("$isPremium");
+         Logger().e("$isPaidFlag");
+    if (isPaidFlag && isPremium) {
       if (videoUrl != null && videoUrl!.isNotEmpty) {
         playVideo(context, videoUrl);
       } else {
