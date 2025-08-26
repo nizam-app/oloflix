@@ -52,6 +52,7 @@ dependencies:
   image_picker: ^1.2.0
   flutter_html: ^3.0.0
   in_app_purchase: ^3.2.3
+  webview_flutter: ^4.13.0
 
 
 

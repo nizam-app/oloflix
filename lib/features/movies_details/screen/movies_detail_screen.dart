@@ -1,4 +1,3 @@
-
 import 'package:Oloflix/core/constants/api_control/auth_api.dart';
 import 'package:Oloflix/core/constants/api_control/global_api.dart';
 import 'package:Oloflix/core/constants/color_control/all_color.dart';
@@ -27,7 +26,37 @@ import 'package:logger/logger.dart';
 
 import '../../deshboard/logic/deshboard_reverport.dart';
 
+/// --------------------
+/// Helpers (safe utils)
+/// --------------------
+String? formatReleaseDate(dynamic raw) {
+  if (raw == null) return null;
+  final s = raw.toString().trim();
+  if (s.isEmpty || s == '0' || s.toLowerCase() == 'null') return null;
 
+  // Epoch number? (sec/ms)
+  final n = int.tryParse(s);
+  if (n != null) {
+    final dt = n > 2000000000
+        ? DateTime.fromMillisecondsSinceEpoch(n) // milliseconds
+        : DateTime.fromMillisecondsSinceEpoch(n * 1000); // seconds
+    return DateFormat('dd MMM yyyy, hh:mm a').format(dt);
+  }
+
+  // ISO-8601?
+  try {
+    return DateFormat('dd MMM yyyy, hh:mm a').format(DateTime.parse(s));
+  } catch (_) {
+    return null;
+  }
+}
+
+bool hasText(String? v) =>
+    v != null && v.trim().isNotEmpty && v.toLowerCase() != 'null';
+
+/// --------------------
+/// Screen
+/// --------------------
 class MoviesDetailScreen extends ConsumerWidget {
   const MoviesDetailScreen({super.key, required this.id});
   final int id;
@@ -46,18 +75,18 @@ class MoviesDetailScreen extends ConsumerWidget {
           );
         }
 
-        // slug + id দিয়ে related movies ফেচ
+        // slug + id দিয়ে related movies
         final relatedAsync = ref.watch(
           relatedMoviesProvider((slug: movie.videoSlug ?? '', id: movie.id ?? 0)),
         );
 
         return BaseWidgetTupperBotton(
           child1: DetailsImage(
-            imageUrl: "${api}${movie.videoImage}",
-            date: '${movie.releaseDate}',
-            duration: '${movie.duration}',
-            videoUrl: '${movie.videoUrl}',
-            checkPaid: "${movie.videoAccess}",
+            imageUrl: "$api${movie.videoImage}",
+            date: movie.releaseDate,                 // int/string/iso—সব handle হবে
+            duration: movie.duration ?? "",          // null-safe
+            videoUrl: movie.videoUrl ?? "",
+            checkPaid: movie.videoAccess ?? "free",
             postID: movie.id ?? 0,
           ),
           child2: Column(
@@ -73,14 +102,17 @@ class MoviesDetailScreen extends ConsumerWidget {
                 text: "You May Also Like",
                 onPressed: () {},
               ),
-
-              // আগের youMayAlsoLike.when(...) এর জায়গায়:
               relatedAsync.when(
                 data: (movies) => CustomCard(movies: movies),
-                loading: () => const CircularProgressIndicator(),
-                error: (e, _) => Text("Error: $e"),
+                loading: () => const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: CircularProgressIndicator(),
+                ),
+                error: (e, _) => Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text("Error: $e"),
+                ),
               ),
-
               SizedBox(height: 20.h),
             ],
           ),
@@ -96,176 +128,173 @@ class MoviesDetailScreen extends ConsumerWidget {
   }
 }
 
+/// --------------------
+/// Description section
+/// --------------------
 class CustomDescription extends StatelessWidget {
-  const CustomDescription({super.key, required this.title, required this.language, required this.age, required this.description});
-  final String title ;
-  final String language ;
-  final String age ;
-  final  String description ;
+  const CustomDescription({
+    super.key,
+    required this.title,
+    required this.language,
+    required this.age,
+    required this.description,
+  });
+
+  final String title;
+  final String language;
+  final String age;
+  final String description;
+
   @override
   Widget build(BuildContext context) {
-    // Hard-coded data (replace later with API)
-
-    
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        SizedBox(height: 20.h),
+        Text(
+          title,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20.sp,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: 6.h),
+        Row(
           children: [
-            SizedBox(height: 20.h,)   ,
-            // Title
             Text(
-              title,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20.sp,
-                fontWeight: FontWeight.bold,
+              language,
+              style: TextStyle(color: Colors.white70, fontSize: 14.sp),
+            ),
+            SizedBox(width: 10.w),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+              decoration: BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              child: Text(
+                age,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-            SizedBox(height: 6.h),
-
-            // Language + Rating pill
-            Row(
-              children: [
-                Text(
-                  language,
-                  style: TextStyle(color: Colors.white70, fontSize: 14.sp),
-                ),
-                SizedBox(width: 10.w),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 10.w, vertical: 4.h),
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: BorderRadius.circular(20.r), // pill shape
-                  ),
-                  child: Text(
-                    age,
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 14.h),
-            CustomElevatedbutton(
-              title: 'Watch Trailer',
-              color: AllColor.orange,
-              onPressed: () {},
-            ) ,
-            // Description
-            Html(
-             data: description,
-            
-            )
           ],
         ),
+        SizedBox(height: 14.h),
+        CustomElevatedbutton(
+          title: 'Watch Trailer',
+          color: AllColor.orange,
+          onPressed: () {},
+        ),
+        if (hasText(description))
+          Html(data: description)
+        else
+          const SizedBox.shrink(),
         SizedBox(height: 20.h),
       ],
     );
   }
 }
 
+/// --------------------
+/// Poster + meta + buttons
+/// --------------------
 class DetailsImage extends ConsumerWidget {
   const DetailsImage({
-    super.key, required this.imageUrl, required this.date,
-    required this.duration, required this.videoUrl, required this.checkPaid,      required this.postID  ,
+    super.key,
+    required this.imageUrl,
+    required this.date,
+    required this.duration,
+    required this.videoUrl,
+    required this.checkPaid,
+    required this.postID,
   });
-  final String imageUrl ;
-  final String videoUrl ;
-  final String date;
-  final String duration ; // Hard-coded duration, replace later with API
+
+  final String imageUrl;
+  final dynamic date; // int/string/iso/null—সবই allow
+  final String duration;
+  final String videoUrl;
   final String checkPaid;
-  final int postID ;
+  final int postID;
 
-
+  static Set<int> premiumPlanIds = {8, 12};
+  bool hasPremium(User? u) => u != null && premiumPlanIds.contains(u.planId);
 
   @override
-  Widget build(BuildContext context, ref) {
- 
+  Widget build(BuildContext context, WidgetRef ref) {
+    final prettyDate = formatReleaseDate(date);
+    final showDuration = hasText(duration);
+
     return Stack(
       children: [
         ClipRRect(
           borderRadius: BorderRadius.vertical(top: Radius.circular(12.r)),
           child: Image.network(
-            "${imageUrl}",
+            imageUrl,
             fit: BoxFit.cover,
             width: double.infinity,
             height: 200.h,
           ),
         ),
-    
+
         // Play Button
         Positioned(
           right: 8.w,
           top: 8.h,
           child: InkWell(
-            onTap: (){
-              videoPlayButtonLogic(context, ref) ;
-            },
+            onTap: () => videoPlayButtonLogic(context, ref),
             child: CircleAvatar(
               radius: 18.r,
               backgroundColor: Colors.red,
-              child: Icon(Icons.play_arrow,
-                  color: Colors.white, size: 20.sp),
+              child: Icon(Icons.play_arrow, color: Colors.white, size: 20.sp),
             ),
           ),
         ),
+
+        // Date + Duration row
         Positioned(
           bottom: 48.h,
           left: 3.w,
           child: Row(
             children: [
-              // 📅 Date
-              Row(
-                children: [
-                  Icon(
-                    FontAwesomeIcons.solidCalendarDays,
-                    size: 16.sp,
+              if (prettyDate != null) ...[
+                Icon(FontAwesomeIcons.solidCalendarDays,
+                    size: 16.sp, color: Colors.white),
+                SizedBox(width: 6.w),
+                Text(
+                  prettyDate,
+                  style: TextStyle(
+                    fontSize: 11.sp,
                     color: Colors.white,
+                    fontWeight: FontWeight.w500,
                   ),
-                  SizedBox(width: 6.w),
-                  Text(
-                    DateFormat('dd MMM yyyy, hh:mm a')
-                        .format(DateTime.parse(date)),
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
+                ),
+                SizedBox(width: 16.w),
+              ],
+              if (showDuration)
+                Row(
+                  children: [
+                    Icon(FontAwesomeIcons.clock, size: 16.sp, color: Colors.white),
+                    SizedBox(width: 6.w),
+                    Text(
+                      duration,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-
-              SizedBox(width: 16.w),
-
-              // ⏰ Duration
-              Row(
-                children: [
-                  Icon(
-                    FontAwesomeIcons.clock,
-                    size: 16.sp,
-                    color: Colors.white,
-                  ),
-                  SizedBox(width: 6.w),
-                  Text(
-                    "$duration",
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
             ],
           ),
-        ) ,
-        // Buttons over poster bottom
+        ),
+
+        // Buttons bottom
         Positioned(
           bottom: 3.h,
           left: 3.w,
@@ -278,12 +307,13 @@ class DetailsImage extends ConsumerWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(3.r),
                   ),
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 12.w, vertical: 8.h),
+                  padding:
+                  EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                 ),
-                onPressed: () async{
+                onPressed: () async {
                   try {
-                    await ref.read(watchlistAddControllerProvider.notifier)
+                    await ref
+                        .read(watchlistAddControllerProvider.notifier)
                         .addMovie(AuthAPIController.addWatchlist, postID, "Movies");
 
                     ref.invalidate(watchlistProvider);
@@ -308,66 +338,71 @@ class DetailsImage extends ConsumerWidget {
                       );
                     }
                   }
-
                 },
                 icon: Icon(Icons.add, color: Colors.white, size: 18.sp),
                 label: Text(
                   "Add to Watchlist",
-                  style:
-                  TextStyle(color: Colors.white, fontSize: 13.sp),
+                  style: TextStyle(color: Colors.white, fontSize: 13.sp),
                 ),
               ),
               SizedBox(width: 12.w),
-              CustomElevatedbutton(title: 'Watch', color: AllColor.blue,onPressed: (){
-
-                },),
+              CustomElevatedbutton(
+                title: 'Watch',
+                color: AllColor.blue,
+                onPressed: () => videoPlayButtonLogic(context, ref),
+              ),
             ],
           ),
         ),
       ],
     );
   }
-// common helper
-  static Set<int> premiumPlanIds = {8, 12};
-  bool hasPremium(User? u) => u != null && premiumPlanIds.contains(u.planId);
 
-// =======================
-// A) Recommend: pass ref
-// =======================
   Future<void> videoPlayButtonLogic(BuildContext context, WidgetRef ref) async {
     final loggedIn = await AuthHelper.isLoggedIn();
     if (!loggedIn) {
-      context.push(LoginScreen.routeName);
+      if (context.mounted) context.push(LoginScreen.routeName);
       return;
     }
 
     final user = ref.read(userProvider);
     final isPremium = hasPremium(user);
-    final isPaidFlag = (checkPaid?.toString().toLowerCase() == 'paid');
-         Logger().e("$isPremium");
-         Logger().e("$isPaidFlag");
-    if (isPaidFlag && isPremium) {
-      if (videoUrl != null && videoUrl!.isNotEmpty) {
-        playVideo(context, videoUrl);
-      } else {
+    final isPaidFlag = checkPaid.toLowerCase() == 'paid';
+
+    Logger().i('isPremium=$isPremium, isPaidFlag=$isPaidFlag');
+
+    if (isPaidFlag && !isPremium) {
+      if (context.mounted) context.push(SubscriptionPlanScreen.routeName);
+      return;
+    }
+
+    if (hasText(videoUrl)) {
+      playVideo(context, videoUrl);
+    } else {
+      if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Video URL not found")),
         );
       }
-    } else {
-      context.push(SubscriptionPlanScreen.routeName);
     }
   }
 
-  void playVideo(BuildContext context, String videoUrl) {
-    context.push("${VideoShowScreen.routeName}?url=$videoUrl");
-
+  void playVideo(BuildContext context, String url) {
+    context.push("${VideoShowScreen.routeName}?url=$url");
   }
 }
+
+/// --------------------
+/// Small button widget
+/// --------------------
 class CustomElevatedbutton extends StatelessWidget {
   const CustomElevatedbutton({
-    super.key, required this.title, required this.color, this.onPressed,
+    super.key,
+    required this.title,
+    required this.color,
+    this.onPressed,
   });
+
   final String title;
   final Color color;
   final VoidCallback? onPressed;
@@ -376,36 +411,38 @@ class CustomElevatedbutton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor:color,
+        backgroundColor: color,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(3.r),
         ),
-        padding: EdgeInsets.symmetric(
-            horizontal: 12.w, vertical: 8.h),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
       ),
       onPressed: onPressed,
       child: Text(
-        "$title",
-        style:
-        TextStyle(color: AllColor.white, fontSize: 13.sp),
+        title,
+        style: TextStyle(color: AllColor.white, fontSize: 13.sp),
       ),
     );
   }
 }
+
+/// --------------------
+/// Related movie list
+/// --------------------
 class CustomCard extends ConsumerWidget {
   const CustomCard({super.key, required this.movies});
-  final dynamic movies;
+  final List<dynamic> movies;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-          return SizedBox(
+    return SizedBox(
       height: 200.h,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: movies.length,
         itemBuilder: (context, index) {
-          final movie = movies [index];
-          return   CustomMoviCard(movie: movie,) ;
-
+          final movie = movies[index];
+          return CustomMoviCard(movie: movie);
         },
       ),
     );

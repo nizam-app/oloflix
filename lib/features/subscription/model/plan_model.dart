@@ -3,11 +3,11 @@ class Plan {
   final int id;
   final String name;
   final int planDays;
-  final String duration;        // "1"
-  final String durationType;    // "365"
-  final String price;           // "15000.00" / "25.00"
+  final String duration;
+  final String durationType;
+  final String price;
   final int deviceLimit;
-  final bool isInternational;
+  final int isInternational; // ← bool নয়, int
   final int status;
 
   Plan({
@@ -30,7 +30,7 @@ class Plan {
     durationType: j['plan_duration_type']?.toString() ?? '',
     price: j['plan_price']?.toString() ?? '0',
     deviceLimit: j['plan_device_limit'] as int,
-    isInternational: (j['is_international'] == 1),
+    isInternational: j['is_international'] as int, // ← সরাসরি int
     status: j['status'] as int,
   );
 }

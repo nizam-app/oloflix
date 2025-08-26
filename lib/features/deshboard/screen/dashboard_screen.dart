@@ -1,4 +1,5 @@
 
+import 'package:Oloflix/features/delete_account/screen/delete_account_screen.dart';
 import 'package:Oloflix/features/subscription/screen/subscription_plan_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -101,7 +102,7 @@ class UserProfileSection extends ConsumerWidget {
           const SizedBox(height: 16.0),
           _buildEditButton(context),
           const SizedBox(height: 8.0),
-          _buildAccountDeleteButton(),
+          _buildAccountDeleteButton(context,ref),
         ],
       ),
     );
@@ -142,9 +143,9 @@ class UserProfileSection extends ConsumerWidget {
     );
   }
 
-  Widget _buildAccountDeleteButton() {
+  Widget _buildAccountDeleteButton(BuildContext context, ref) {
     return ElevatedButton.icon(
-      onPressed: () {},
+      onPressed: () { showDeleteAccountFlow(context , ref);},
       icon: const Icon(Icons.delete, color: Colors.white),
       label: const Text(
         "ACCOUNT DELETE",

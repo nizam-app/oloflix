@@ -71,12 +71,13 @@ class _SubscriptionPlanScreenState extends ConsumerState<SubscriptionPlanScreen>
                     plan: p,
                     onSelect: () {
                       context.push(
-                        '${PaymentMethod.routeName}',
+                        PaymentMethod.routeName,
                         extra: {
                           'planId': p.id,
                           'amount': p.price,
                           'title': p.name,
-                          'isInternational': p.isInternational,
+                          'isInternational': p.isInternational, // int: 0/1
+                          'movieId': null,
                         },
                       );
                     },
@@ -155,7 +156,7 @@ class _SubscriptionPlanScreenState extends ConsumerState<SubscriptionPlanScreen>
     required Plan plan,
     required VoidCallback onSelect,
   }) {
-    final symbol = plan.isInternational ? '\$' : '₦';
+    final symbol = (plan.isInternational == 1) ? '\$' : '₦';
     final durationText = '${plan.duration} Year(s)';
     final deviceLimitText = plan.deviceLimit.toString();
 

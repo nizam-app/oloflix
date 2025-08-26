@@ -51,7 +51,7 @@ class CustomMoviCard extends StatelessWidget {
           right: 18.w,
           child: GestureDetector(
               onTap: () {
-                context.push(PPVSubscriptionPlanScreen.routeName);
+                context.push("${PPVSubscriptionPlanScreen.routeName}");
               },
               child: CustomPrimiumButton()),
         ),

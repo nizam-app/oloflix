@@ -1,3 +1,4 @@
+// lib/features/subscription/screen/payment.dart
 import 'package:Oloflix/core/constants/image_control/image_path.dart';
 import 'package:Oloflix/core/utils/logOut_botton.dart';
 import 'package:Oloflix/core/widget/aboute_fooder.dart';
@@ -11,18 +12,24 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
 
-class PaymentMethod extends ConsumerStatefulWidget { // ← আগে StatefulWidget ছিল
+import '../../deshboard/logic/deshboard_reverport.dart';
+
+class PaymentMethod extends ConsumerStatefulWidget {
   const PaymentMethod({
     super.key,
-    required this.planId,
-    required this.amount,
-    required this.title,
-    required this.isInternational,
+    this.planId,
+    this.amount,
+    this.title,
+    required this.isInternational, // int: 0/1/2  (0=Local,1=USD,2=PPV)
+    this.movieId,                  // PPV হলে আসবে
   });
+
   final int? planId;
   final String? amount;
   final String? title;
-  final bool isInternational;
+  final int isInternational; // bool থেকে int
+  final int? movieId;        // PPV হলে লাগবে
+
   static final routeName = '/payment';
 
   @override
@@ -32,7 +39,7 @@ class PaymentMethod extends ConsumerStatefulWidget { // ← আগে StatefulWi
 class _PaymentMethodState extends ConsumerState<PaymentMethod> {
   @override
   Widget build(BuildContext context) {
-    final iapState = ref.watch(iapControllerProvider);
+    final _ = ref.watch(iapControllerProvider); // init নিশ্চিত করতে; unused warning এড়াতে _
     final busy = ref.watch(purchaseBusyProvider);
 
     return Scaffold(
@@ -46,28 +53,54 @@ class _PaymentMethodState extends ConsumerState<PaymentMethod> {
               SizedBox(height: 10.h),
               paymentMethodSelect(context),
               SizedBox(height: 10.h),
-              
-              ApplePay(context, onPay: () async {
-                final pid = productIdForPlan(isInternational: widget.isInternational);
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Processing purchase...')),
-                );
+              ApplePay(
+                context,
+                onPay: () async {
+                  final pid = productIdForPlan(isInternational: widget.isInternational);
 
-                final ok = await ref.read(iapControllerProvider.notifier).buy(pid);
+                  // IAP service instance
+                  final svc = ref.read(iapServiceProvider);
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(ok ? 'Subscription active ✅' : 'Payment failed or canceled')),
-                );
+                  if (widget.isInternational == 2 && widget.movieId != null) {
+                    // 👉 PPV → /payment/apple/ppv/verify  (image-1 format)
+                    // body: { receipt, movie_id, transaction_id, days }
+                    svc.setExtraPayload({
+                      'source': 'ppv',
+                      'movieId': widget.movieId, // int
+                      'days': 3,                 // চাইলে UI থেকে ডাইনামিক পাঠাও
+                    });
+                  } else {
+                    // 👉 Subscription → /payment/apple/verify  (image-2 format)
+                    // body: { receipt, plan_id }
+                    svc.setExtraPayload({
+                      'source': 'subscription',
+                      'planId': widget.planId,   // int
+                    });
+                  }
 
-                if (ok) {
-                  // TODO: premium unlock / navigation
-                  // context.go('/homePage');
-                }
-              }, busy: busy),
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Processing purchase...')),
+                  );
+
+                  final ok = await ref.read(iapControllerProvider.notifier).buy(pid);
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(ok ? 'Subscription active ✅' : 'Payment failed or canceled'),
+                    ),
+                  );
+
+                  if (ok) {
+                    // TODO: premium unlock / navigation
+                    // context.go('/homePage');
+                  }
+                },
+                busy: busy,
+              ),
 
               SizedBox(height: 20.h),
-              FooterSection(),
+              const FooterSection(),
             ],
           ),
         ),
@@ -75,6 +108,7 @@ class _PaymentMethodState extends ConsumerState<PaymentMethod> {
     );
   }
 }
+
 Widget dashboardTextImages(BuildContext content) {
   return SafeArea(
     child: Container(
@@ -84,7 +118,7 @@ Widget dashboardTextImages(BuildContext content) {
         image: DecorationImage(
           image: AssetImage(ImagePath.Mbackground),
           opacity: 0.3,
-          fit: BoxFit.cover, // Adjust the fit as needed
+          fit: BoxFit.cover,
         ),
       ),
       child: Column(
@@ -106,31 +140,31 @@ Widget dashboardTextImages(BuildContext content) {
             children: [
               InkWell(
                 onTap: () => content.push("/homePage"),
-                child: Text(
+                child: const Text(
                   "Home",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
-              SizedBox(width: 5),
-              Icon(Icons.arrow_right, size: 20),
-              SizedBox(width: 5),
+              const SizedBox(width: 5),
+              const Icon(Icons.arrow_right, size: 20),
+              const SizedBox(width: 5),
               InkWell(
                 onTap: () {
                   content.push("/dashboardScreen");
                 },
-                child: Text(
+                child: const Text(
                   "Dashboard",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
-              SizedBox(width: 5),
-              Icon(Icons.arrow_right, size: 20),
-              SizedBox(width: 5),
+              const SizedBox(width: 5),
+              const Icon(Icons.arrow_right, size: 20),
+              const SizedBox(width: 5),
               InkWell(
                 onTap: () {
                   content.push("/payment");
                 },
-                child: Text(
+                child: const Text(
                   "Payment Method",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
@@ -145,100 +179,77 @@ Widget dashboardTextImages(BuildContext content) {
 
 Widget paymentMethodSelect(BuildContext context) {
   return Container(
-    padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-    width: double.infinity,
-    decoration: BoxDecoration(
-      color: const Color(0xFF1A093F),
-      borderRadius: BorderRadius.circular(8),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Text(
-          "Payment Method",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
-        ),
-        Container(
-          alignment: Alignment.center,
-          height: 4,
-          width: 40,
-          color: Colors.red,
-        ),
-        SizedBox(height: 10),
-        Text(
-          'You have Selected Yearly Plan (\$)',
-          style: TextStyle(fontSize: 16),
-        ),
-        SizedBox(height: 5),
+    child: Consumer(
+      builder: (context, ref, _) {
+        final user = ref.watch(userProvider);
+        final email = user?.email ?? 'Unknown';
 
-        RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: "You are Logged in as ",
-                style: TextStyle(color: Colors.white70, fontSize: 14),
-              ),
-              TextSpan(
-                text: "palashchandra900189@gmail.com ",
-                style: TextStyle(
-                  color: Colors.redAccent,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              TextSpan(
-                text:
-                    "If you Would Like to Use a Different Account for this Subscription, ",
-                style: TextStyle(color: Colors.white70, fontSize: 14),
-              ),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Payment Method",
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
+            ),
+            Container(height: 4, width: 40, color: Colors.red),
+            const SizedBox(height: 10),
 
+            // Info text — চাইলে isInternational দেখে টেক্সট আলাদা করতে পারো
+            const Text(
+              'You have Selected Yearly Plan (\$)',
+              style: TextStyle(fontSize: 16, color: Colors.white70),
+            ),
+            const SizedBox(height: 5),
+
+            Text.rich(
               TextSpan(
-                text: "Logout Now.",
-                style: const TextStyle(
-                  color: Colors.redAccent,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () {
-
-                    Get.snackbar("Logout", "You have been logged out");
-                    showLogOutDialog(context);
-                  },
+                children: [
+                  const TextSpan(
+                    text: "You are Logged in as ",
+                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                  ),
+                  TextSpan(
+                    text: "$email ",
+                    style: const TextStyle(color: Colors.redAccent, fontSize: 14, fontWeight: FontWeight.bold),
+                  ),
+                  const TextSpan(
+                    text: "If you Would Like to Use a Different Account for this Subscription, ",
+                    style: TextStyle(color: Colors.white70, fontSize: 14),
+                  ),
+                  TextSpan(
+                    text: "Logout Now.",
+                    style: const TextStyle(color: Colors.redAccent, fontSize: 14, fontWeight: FontWeight.bold),
+                    recognizer: TapGestureRecognizer()
+                      ..onTap = () {
+                        Get.snackbar("Logout", "You have been logged out");
+                        showLogOutDialog(context);
+                      },
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
 
-        SizedBox(height: 10.h),
-        InkWell(
-          onTap: (){
-                context.push(SubscriptionPlanScreen.routeName);
-          },
-          child: Container(
+            const SizedBox(height: 10),
+            InkWell(
+              onTap: () => context.push(SubscriptionPlanScreen.routeName),
+              child: Container(
                 width: 130,
-                padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [Colors.orange, Colors.red]),
+                  gradient: const LinearGradient(colors: [Colors.orange, Colors.red]),
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child:  Text("CHANGE PLAN", style: TextStyle(color: Colors.white)),
+                child: const Text("CHANGE PLAN", style: TextStyle(color: Colors.white)),
               ),
-        ),
-
-      ],
-
+            ),
+          ],
+        );
+      },
     ),
   );
 }
 
-
-// আগের ApplePay(...) ফাংশনটাকে এরকম করে নাও:
+// ApplePay UI wrapper
 Widget ApplePay(BuildContext content, {required VoidCallback onPay, bool busy = false}) {
   return Container(
     padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
@@ -257,12 +268,13 @@ Widget ApplePay(BuildContext content, {required VoidCallback onPay, bool busy = 
           ),
           Container(
             margin: const EdgeInsets.only(top: 6),
-            height: 4, width: 44,
+            height: 4,
+            width: 44,
             decoration: BoxDecoration(color: Colors.white54, borderRadius: BorderRadius.circular(2)),
           ),
           const SizedBox(height: 12),
           ApplePayButton(
-            onPressed: busy ? (){} : onPay, // এখানে শুধু কলব্যাক ডাকছি
+            onPressed: busy ? () {} : onPay,
             variant: ApplePayButtonVariant.white,
             label: busy ? 'Processing...' : 'Pay',
           ),
@@ -272,8 +284,7 @@ Widget ApplePay(BuildContext content, {required VoidCallback onPay, bool busy = 
   );
 }
 
-
-
+// Paystack placeholder
 Widget paystackPayment(BuildContext content) {
   return Container(
     padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
@@ -285,46 +296,31 @@ Widget paystackPayment(BuildContext content) {
     child: Center(
       child: Column(
         children: [
-          Text(
-          "paystack -(Pay with ATM Card) ",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-
+          const Text(
+            "paystack -(Pay with ATM Card) ",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
           ),
-        ),
-        Container(
-          alignment: Alignment.center,
-          height: 4,
-          width: 40,
-          color: Colors.red,
-        ),
-
-         SizedBox(height: 10.h),
-        InkWell(
-          onTap: (){
-
-          },
-          child: Container(
-                   width: 95,
-                padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [Colors.orange, Colors.red]),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child:  Text("PAY NOW", style: TextStyle(color: Colors.white)),
+          Container(alignment: Alignment.center, height: 4, width: 40, color: Colors.red),
+          SizedBox(height: 10.h),
+          InkWell(
+            onTap: () {},
+            child: Container(
+              width: 95,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: [Colors.orange, Colors.red]),
+                borderRadius: BorderRadius.circular(4),
               ),
-        ),
-
+              child: const Text("PAY NOW", style: TextStyle(color: Colors.white)),
+            ),
+          ),
         ],
       ),
     ),
-
-    );
+  );
 }
 
-
+// Flutterwave placeholder
 Widget FlutterWavePayment(BuildContext content) {
   return Container(
     padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
@@ -336,46 +332,32 @@ Widget FlutterWavePayment(BuildContext content) {
     child: Center(
       child: Column(
         children: [
-          Align(alignment: Alignment.center,),
-          Text(
-
-          "Flutterwave -(Pay with Card, Bank, Transfer, USSD)",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-
+          const Align(alignment: Alignment.center),
+          const Text(
+            "Flutterwave -(Pay with Card, Bank, Transfer, USSD)",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
           ),
-        ),
-        Container(
-          alignment: Alignment.center,
-          height: 4,
-          width: 40,
-          color: Colors.red,
-        ),
-
-         SizedBox(height: 10.h),
-        InkWell(
-          onTap: (){
-
-          },
-          child: Container(
-                width: 95,
-                padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: [Colors.orange, Colors.red]),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child:  Text("PAY NOW", style: TextStyle(color: Colors.white)),
+          Container(alignment: Alignment.center, height: 4, width: 40, color: Colors.red),
+          SizedBox(height: 10.h),
+          InkWell(
+            onTap: () {},
+            child: Container(
+              width: 95,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: [Colors.orange, Colors.red]),
+                borderRadius: BorderRadius.circular(4),
               ),
-        ),
-
+              child: const Text("PAY NOW", style: TextStyle(color: Colors.white)),
+            ),
+          ),
         ],
       ),
     ),
-
-    );
+  );
 }
+
+// Apple Pay button widget
 class ApplePayButton extends StatelessWidget {
   const ApplePayButton({
     super.key,
@@ -410,7 +392,7 @@ class ApplePayButton extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(borderRadius),
           side: isWhite || variant == ApplePayButtonVariant.outline
-              ? BorderSide(color: Colors.black, width: 1)
+              ? const BorderSide(color: Colors.black, width: 1)
               : BorderSide.none,
         ),
         child: InkWell(
