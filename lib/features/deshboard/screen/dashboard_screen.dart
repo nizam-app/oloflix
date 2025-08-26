@@ -1,4 +1,5 @@
 
+import 'package:Oloflix/core/widget/app_drawer.dart';
 import 'package:Oloflix/features/delete_account/screen/delete_account_screen.dart';
 import 'package:Oloflix/features/subscription/screen/subscription_plan_screen.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,7 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
+      endDrawer: AppDrawer(),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {

@@ -1,5 +1,6 @@
 // lib/features/subscription/screen/subscription_plan_screen.dart
 import 'package:Oloflix/core/widget/aboute_fooder.dart';
+import 'package:Oloflix/core/widget/app_drawer.dart';
 import 'package:Oloflix/core/widget/custom_home_topper_section.dart';
 import 'package:Oloflix/features/auth/widgets/custom_buttom.dart';
 import 'package:Oloflix/features/subscription/logic/plan_reverpod.dart';
@@ -40,6 +41,7 @@ class _SubscriptionPlanScreenState extends ConsumerState<SubscriptionPlanScreen>
           ),
         ],
       ),
+      endDrawer: AppDrawer(),
       body: asyncPlans.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => _errorView(
