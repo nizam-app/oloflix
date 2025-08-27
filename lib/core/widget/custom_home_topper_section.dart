@@ -99,16 +99,7 @@ class CustomHomeTopperSection extends ConsumerWidget {
     _MenuItem('My Watchlist', Icons.list_alt),
     _MenuItem('Logout', Icons.logout),
   ];
-  final List<String> items = [
-    'Apple',
-    'Banana',
-    'Mango',
-    'Orange',
-    'Pineapple',
-    'Watermelon',
-    'Grapes',
-    'Strawberry',
-  ];
+
   void goToSearch(BuildContext context, List<MovieDetailsModel> movies) {
     showSearch(
       context: context,
@@ -121,7 +112,13 @@ class CustomHomeTopperSection extends ConsumerWidget {
     });
   }
 
-  void goToSubscriptionScreen(BuildContext context) {
+void goToSubscriptionScreen(BuildContext context)   async  {
+  final bool loggedIn = await AuthHelper.isLoggedIn();
+
+    if (!loggedIn) {
+      context.push(LoginScreen.routeName);
+      return;
+    }
     context.push(SubscriptionPlanScreen.routeName);
   }
 }

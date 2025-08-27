@@ -1,6 +1,7 @@
 // Flutter imports:
 import 'package:Oloflix/features/auth/logic/loging_controller.dart';
 import 'package:Oloflix/features/auth/widgets/custom_buttom.dart';
+import 'package:Oloflix/features/home/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -84,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             TextButton(
               onPressed: () {
-                context.go(BottomNavBar.routeName);
+                context.go(HomeScreen.routeName);
               },
               child: Text(
                 "Skip",
