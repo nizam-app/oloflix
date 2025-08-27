@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:Oloflix/core/constants/api_control/auth_api.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:go_router/go_router.dart';
@@ -32,7 +33,7 @@ class SignupController extends GetxController {
     isLoading.value = true;
 
     try {
-      var url = Uri.parse("http://103.145.138.111:8000/api/signup");
+      var url = Uri.parse(AuthAPIController.sigup);
       var response = await http.post(
         url,
         headers: {"Content-Type": "application/json"},

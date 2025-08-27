@@ -31,38 +31,40 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(context),
-            SizedBox(height: 30.h),
-            _buildEmailField(),
-            SizedBox(height: 15.h),
-            _buildPasswordField(),
-            SizedBox(height: 10.h),
-            _buildOptionsRow(context),
-            SizedBox(height: 30.h),
-            Obx(
-  () => controller.isLoading.value
-      ? const Center(child: CircularProgressIndicator())
-      : CustomButtom(
-          text: "LOGIN",
-          onTap: () {
-            controller.login(
-              context,
-              emailCtrl.text.trim(),
-              passCtrl.text.trim(),
-            );
-          },
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(context),
+              SizedBox(height: 30.h),
+              _buildEmailField(),
+              SizedBox(height: 15.h),
+              _buildPasswordField(),
+              SizedBox(height: 10.h),
+              _buildOptionsRow(context),
+              SizedBox(height: 30.h),
+              Obx(
+          () => controller.isLoading.value
+        ? const Center(child: CircularProgressIndicator())
+        : CustomButtom(
+            text: "LOGIN",
+            onTap: () {
+              controller.login(
+                context,
+                emailCtrl.text.trim(),
+                passCtrl.text.trim(),
+              );
+            },
+          ),
         ),
-),
-
-            SizedBox(height: 20.h),
-            _buildSignupText(context),
-            SizedBox(height: 30.h),
-          ],
+        
+              SizedBox(height: 20.h),
+              _buildSignupText(context),
+              SizedBox(height: 30.h),
+            ],
+          ),
         ),
       ),
     );

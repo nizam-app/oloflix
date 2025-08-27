@@ -248,7 +248,7 @@ Widget paymentMethodSelect(BuildContext context) {
 
             const SizedBox(height: 10),
             InkWell(
-              onTap: () => context.push(SubscriptionPlanScreen.routeName),
+              onTap: () { context.go(SubscriptionPlanScreen.routeName);},
               child: Container(
                 width: 130,
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),

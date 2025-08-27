@@ -77,7 +77,7 @@ class MoviesSection extends ConsumerWidget {
           children: [
             _buildSectionTitle("Movies"),
             SizedBox(height: 10.h),
-           if (movie.length <1)
+           if (movie.length >0)
             CustomCard(movies: movie) // movies list pass করলাম
           ],
         );
