@@ -17,7 +17,6 @@ class VideoShowScreen extends ConsumerWidget {
     final hours = position.inHours;
     final minutes = position.inMinutes.remainder(60);
     final seconds = position.inSeconds.remainder(60);
-
     if (hours > 0) {
       return "${twoDigits(hours)}:${twoDigits(minutes)}:${twoDigits(seconds)}";
     } else {
@@ -30,122 +29,156 @@ class VideoShowScreen extends ConsumerWidget {
     final videoAsync = ref.watch(videoPlayerControllerProvider(videoUrl));
     final position = ref.watch(videoPositionProvider(videoUrl)); // ⏱️ real-time
 
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: videoAsync.when(
-        data: (controller) {
-          return Stack(
-            alignment: Alignment.center,
-            children: [
-              // 🎬 Main Video
-              Center(
-                child: AspectRatio(
-                  aspectRatio: controller.value.aspectRatio,
-                  child: VideoPlayer(controller),
+    return WillPopScope(
+      onWillPop: () async {
+        final controller = videoAsync.asData?.value;
+        if (controller != null && controller.value.isInitialized) {
+          // 👉 সাথে সাথে অডিও থামাও
+          await controller.pause();
+          await controller.setVolume(0.0);
+        }
+        return true;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: videoAsync.when(
+          data: (controller) {
+            return Stack(
+              alignment: Alignment.center,
+              children: [
+                // 🎬 Main Video
+                Center(
+                  child: AspectRatio(
+                    aspectRatio: controller.value.aspectRatio,
+                    child: VideoPlayer(controller),
+                  ),
                 ),
-              ),
 
-              // 🔙 Back Button (Top-Left)
-              Positioned(
-                top: 30,
-                left: 10,
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
-                  onPressed: () {context.pop();},
+                // 🔙 Back Button (Top-Left)
+                Positioned(
+                  top: 30,
+                  left: 10,
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                    onPressed: () async {
+                      // 👉 সঙ্গে সঙ্গে pause+mute করে বের হও
+                      await controller.pause();
+                      await controller.setVolume(0.0);
+                      context.pop();
+                    },
+                  ),
                 ),
-              ),
 
-              // 🎛 Control Buttons
-              Positioned(
-                bottom: 20,
-                left: 0,
-                right: 0,
-                child: Column(
-                  children: [
-                    // ⏳ Progress Bar
-                    VideoProgressIndicator(
-                      controller,
-                      allowScrubbing: true,
-                      colors: const VideoProgressColors(
-                        playedColor: Colors.red,
-                        backgroundColor: Colors.grey,
-                        bufferedColor: Colors.white30,
+                // 🎛 Control Buttons
+                Positioned(
+                  bottom: 20,
+                  left: 0,
+                  right: 0,
+                  child: Column(
+                    children: [
+                      // ⏳ Progress Bar
+                      VideoProgressIndicator(
+                        controller,
+                        allowScrubbing: true,
+                        colors: const VideoProgressColors(
+                          playedColor: Colors.red,
+                          backgroundColor: Colors.grey,
+                          bufferedColor: Colors.white30,
+                        ),
                       ),
-                    ),
 
-                    const SizedBox(height: 8),
+                      const SizedBox(height: 8),
 
-                    // ⏱ Time + Control Buttons
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        // ⏪ Backward 10s
-                        IconButton(
-                          icon: const Icon(Icons.replay_10, color: Colors.white, size: 30),
-                          onPressed: () {
-                            final newPos = controller.value.position - const Duration(seconds: 10);
-                            controller.seekTo(newPos >= Duration.zero ? newPos : Duration.zero);
-                          },
-                        ),
-
-                        // ▶️ Play / Pause
-                        IconButton(
-                          icon: Icon(
-                            controller.value.isPlaying ? Icons.pause_circle : Icons.play_circle,
-                            color: Colors.white,
-                            size: 50,
-                          ),
-                          onPressed: () {
-                            controller.value.isPlaying
-                                ? controller.pause()
-                                : controller.play();
-                          },
-                        ),
-
-                        // ⏩ Forward 10s
-                        IconButton(
-                          icon: const Icon(Icons.forward_10, color: Colors.white, size: 30),
-                          onPressed: () {
-                            final maxPos = controller.value.duration;
-                            final newPos = controller.value.position + const Duration(seconds: 10);
-                            controller.seekTo(newPos <= maxPos ? newPos : maxPos);
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(
-                              Icons.fullscreen, color: Colors.white, size: 28),
-                          onPressed: () { Navigator.push( context, MaterialPageRoute(
-                            builder: (_) =>
-                                FullScreenPlayer(controller: controller, videoUrl: videoUrl,), ), ); }, ),
-                      ],
-                    ),
-
-                    // ⏱ Time Labels (real-time Riverpod)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      // ⏱ Time + Control Buttons
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          Text(
-                            formatDuration(position), // ✅ current position from Riverpod
-                            style: const TextStyle(color: Colors.white, fontSize: 14),
+                          // ⏪ Backward 10s
+                          IconButton(
+                            icon: const Icon(Icons.replay_10, color: Colors.white, size: 30),
+                            onPressed: () {
+                              final newPos = controller.value.position - const Duration(seconds: 10);
+                              controller.seekTo(newPos >= Duration.zero ? newPos : Duration.zero);
+                            },
                           ),
-                          Text(
-                            formatDuration(controller.value.duration), // ✅ total duration
-                            style: const TextStyle(color: Colors.white, fontSize: 14),
+
+                          // ▶️ Play / Pause (instantly reactive)
+                          ValueListenableBuilder<VideoPlayerValue>(
+                            valueListenable: controller,
+                            builder: (_, value, __) {
+                              final playing = value.isPlaying;
+                              return IconButton(
+                                icon: Icon(
+                                  playing ? Icons.pause_circle : Icons.play_circle,
+                                  color: Colors.white,
+                                  size: 50,
+                                ),
+                                onPressed: () {
+                                  if (playing) {
+                                    controller.pause();
+                                  } else {
+                                    controller.setVolume(1.0);
+                                    controller.play();
+                                  }
+                                },
+                              );
+                            },
+                          ),
+
+                          // ⏩ Forward 10s
+                          IconButton(
+                            icon: const Icon(Icons.forward_10, color: Colors.white, size: 30),
+                            onPressed: () {
+                              final maxPos = controller.value.duration;
+                              final newPos = controller.value.position + const Duration(seconds: 10);
+                              controller.seekTo(newPos <= maxPos ? newPos : maxPos);
+                            },
+                          ),
+
+                          // ⛶ Fullscreen — একই controller শেয়ার করো
+                          IconButton(
+                            icon: const Icon(Icons.fullscreen, color: Colors.white, size: 28),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => FullScreenPlayer(
+                                    controller: controller,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),
-                    ),
-                  ],
+
+                      // ⏱ Time Labels (real-time Riverpod)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              formatDuration(position),
+                              style: const TextStyle(color: Colors.white, fontSize: 14),
+                            ),
+                            Text(
+                              formatDuration(controller.value.duration),
+                              style: const TextStyle(color: Colors.white, fontSize: 14),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(
-          child: Text("Error: $e", style: const TextStyle(color: Colors.white)),
+              ],
+            );
+          },
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (e, _) => Center(
+            child: Text("Error: $e", style: const TextStyle(color: Colors.white)),
+          ),
         ),
       ),
     );

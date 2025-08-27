@@ -19,9 +19,7 @@ import 'package:Oloflix/core/widget/movie_and_promotion/promosion_slider.dart';
 import 'package:go_router/go_router.dart';
 class HomeScreen extends ConsumerWidget {
   static final routeName = "/homePage";
-
   const HomeScreen({super.key});
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Example: তিনটা আলাদা category থেকে আলাদা data আনব
@@ -45,7 +43,7 @@ class HomeScreen extends ConsumerWidget {
               CustomCategoryName(
                 context: context,
                 text: "Pay-Per-View Movies (PPV)",
-                onPressed: () => goToPPVScreen(   ref
+                onPressed: () => goToPPVScreen(   ref ,context
                 ),
               ),
               ppvMoviesAsync.when(
@@ -97,9 +95,8 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  void goToPPVScreen(WidgetRef ref) {
-           goToPPvScreen(ref) ;
-    
+  void goToPPVScreen(WidgetRef ref,BuildContext context) {
+           goToPPvScreen(ref, context) ;
   }
   void goToNollywoodScreen(BuildContext context) {
     context.push("${MoviesScreen.routeName}/2");

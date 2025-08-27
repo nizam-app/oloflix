@@ -45,13 +45,25 @@ class AppDrawer extends ConsumerWidget {
             leading: const Icon(Icons.music_video_rounded),
             title: const Text('PPV'),
             onTap: () {
-             goToPPvScreen(ref);
+             goToPPvScreen(ref,context);
             },
           ),
           ListTile(
             leading: const Icon(Icons.live_tv),
             title: const Text('Live'),
-            onTap: () => context.push(LiveScreen.routeName),
+            onTap: () {   final premium = hasPremium(ref);
+            if (!premium) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context)
+                  ..clearSnackBars()
+                  ..showSnackBar(
+                    const SnackBar(
+                      content: Text("Please purchase the YEARLY subscription to view page!!"),
+                    ),
+                  );
+              }
+              return; // index change হবে না
+            }},
           ),
           ListTile(
             leading: const Icon(Icons.music_video),

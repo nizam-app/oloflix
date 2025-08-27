@@ -1,4 +1,4 @@
-
+// lib/features/movies_details/movies_detail_screen.dart
 import 'package:Oloflix/core/constants/api_control/auth_api.dart';
 import 'package:Oloflix/core/constants/api_control/global_api.dart';
 import 'package:Oloflix/core/constants/color_control/all_color.dart';
@@ -7,10 +7,11 @@ import 'package:Oloflix/core/widget/custom_category_name.dart';
 import 'package:Oloflix/core/widget/custom_snackbar.dart';
 import 'package:Oloflix/core/widget/movie_and_promotion/custom_movie_card.dart';
 import 'package:Oloflix/features/auth/screens/login_screen.dart';
-import 'package:Oloflix/features/home/logic/cetarory_fiend_controller.dart';
+import 'package:Oloflix/features/deshboard/model/deshboard_model.dart';
 import 'package:Oloflix/features/movies_details/logic/get_movie_details.dart';
 import 'package:Oloflix/features/movies_details/logic/related_movie_show_revarpod.dart';
 import 'package:Oloflix/features/profile/logic/login_check.dart';
+import 'package:Oloflix/features/subscription/screen/ppv_subscription.dart';
 import 'package:Oloflix/features/subscription/screen/subscription_plan_screen.dart';
 import 'package:Oloflix/features/video_show/video_show_screen.dart';
 import 'package:Oloflix/features/watchlist/logic/watchlist_add_revarpot.dart';
@@ -21,9 +22,46 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:logger/logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../deshboard/logic/deshboard_reverport.dart';
 
+/// --------------------
+/// Helpers
+/// --------------------
+String? formatReleaseDate(dynamic raw) {
+  if (raw == null) return null;
+  final s = raw.toString().trim();
+  if (s.isEmpty || s == '0' || s.toLowerCase() == 'null') return null;
+
+  final n = int.tryParse(s);
+  if (n != null) {
+    final dt = n > 2000000000
+        ? DateTime.fromMillisecondsSinceEpoch(n)
+        : DateTime.fromMillisecondsSinceEpoch(n * 1000);
+    return DateFormat('dd MMM yyyy, hh:mm a').format(dt);
+  }
+
+  try {
+    return DateFormat('dd MMM yyyy, hh:mm a').format(DateTime.parse(s));
+  } catch (_) {
+    return null;
+  }
+}
+
+bool hasText(String? v) =>
+    v != null && v.trim().isNotEmpty && v.toLowerCase() != 'null';
+
+void playVideoRoute(BuildContext context, String url) {
+  context.push("${VideoShowScreen.routeName}?url=$url");
+}
+
+/// --------------------
+/// Screen
+/// --------------------
 class MoviesDetailScreen extends ConsumerWidget {
   const MoviesDetailScreen({super.key, required this.id});
   final int id;
@@ -42,19 +80,32 @@ class MoviesDetailScreen extends ConsumerWidget {
           );
         }
 
-        // slug + id দিয়ে related movies ফেচ
+        // Access flags
+        final String checkPaid = (movie.videoAccess ?? 'free').toString();
+        final bool isPpv = checkPaid.toLowerCase() == 'ppv';
+        final int movieId = movie.id ?? 0;
+        final String videoUrl = movie.videoUrl ?? '';
+
+        // Trailer URL (supports different possible keys)
+        final String trailerUrl =
+        (movie.trailerUrl ?? movie.trailerUrl?? '').toString();
+
+        // Related movies
         final relatedAsync = ref.watch(
-          relatedMoviesProvider((slug: movie.videoSlug ?? '', id: movie.id ?? 0)),
+          relatedMoviesProvider((slug: movie.videoSlug ?? '', id: movieId)),
         );
 
         return BaseWidgetTupperBotton(
           child1: DetailsImage(
-            imageUrl: "${api}${movie.videoImage}",
-            date: '${movie.releaseDate}',
-            duration: '${movie.duration}',
-            videoUrl: '${movie.videoUrl}',
-            checkPaid: "${movie.videoAccess}",
-            postID: movie.id ?? 0,
+            imageUrl: "$api${movie.videoImage}",
+            date: movie.releaseDate,
+            duration: movie.duration ?? "",
+            videoUrl: videoUrl,
+            checkPaid: checkPaid,
+            postID: movieId,
+            isPpv: isPpv,
+            movieId: movieId,
+            videoSlug:movie.videoSlug,
           ),
           child2: Column(
             children: [
@@ -63,20 +114,24 @@ class MoviesDetailScreen extends ConsumerWidget {
                 language: "English",
                 age: '18+',
                 description: movie.videoDescription ?? '',
+                trailerUrl: trailerUrl, // ← trailer play hook
               ),
               CustomCategoryName(
                 context: context,
                 text: "You May Also Like",
                 onPressed: () {},
               ),
-
-              // আগের youMayAlsoLike.when(...) এর জায়গায়:
               relatedAsync.when(
                 data: (movies) => CustomCard(movies: movies),
-                loading: () => const CircularProgressIndicator(),
-                error: (e, _) => Text("Error: $e"),
+                loading: () => const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: CircularProgressIndicator(),
+                ),
+                error: (e, _) => Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text("Error: $e"),
+                ),
               ),
-
               SizedBox(height: 20.h),
             ],
           ),
@@ -92,176 +147,203 @@ class MoviesDetailScreen extends ConsumerWidget {
   }
 }
 
+/// --------------------
+/// Description section
+/// --------------------
 class CustomDescription extends StatelessWidget {
-  const CustomDescription({super.key, required this.title, required this.language, required this.age, required this.description});
-  final String title ;
-  final String language ;
-  final String age ;
-  final  String description ;
+  const CustomDescription({
+    super.key,
+    required this.title,
+    required this.language,
+    required this.age,
+    required this.description,
+    required this.trailerUrl,
+  });
+
+  final String title;
+  final String language;
+  final String age;
+  final String description;
+  final String trailerUrl;
+
   @override
   Widget build(BuildContext context) {
-    // Hard-coded data (replace later with API)
-
-    
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        SizedBox(height: 20.h),
+        Text(
+          title,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 20.sp,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: 6.h),
+        Row(
           children: [
-            SizedBox(height: 20.h,)   ,
-            // Title
             Text(
-              title,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 20.sp,
-                fontWeight: FontWeight.bold,
+              language,
+              style: TextStyle(color: Colors.white70, fontSize: 14.sp),
+            ),
+            SizedBox(width: 10.w),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+              decoration: BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              child: Text(
+                age,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-            SizedBox(height: 6.h),
-
-            // Language + Rating pill
-            Row(
-              children: [
-                Text(
-                  language,
-                  style: TextStyle(color: Colors.white70, fontSize: 14.sp),
-                ),
-                SizedBox(width: 10.w),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 10.w, vertical: 4.h),
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: BorderRadius.circular(20.r), // pill shape
-                  ),
-                  child: Text(
-                    age,
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 14.h),
-            CustomElevatedbutton(
-              title: 'Watch Trailer',
-              color: AllColor.orange,
-              onPressed: () {},
-            ) ,
-            // Description
-            Html(
-             data: description,
-            
-            )
           ],
         ),
+        SizedBox(height: 14.h),
+
+        // 🎬 Watch Trailer
+        CustomElevatedbutton(
+          title: 'Watch Trailer',
+          color: AllColor.orange,
+          onPressed: () {
+            if (hasText(trailerUrl)) {
+              playVideoRoute(context, trailerUrl);
+            } else {
+              ScaffoldMessenger.of(context)
+                ..clearSnackBars()
+                ..showSnackBar(
+                  const SnackBar(content: Text('Trailer not available')),
+                );
+            }
+          },
+        ),
+
+        if (hasText(description))
+          Html(data: description)
+        else
+          const SizedBox.shrink(),
         SizedBox(height: 20.h),
       ],
     );
   }
 }
 
+/// --------------------
+/// Poster + meta + buttons
+/// --------------------
 class DetailsImage extends ConsumerWidget {
   const DetailsImage({
-    super.key, required this.imageUrl, required this.date,
-    required this.duration, required this.videoUrl, required this.checkPaid,      required this.postID
+    super.key,
+    required this.imageUrl,
+    required this.date,
+    required this.duration,
+    required this.videoUrl,
+    required this.checkPaid,
+    required this.postID,
+    required this.isPpv,
+    required this.movieId,
+    required this.videoSlug
   });
-  final String imageUrl ;
-  final String videoUrl ;
-  final String date;
-  final String duration ; // Hard-coded duration, replace later with API
+
+  final String imageUrl;
+  final dynamic date; // int/string/iso/null—সবই allow
+  final String duration;
+  final String videoUrl;
   final String checkPaid;
-  final int postID ;
+  final int postID;
 
+  final bool isPpv;   // from parent (derived from videoAccess)
+  final int movieId;  // from parent
+  final dynamic videoSlug ;
 
+  static Set<int> premiumPlanIds = {8, 12};
+  bool hasPremium(User? u) => u != null && premiumPlanIds.contains(u.planId);
 
   @override
-  Widget build(BuildContext context, ref) {
- 
+  Widget build(BuildContext context, WidgetRef ref) {
+    final prettyDate = formatReleaseDate(date);
+    final showDuration = hasText(duration);
+
     return Stack(
       children: [
         ClipRRect(
           borderRadius: BorderRadius.vertical(top: Radius.circular(12.r)),
           child: Image.network(
-            "${imageUrl}",
+            imageUrl,
             fit: BoxFit.cover,
             width: double.infinity,
             height: 200.h,
           ),
         ),
-    
-        // Play Button
+
+        // ▶️ Play Button
         Positioned(
           right: 8.w,
           top: 8.h,
           child: InkWell(
-            onTap: (){
-              videoPlayButtonLogic(context) ;
-            },
+            onTap: () => videoPlayButtonLogic(
+              context,
+              ref,
+              checkPaid: checkPaid,
+              isPpv: isPpv,
+              movieId: movieId,
+              videoUrl: videoUrl,
+              videoSlug: videoSlug
+            ),
             child: CircleAvatar(
               radius: 18.r,
               backgroundColor: Colors.red,
-              child: Icon(Icons.play_arrow,
-                  color: Colors.white, size: 20.sp),
+              child: Icon(Icons.play_arrow, color: Colors.white, size: 20.sp),
             ),
           ),
         ),
+
+        // 📅 Date + ⏱ Duration
         Positioned(
           bottom: 48.h,
           left: 3.w,
           child: Row(
             children: [
-              // 📅 Date
-              Row(
-                children: [
-                  Icon(
-                    FontAwesomeIcons.solidCalendarDays,
-                    size: 16.sp,
+              if (prettyDate != null) ...[
+                Icon(FontAwesomeIcons.solidCalendarDays,
+                    size: 16.sp, color: Colors.white),
+                SizedBox(width: 6.w),
+                Text(
+                  prettyDate,
+                  style: TextStyle(
+                    fontSize: 11.sp,
                     color: Colors.white,
+                    fontWeight: FontWeight.w500,
                   ),
-                  SizedBox(width: 6.w),
-                  Text(
-                    DateFormat('dd MMM yyyy, hh:mm a')
-                        .format(DateTime.parse(date)),
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
+                ),
+                SizedBox(width: 16.w),
+              ],
+              if (showDuration)
+                Row(
+                  children: [
+                    Icon(FontAwesomeIcons.clock, size: 16.sp, color: Colors.white),
+                    SizedBox(width: 6.w),
+                    Text(
+                      duration,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-
-              SizedBox(width: 16.w),
-
-              // ⏰ Duration
-              Row(
-                children: [
-                  Icon(
-                    FontAwesomeIcons.clock,
-                    size: 16.sp,
-                    color: Colors.white,
-                  ),
-                  SizedBox(width: 6.w),
-                  Text(
-                    "$duration",
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
             ],
           ),
-        ) ,
-        // Buttons over poster bottom
+        ),
+
+        // Buttons bottom
         Positioned(
           bottom: 3.h,
           left: 3.w,
@@ -274,12 +356,13 @@ class DetailsImage extends ConsumerWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(3.r),
                   ),
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 12.w, vertical: 8.h),
+                  padding:
+                  EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                 ),
-                onPressed: () async{
+                onPressed: () async {
                   try {
-                    await ref.read(watchlistAddControllerProvider.notifier)
+                    await ref
+                        .read(watchlistAddControllerProvider.notifier)
                         .addMovie(AuthAPIController.addWatchlist, postID, "Movies");
 
                     ref.invalidate(watchlistProvider);
@@ -304,57 +387,134 @@ class DetailsImage extends ConsumerWidget {
                       );
                     }
                   }
-
                 },
                 icon: Icon(Icons.add, color: Colors.white, size: 18.sp),
                 label: Text(
                   "Add to Watchlist",
-                  style:
-                  TextStyle(color: Colors.white, fontSize: 13.sp),
+                  style: TextStyle(color: Colors.white, fontSize: 13.sp),
                 ),
               ),
               SizedBox(width: 12.w),
-              CustomElevatedbutton(title: 'Watch', color: AllColor.blue,onPressed: (){
-
-                },),
+              CustomElevatedbutton(
+                title: 'Watch',
+                color: AllColor.blue,
+                onPressed: () => videoPlayButtonLogic(
+                  context,
+                  ref,
+                  checkPaid: checkPaid,
+                  isPpv: isPpv,
+                  movieId: movieId,
+                  videoUrl: videoUrl,
+                  videoSlug:      videoSlug
+                ),
+              ),
             ],
           ),
         ),
       ],
     );
   }
-  Future<void> videoPlayButtonLogic(BuildContext context) async {
-    final loggedIn = await AuthHelper.isLoggedIn();
 
+  Future<void> videoPlayButtonLogic(
+      BuildContext context,
+      WidgetRef ref, {
+        required String checkPaid,     // "Paid" / "Free" / "PPV"
+        required bool isPpv,           // derived from videoAccess
+        required int movieId,          // PPV হলে লাগবে
+        required String? videoUrl,     // প্লে করার লিংক
+        required String videoSlug,     // ✅ নতুন: API hit-এর জন্য দরকার
+      }) async {
+    // 🔐 Login check
+    final loggedIn = await AuthHelper.isLoggedIn();
     if (!loggedIn) {
-      // লগইন না থাকলে login page এ পাঠাও
-      context.push(LoginScreen.routeName);
+      if (context.mounted) context.push(LoginScreen.routeName);
       return;
     }
 
-    // লগইন আছে → Paid check
-    if (checkPaid?.toString() == "Paid") {
-      if (videoUrl != null && videoUrl!.isNotEmpty) {
-        playVideo(context, videoUrl);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Video URL not found")),
+    final user = ref.read(userProvider);
+    final isPremium  = hasPremium(user);
+    final isPaidFlag = checkPaid.toLowerCase() == 'paid';
+    final isPpvFlag  = isPpv;
+
+    // ✅ শুধুই PPV কেসে: token নিয়ে slug+id দিয়ে API hit
+    if (isPpvFlag) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final token = prefs.getString('token') ?? '';
+
+        // নিজের এন্ডপয়েন্ট বসাও: eg. "$api/ppv/access/$videoSlug/$movieId"
+        final url = "${AuthAPIController.movies_watch_ppv}/$videoSlug/$movieId";
+
+        final res = await http.get(
+          Uri.parse(url),
+          headers: {
+            'Accept': 'application/json',
+            if (token.isNotEmpty) 'Authorization': 'Bearer $token',
+          },
         );
+
+        if (res.statusCode == 200) {
+          if (videoUrl != null && videoUrl.trim().isNotEmpty) {
+            playVideoRoute(context, videoUrl);
+          } else {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context)
+                ..clearSnackBars()
+                ..showSnackBar(const SnackBar(content: Text("Video URL not found")));
+            }
+          }
+        } else {
+          // Not allowed → PPV subscription page
+          if (context.mounted) {
+            context.push(
+              PPVSubscriptionPlanScreen.routeName,
+              extra: {'movieId': movieId},
+            );
+          }
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Network error: $e')),
+          );
+        }
       }
+      return; // PPV flow end
+    }
+
+    // 🔁 Normal Paid (non-PPV) & user not premium → Subscription plans
+    if (isPaidFlag && !isPremium) {
+      if (context.mounted) {
+        context.push(SubscriptionPlanScreen.routeName);
+      }
+      return;
+    }
+
+    // 🎬 Otherwise → play main video
+    if (videoUrl != null && videoUrl.trim().isNotEmpty) {
+      playVideoRoute(context, videoUrl);
     } else {
-      context.push(SubscriptionPlanScreen.routeName);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(const SnackBar(content: Text("Video URL not found")));
+      }
     }
   }
 
-  void playVideo(BuildContext context, String videoUrl) {
-    context.push("${VideoShowScreen.routeName}?url=$videoUrl");
-
-  }
 }
+
+/// --------------------
+/// Small button widget
+/// --------------------
 class CustomElevatedbutton extends StatelessWidget {
   const CustomElevatedbutton({
-    super.key, required this.title, required this.color, this.onPressed,
+    super.key,
+    required this.title,
+    required this.color,
+    this.onPressed,
   });
+
   final String title;
   final Color color;
   final VoidCallback? onPressed;
@@ -363,36 +523,38 @@ class CustomElevatedbutton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor:color,
+        backgroundColor: color,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(3.r),
         ),
-        padding: EdgeInsets.symmetric(
-            horizontal: 12.w, vertical: 8.h),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
       ),
       onPressed: onPressed,
       child: Text(
-        "$title",
-        style:
-        TextStyle(color: AllColor.white, fontSize: 13.sp),
+        title,
+        style: TextStyle(color: AllColor.white, fontSize: 13.sp),
       ),
     );
   }
 }
+
+/// --------------------
+/// Related movie list
+/// --------------------
 class CustomCard extends ConsumerWidget {
   const CustomCard({super.key, required this.movies});
-  final dynamic movies;
+  final List<dynamic> movies;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-          return SizedBox(
+    return SizedBox(
       height: 200.h,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: movies.length,
         itemBuilder: (context, index) {
-          final movie = movies [index];
-          return   CustomMoviCard(movie: movie,) ;
-
+          final movie = movies[index];
+          return CustomMoviCard(movie: movie);
         },
       ),
     );

@@ -1,7 +1,7 @@
 // Flutter imports:
 import 'package:Oloflix/core/constants/color_control/all_color.dart';
 import 'package:Oloflix/core/widget/bottom_nav_bar/screen/bottom_nav_bar.dart';
-import 'package:Oloflix/features/auth/screens/forgod_screen.dart';
+
 import 'package:Oloflix/features/auth/screens/login_screen.dart';
 import 'package:Oloflix/features/home/screens/home_screen.dart';
 import 'package:flutter/material.dart';
@@ -56,7 +56,7 @@ class _SplashScreenState extends State<SplashScreen> {
               Spacer(),
               const CircularProgressIndicator(),
               SizedBox(height: 10.h),
-              Text("v1.1.0",style: TextStyle(color: AllColor.white70),)     ,
+              Text("v3.0.2",style: TextStyle(color: AllColor.white70),)     ,
               SizedBox(height: 20.h,)
             ],
           ),

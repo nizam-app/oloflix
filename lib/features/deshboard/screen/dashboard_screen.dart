@@ -1,6 +1,10 @@
-// features/deshboard/ui/dashboard_screen.dart
+
+import 'package:Oloflix/core/widget/app_drawer.dart';
+import 'package:Oloflix/features/delete_account/screen/delete_account_screen.dart';
+import 'package:Oloflix/features/subscription/screen/subscription_plan_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import 'package:Oloflix/core/widget/aboute_backgrount_image.dart';
@@ -10,6 +14,8 @@ import 'package:Oloflix/core/widget/custom_home_topper_section.dart';
 import 'package:Oloflix/features/deshboard/logic/deshboard_reverport.dart';
 import 'package:Oloflix/features/deshboard/model/deshboard_model.dart';
 
+import '../../profile/screen/profile_screen.dart';
+
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
   static final routeName = "/dashboardScreen";
@@ -17,6 +23,7 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
+      endDrawer: AppDrawer(),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {
@@ -95,9 +102,9 @@ class UserProfileSection extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16.0),
-          _buildEditButton(),
+          _buildEditButton(context),
           const SizedBox(height: 8.0),
-          _buildAccountDeleteButton(),
+          _buildAccountDeleteButton(context,ref),
         ],
       ),
     );
@@ -119,10 +126,10 @@ class UserProfileSection extends ConsumerWidget {
     );
   }
 
-  Widget _buildEditButton() {
+  Widget _buildEditButton(BuildContext context) {
     return ElevatedButton.icon(
       onPressed: () {
-                   
+        context.push(ProfileScreen.routeName);
       },
       icon: const Icon(Icons.edit, color: Colors.black),
       label: const Text(
@@ -138,9 +145,9 @@ class UserProfileSection extends ConsumerWidget {
     );
   }
 
-  Widget _buildAccountDeleteButton() {
+  Widget _buildAccountDeleteButton(BuildContext context, ref) {
     return ElevatedButton.icon(
-      onPressed: () {},
+      onPressed: () { showDeleteAccountFlow(context , ref);},
       icon: const Icon(Icons.delete, color: Colors.white),
       label: const Text(
         "ACCOUNT DELETE",
@@ -151,7 +158,7 @@ class UserProfileSection extends ConsumerWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
-      ),
+      ),                                                                              
     );
   }
 }
@@ -182,7 +189,7 @@ class MySubscriptionSection extends ConsumerWidget {
           const SizedBox(height: 8.0),
           _rowDetail("Subscription expires on:", _pill(expText)),
           const SizedBox(height: 16.0),
-          _upgradeButton(),
+          _upgradeButton(context),
         ],
       ),
     );
@@ -214,8 +221,8 @@ class MySubscriptionSection extends ConsumerWidget {
     child: Text(text, style: const TextStyle(color: Colors.white)),
   );
 
-  static Widget _upgradeButton() => ElevatedButton(
-    onPressed: () {},
+  static Widget _upgradeButton(BuildContext context) => ElevatedButton(
+    onPressed: () {context.push(SubscriptionPlanScreen.routeName);},
     style: ElevatedButton.styleFrom(
       backgroundColor: Colors.red,
       shape: RoundedRectangleBorder(

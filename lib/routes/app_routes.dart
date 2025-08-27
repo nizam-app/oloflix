@@ -67,11 +67,20 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const SubscriptionPlanScreen(),
     ),
 
-    GoRoute(
-      path: PaymentMethod.routeName,
-      name: PaymentMethod.routeName,
-      builder: (context, state) => const PaymentMethod(),
-    ), 
+GoRoute(
+path: PaymentMethod.routeName,
+builder: (context, state) {
+final m = (state.extra as Map?) ?? {};
+return PaymentMethod(
+planId: m['planId'] as int?,
+amount: m['amount'] as String?,
+title: m['title'] as String?,
+isInternational: (m['isInternational'] as int?) ?? 0,
+movieId: m['movieId'] as int?,
+);
+},
+),
+
 
     GoRoute(
       path: SplashScreen.routeName,
@@ -175,8 +184,11 @@ final GoRouter router = GoRouter(
       builder: (context, state) => AllMoviesScreen(),
     ), GoRoute(
       path: PPVSubscriptionPlanScreen.routeName,
-      name: PPVSubscriptionPlanScreen.routeName,
-      builder: (context, state) => PPVSubscriptionPlanScreen(),
+      builder: (context, state) {
+        final m = (state.extra as Map?) ?? {};
+        final movieId = m['movieId'] as int? ?? 0;
+        return PPVSubscriptionPlanScreen(movieId: movieId);
+      },
     ),
     GoRoute(
       path: '${MoviesDetailScreen.routeName}/:id',
