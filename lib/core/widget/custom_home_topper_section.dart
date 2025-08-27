@@ -39,7 +39,7 @@ class CustomHomeTopperSection extends ConsumerWidget {
           children: [
             InkWell(
               onTap: (){
-                context.go(BottomNavBar.routeName);
+                context.go(HomeScreen.routeName);
               },
                 child: Image.asset(ImagePath.logo, width: 80.w)),
             Spacer(),

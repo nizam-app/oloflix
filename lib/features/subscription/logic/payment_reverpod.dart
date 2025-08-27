@@ -7,7 +7,10 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 /// ✅ Product IDs (App Store Connect-এর সাথে হুবহু মিলবে)
 const kProductIdYearlyLocal = 'oloflix_yearlyplan';
 const kProductIdYearlyUSD   = 'oloflix_yearlyplan';
-const kProductIdPPV         = 'com.oloflix.premiumsub'; // ← নতুন PPV
+
+/// 👉 তোমার টেস্ট লগে ছিল com.sampleppv.product — সেটাই রাখলাম
+///    যদি চূড়ান্তটি অন্য কিছু হয় (e.g. com.oloflix.premiumsub), এটা বদলে দিও।
+const kProductIdPPV         = 'com.sampleppv.product';
 
 /// 👉 তোমার verify API
 final kVerifyUrl = AuthAPIController.payment_apple_verify;
@@ -37,7 +40,7 @@ class IapController extends StateNotifier<AsyncValue<IapState>> {
     try {
       final svc = ref.read(iapServiceProvider);
       await svc.init(
-        productIds: {kProductIdYearlyLocal, kProductIdYearlyUSD, kProductIdPPV}, // ← PPV যোগ
+        productIds: {kProductIdYearlyLocal, kProductIdYearlyUSD, kProductIdPPV},
         serverVerifyUrl: kVerifyUrl,
       );
       state = AsyncValue.data(
@@ -71,9 +74,12 @@ class IapController extends StateNotifier<AsyncValue<IapState>> {
 /// 🔁 int ভিত্তিক ম্যাপিং: 0=Local, 1=USD, 2=PPV
 String productIdForPlan({required int isInternational}) {
   switch (isInternational) {
-    case 1: return kProductIdYearlyUSD;
-    case 2: return kProductIdPPV;           // ← PPV
+    case 1:
+      return kProductIdYearlyUSD;
+    case 2:
+      return kProductIdPPV; // ← PPV
     case 0:
-    default: return kProductIdYearlyLocal;
+    default:
+      return kProductIdYearlyLocal;
   }
 }

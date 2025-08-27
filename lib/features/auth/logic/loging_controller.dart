@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:Oloflix/core/constants/api_control/auth_api.dart';
 import 'package:Oloflix/core/widget/bottom_nav_bar/screen/bottom_nav_bar.dart';
+import 'package:Oloflix/features/home/screens/home_screen.dart';
 import 'package:Oloflix/features/profile/logic/profile_data_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -64,7 +65,7 @@ class LoginController extends GetxController {
         }
 
         // 3) ন্যাভিগেট
-        if (context.mounted) context.go(BottomNavBar.routeName);
+        if (context.mounted) context.go(HomeScreen.routeName);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(data["message"] ?? "Invalid email or password")),

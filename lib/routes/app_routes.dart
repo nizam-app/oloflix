@@ -32,7 +32,6 @@ import 'package:Oloflix/features/subscription/screen/subscription_plan_screen.da
 import 'package:Oloflix/features/terms_of/screen/terms_of_use_screen.dart';
 import 'package:Oloflix/features/tv_shows/screen/tv_shows_screen.dart';
 import 'package:Oloflix/features/watchlist/screen/my_watchlist_screen.dart';
-
 import '../features/video_show/video_show_screen.dart';
 
 final GoRouter router = GoRouter(
@@ -41,172 +40,53 @@ final GoRouter router = GoRouter(
       Scaffold(body: Center(child: Text('Error: ${state.error} '))),
 
   routes: [
-    GoRoute(
-      path: HomeScreen.routeName,
-      name: "homePage",
-      builder: (context, state) => HomeScreen(),
-    ),
-    GoRoute(
-      path: ProfileScreen.routeName,
-      name: "profile",
-      builder: (context, state) => const ProfileScreen(),
-    ),
-    GoRoute(
-      path: DashboardScreen.routeName,
-      name: DashboardScreen.routeName,
-      builder: (context, state) => const DashboardScreen(),
-    ),
-    GoRoute(
-      path: MyWatchlistScreen.routeName,
-      name: MyWatchlistScreen.routeName,
-      builder: (context, state) => const MyWatchlistScreen(),
-    ),
-    GoRoute(
-      path: SubscriptionPlanScreen.routeName,
-      name: SubscriptionPlanScreen.routeName,
-      builder: (context, state) => const SubscriptionPlanScreen(),
-    ),
-
-GoRoute(
-path: PaymentMethod.routeName,
-builder: (context, state) {
-final m = (state.extra as Map?) ?? {};
-return PaymentMethod(
-planId: m['planId'] as int?,
-amount: m['amount'] as String?,
-title: m['title'] as String?,
-isInternational: (m['isInternational'] as int?) ?? 0,
-movieId: m['movieId'] as int?,
-);
-},
-),
-
-
+    // ✅ Splash বাইরে (BottomNav থাকবে না)
     GoRoute(
       path: SplashScreen.routeName,
       name: "splash",
       builder: (context, state) => SplashScreen(),
     ),
 
+    // ✅ Payment বাইরে (BottomNav থাকবে না)
+    GoRoute(
+      path: PaymentMethod.routeName,
+      name: "payment",
+      builder: (context, state) {
+        final m = (state.extra as Map?) ?? {};
+        return PaymentMethod(
+          planId: m['planId'] as int?,
+          amount: m['amount'] as String?,
+          title: m['title'] as String?,
+          isInternational: (m['isInternational'] as int?) ?? 0,
+          movieId: m['movieId'] as int?,
+        );
+      },
+    ),
     GoRoute(
       path: LoginScreen.routeName,
       name: "login_screen",
-      builder: (context, state) => LoginScreen(),
+      builder: (context, state) => const LoginScreen(),
     ),
-
     GoRoute(
       path: SignupScreen.routeName,
       name: "signup_screen",
-      builder: (context, state) => SignupScreen(),
+      builder: (context, state) => const SignupScreen(),
     ),
-
     GoRoute(
       path: ForgotScreen.routeName,
       name: "forgot_screen",
-      builder: (context, state) => ForgotScreen(),
+      builder: (context, state) => const ForgotScreen(),
     ),
-
     GoRoute(
       path: OtpScreen.routeName,
       name: "otp",
-      builder: (context, state) => OtpScreen(),
+      builder: (context, state) => const OtpScreen(),
     ),
-
     GoRoute(
       path: ResetPassword.routeName,
       name: "reset_password",
-      builder: (context, state) => ResetPassword(),
-    ), 
-    GoRoute(
-      path: BottomNavBar.routeName,
-      name: BottomNavBar.routeName,
-      builder: (context, state) => BottomNavBar(),
+      builder: (context, state) => const ResetPassword(),
     ),
-
-    GoRoute(
-      path: LiveScreen.routeName,
-      name: "live_screen",
-      builder: (context, state) => LiveScreen(),
-    ),
-
-    GoRoute(
-      path: PpvScreen.routeName,
-      name: "ppv_screen",
-      builder: (context, state) => PpvScreen(),
-    ),
-
-    GoRoute(
-      path: DashboardScreen.routeName,
-      name: "dashboard",
-      builder: (context, state) => DashboardScreen(),
-    ),
-
-    // GoRoute setup
-
-    GoRoute(
-      path: TvShowsScreen.routeName,
-      name: TvShowsScreen.routeName,
-      builder: (context, state) => TvShowsScreen(),
-    ),
-    // This is Bottom side navigation
-    GoRoute(
-      path: AboutScreen.routeName,
-      name: AboutScreen.routeName,
-      builder: (context, state) => AboutScreen(),
-    ),
-    GoRoute(
-      path: TermsOfUseScreen.routeName,
-      name: TermsOfUseScreen.routeName,
-      builder: (context, state) => TermsOfUseScreen(),
-    ),
-    GoRoute(
-      path: PrivacyPolicyScreen.routeName,
-      name: PrivacyPolicyScreen.routeName,
-      builder: (context, state) => PrivacyPolicyScreen(),
-    ),
-    GoRoute(
-      path: PricingRefundsScreen.routeName,
-      name: PricingRefundsScreen.routeName,
-      builder: (context, state) => PricingRefundsScreen(),
-    ),
-    GoRoute(
-      path: ContactScreen.routeName,
-      name: ContactScreen.routeName,
-      builder: (context, state) => ContactScreen(),
-    ),
-    GoRoute(
-      path: DeleteAccountScreen.routeName,
-      name: DeleteAccountScreen.routeName,
-      builder: (context, state) => DeleteAccountScreen(),
-    ), GoRoute(
-      path: AllMoviesScreen.routeName,
-      name: AllMoviesScreen.routeName,
-      builder: (context, state) => AllMoviesScreen(),
-    ), GoRoute(
-      path: PPVSubscriptionPlanScreen.routeName,
-      builder: (context, state) {
-        final m = (state.extra as Map?) ?? {};
-        final movieId = m['movieId'] as int? ?? 0;
-        return PPVSubscriptionPlanScreen(movieId: movieId);
-      },
-    ),
-    GoRoute(
-      path: '${MoviesDetailScreen.routeName}/:id',
-      name: MoviesDetailScreen.routeName,
-      builder: (context, state) {
-        final id = int.parse(state.pathParameters['id']!);
-        return MoviesDetailScreen(id: id);
-      },
-    ),
-    GoRoute(
-      path: '${MoviesScreen.routeName}/:id',
-      name: MoviesScreen.routeName,
-      builder: (context, state) {
-        final id = int.parse(state.pathParameters['id']!);
-        return MoviesScreen( movie: id,);
-      },
-    ),
-    // route
     GoRoute(
       path: VideoShowScreen.routeName,
       name: VideoShowScreen.routeName,
@@ -214,6 +94,119 @@ movieId: m['movieId'] as int?,
         final videoUrl = state.uri.queryParameters['url'];
         return VideoShowScreen(videoUrl: videoUrl!);
       },
+    ),
+
+    // ✅ বাকি সবকিছু ShellRoute-এর ভিতরে (BottomNav সবখানে থাকবে)
+    ShellRoute(
+      builder: (context, state, child) => BottomNavBar(child: child),
+      routes: [
+        // Tabs
+        GoRoute(
+          path: HomeScreen.routeName,
+          name: "homePage",
+          builder: (context, state) => const HomeScreen(),
+        ),
+        GoRoute(
+          path: PpvScreen.routeName,
+          name: "ppv_screen",
+          builder: (context, state) => const PpvScreen(),
+        ),
+        GoRoute(
+          path: LiveScreen.routeName,
+          name: "live_screen",
+          builder: (context, state) => const LiveScreen(),
+        ),
+        GoRoute(
+          path: ProfileScreen.routeName,
+          name: "profile",
+          builder: (context, state) => const ProfileScreen(),
+        ),
+
+        // Other screens (সবই BottomNav সহ খোলে)
+        GoRoute(
+          path: DashboardScreen.routeName,
+          name: "dashboard",
+          builder: (context, state) => const DashboardScreen(),
+        ),
+        GoRoute(
+          path: MyWatchlistScreen.routeName,
+          name: MyWatchlistScreen.routeName,
+          builder: (context, state) => const MyWatchlistScreen(),
+        ),
+        GoRoute(
+          path: SubscriptionPlanScreen.routeName,
+          name: SubscriptionPlanScreen.routeName,
+          builder: (context, state) => const SubscriptionPlanScreen(),
+        ),
+        GoRoute(
+          path: TvShowsScreen.routeName,
+          name: TvShowsScreen.routeName,
+          builder: (context, state) => const TvShowsScreen(),
+        ),
+        GoRoute(
+          path: AboutScreen.routeName,
+          name: AboutScreen.routeName,
+          builder: (context, state) => const AboutScreen(),
+        ),
+        GoRoute(
+          path: TermsOfUseScreen.routeName,
+          name: TermsOfUseScreen.routeName,
+          builder: (context, state) => const TermsOfUseScreen(),
+        ),
+        GoRoute(
+          path: PrivacyPolicyScreen.routeName,
+          name: PrivacyPolicyScreen.routeName,
+          builder: (context, state) => const PrivacyPolicyScreen(),
+        ),
+        GoRoute(
+          path: PricingRefundsScreen.routeName,
+          name: PricingRefundsScreen.routeName,
+          builder: (context, state) => const PricingRefundsScreen(),
+        ),
+        GoRoute(
+          path: ContactScreen.routeName,
+          name: ContactScreen.routeName,
+          builder: (context, state) => const ContactScreen(),
+        ),
+        GoRoute(
+          path: DeleteAccountScreen.routeName,
+          name: DeleteAccountScreen.routeName,
+          builder: (context, state) => const DeleteAccountScreen(),
+        ),
+        GoRoute(
+          path: AllMoviesScreen.routeName,
+          name: AllMoviesScreen.routeName,
+          builder: (context, state) => const AllMoviesScreen(),
+        ),
+        GoRoute(
+          path: PPVSubscriptionPlanScreen.routeName,
+          name: "ppv_subscription",
+          builder: (context, state) {
+            final m = (state.extra as Map?) ?? {};
+            final movieId = m['movieId'] as int? ?? 0;
+            return PPVSubscriptionPlanScreen(movieId: movieId);
+          },
+        ),
+        GoRoute(
+          path: '${MoviesDetailScreen.routeName}/:id',
+          name: MoviesDetailScreen.routeName,
+          builder: (context, state) {
+            final id = int.parse(state.pathParameters['id']!);
+            return MoviesDetailScreen(id: id);
+          },
+        ),
+        GoRoute(
+          path: '${MoviesScreen.routeName}/:id',
+          name: MoviesScreen.routeName,
+          builder: (context, state) {
+            final id = int.parse(state.pathParameters['id']!);
+            return MoviesScreen(movie: id);
+          },
+        ),
+
+        // Auth screens (এইগুলাও চাইলে bar সহ দেখাতে পারো; না চাইলে বাইরে নিলে হবে)
+        
+      ],
     ),
   ],
 );
