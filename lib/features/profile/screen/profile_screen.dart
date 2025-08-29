@@ -5,7 +5,6 @@ import 'package:Oloflix/core/widget/app_drawer.dart';
 import 'package:Oloflix/core/widget/custom_home_topper_section.dart';
 import 'package:Oloflix/features/profile/logic/profile_data_controller.dart';
 import 'package:flutter/material.dart';
-
 // Package imports:
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

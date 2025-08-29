@@ -17,6 +17,7 @@ class AuthAPIController {
   static final payment_apple_ppv_verify = '$_base_api/payment/apple/ppv/verify';
   static final String account_delete = "$_base_api/account_delete";
   static final String movies_watch_ppv = "$_base_api/movies/watch";
+  static final String contact = "$_base_api/contact";
 
 
 }
