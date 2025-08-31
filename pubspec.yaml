@@ -54,6 +54,8 @@ dependencies:
   in_app_purchase: ^3.2.3
   webview_flutter: ^4.13.0
   in_app_purchase_storekit: ^0.4.4
+  path_provider: ^2.1.5
+  flutter_image_compress: ^2.4.0
 
 
 

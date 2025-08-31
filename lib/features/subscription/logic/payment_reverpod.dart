@@ -8,8 +8,7 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 const kProductIdYearlyLocal = 'oloflix_yearlyplan';
 const kProductIdYearlyUSD   = 'oloflix_yearlyplan';
 
-/// 👉 তোমার টেস্ট লগে ছিল com.sampleppv.product — সেটাই রাখলাম
-///    যদি চূড়ান্তটি অন্য কিছু হয় (e.g. com.oloflix.premiumsub), এটা বদলে দিও।
+
 const kProductIdPPV         = 'com.sampleppv.product';
 
 /// 👉 তোমার verify API

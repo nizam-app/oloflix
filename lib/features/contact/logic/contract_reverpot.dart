@@ -1,9 +1,12 @@
-import 'package:Oloflix/features/contact/data/contact_data.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:Oloflix/core/constants/api_control/auth_api.dart';
 
-final contactRepositoryProvider = Provider((ref) => const ContactRepository());
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:Oloflix/core/constants/api_control/auth_api.dart';
+import 'package:Oloflix/features/contact/data/contact_data.dart'; // ContactRepository
+
+final contactRepositoryProvider = Provider((_) => const ContactRepository());
+
+final contactControllerProvider =
+AsyncNotifierProvider<ContactController, void>(ContactController.new);
 
 class ContactController extends AsyncNotifier<void> {
   @override
@@ -16,34 +19,15 @@ class ContactController extends AsyncNotifier<void> {
     required String subject,
     required String message,
   }) async {
-    state = const AsyncLoading();
-    try {
-      final sp = await SharedPreferences.getInstance();
-      final token = sp.getString('token') ;
-
-      final headers = {
-        if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
-      };
-
-      await ref.read(contactRepositoryProvider).send(
-        url: AuthAPIController.contact, // <-- তোমার contact API endpoint
-        headers: headers,
-        data: {
-          'name': name.trim(),
-          'email': email.trim(),
-          'phone': phone.trim(),
-          'subject': subject.trim(),
-          'message': message.trim(),
-        },
-      );
-
-      state = const AsyncData(null);
-    } catch (e, st) {
-      state = AsyncError(e, st);
-      rethrow;
-    }
+    await ref.read(contactRepositoryProvider).send(
+      url: AuthAPIController.contact,
+      data: {
+        'name': name.trim(),
+        'email': email.trim(),
+        'phone': phone.trim(),
+        'subject': subject.trim(),
+        'message': message.trim(),
+      },
+    );
   }
 }
-
-final contactControllerProvider =
-AsyncNotifierProvider<ContactController, void>(ContactController.new);

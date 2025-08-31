@@ -13,9 +13,13 @@ static final profileProvider = FutureProvider<ProfileResponse>((ref) async {
   return repo.fetchProfile(AuthAPIController.profile);
 });
 
- static final profileUpdateController =
+// features/profile/logic/profile_data_controller.dart
+// features/profile/logic/profile_data_controller.dart
+  static final profileUpdateController =
   StateNotifierProvider<ProfileUpdateController, AsyncValue<void>>(
-          (ref) => ProfileUpdateController());
+        (ref) => ProfileUpdateController(),
+  );
+
 
 
 
