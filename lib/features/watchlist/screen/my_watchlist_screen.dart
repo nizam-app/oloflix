@@ -1,5 +1,5 @@
 // Flutter imports:
-import 'package:Oloflix/%20business_logic/models/movie_details_model.dart';
+import 'package:Oloflix/business_logic/models/movie_details_model.dart';
 import 'package:Oloflix/core/widget/app_drawer.dart';
 import 'package:Oloflix/core/widget/custom_snackbar.dart';
 import 'package:Oloflix/core/widget/movie_and_promotion/custom_movie_card.dart';
@@ -77,7 +77,7 @@ class MoviesSection extends ConsumerWidget {
           children: [
             _buildSectionTitle("Movies"),
             SizedBox(height: 10.h),
-           if (movie.length <1)
+           if (movie.length >0)
             CustomCard(movies: movie) // movies list pass করলাম
           ],
         );

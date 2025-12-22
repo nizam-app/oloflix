@@ -1,4 +1,5 @@
-import 'package:Oloflix/%20business_logic/models/movie_details_model.dart';
+
+import 'package:Oloflix/business_logic/models/movie_details_model.dart';
 import 'package:Oloflix/core/constants/api_control/global_api.dart';
 import 'package:Oloflix/core/utils/movies/go_to_details_screen.dart';
 import 'package:Oloflix/features/subscription/screen/ppv_subscription.dart';

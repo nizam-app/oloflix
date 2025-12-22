@@ -63,6 +63,8 @@ class AppDrawer extends ConsumerWidget {
                   );
               }
               return; // index change হবে না
+            }else {
+              context.push(LiveScreen.routeName) ;
             }},
           ),
           ListTile(

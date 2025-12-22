@@ -1,5 +1,4 @@
 // Flutter imports:
-import 'package:Oloflix/%20business_logic/models/movie_details_model.dart';
 import 'package:Oloflix/features/all_movie/screen/all_movies_screen/all_movie.dart';
 import 'package:Oloflix/features/auth/screens/otp_screen.dart';
 import 'package:Oloflix/features/auth/screens/reset_password.dart';

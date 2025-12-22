@@ -1,5 +1,5 @@
 // Flutter imports:
-import 'package:Oloflix/%20business_logic/models/movie_details_model.dart';
+import 'package:Oloflix/business_logic/models/movie_details_model.dart';
 import 'package:Oloflix/core/widget/bottom_nav_bar/controller/bottom_controller.dart';
 import 'package:Oloflix/core/widget/custom_category_name.dart';
 import 'package:Oloflix/features/home/logic/cetarory_fiend_controller.dart';

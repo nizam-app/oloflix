@@ -87,8 +87,13 @@ class MoviesDetailScreen extends ConsumerWidget {
         final String videoUrl = movie.videoUrl ?? '';
 
         // Trailer URL (supports different possible keys)
-        final String trailerUrl =
-        (movie.trailerUrl ?? movie.trailerUrl?? '').toString();
+        
+        // final String trailerUrl =
+        // (movie.trailerUrl ?? movie.trailerUrl?? '').toString();
+
+        final String trailerUrl = (movie.trailerUrl ?? '').toString().trim();
+
+
 
         // Related movies
         final relatedAsync = ref.watch(
@@ -119,7 +124,7 @@ class MoviesDetailScreen extends ConsumerWidget {
               CustomCategoryName(
                 context: context,
                 text: "You May Also Like",
-                onPressed: () {},
+                onPressed: () {}
               ),
               relatedAsync.when(
                 data: (movies) => CustomCard(movies: movies),

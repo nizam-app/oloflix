@@ -1,5 +1,5 @@
 // Flutter imports:
-import 'package:Oloflix/%20business_logic/models/movie_details_model.dart';
+import 'package:Oloflix/business_logic/models/movie_details_model.dart';
 import 'package:Oloflix/core/constants/api_control/global_api.dart';
 import 'package:Oloflix/core/utils/logOut_botton.dart';
 import 'package:Oloflix/features/auth/screens/login_screen.dart';

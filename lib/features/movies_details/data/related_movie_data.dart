@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:Oloflix/%20business_logic/models/movie_details_model.dart';
+import 'package:Oloflix/business_logic/models/movie_details_model.dart';
 import 'package:Oloflix/core/constants/api_control/auth_api.dart';
 import 'package:http/http.dart' as http;
 
