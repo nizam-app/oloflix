@@ -20,15 +20,15 @@ class PaymentMethod extends ConsumerStatefulWidget {
     this.planId,
     this.amount,
     this.title,
-    required this.isInternational, // int: 0/1/2  (0=Local,1=USD,2=PPV)
-    this.movieId,                  // PPV হলে আসবে
+    required this.isInternational, // 0=Local, 1=USD, 2=PPV
+    this.movieId,                  // PPV হলে দরকার
   });
 
   final int? planId;
   final String? amount;
   final String? title;
-  final int isInternational; // bool থেকে int
-  final int? movieId;        // PPV হলে লাগবে
+  final int isInternational;
+  final int? movieId;
 
   static final routeName = '/payment';
 
@@ -39,7 +39,7 @@ class PaymentMethod extends ConsumerStatefulWidget {
 class _PaymentMethodState extends ConsumerState<PaymentMethod> {
   @override
   Widget build(BuildContext context) {
-    final _ = ref.watch(iapControllerProvider); // init নিশ্চিত করতে; unused warning এড়াতে _
+    final _ = ref.watch(iapControllerProvider); // init নিশ্চিত করতে
     final busy = ref.watch(purchaseBusyProvider);
 
     return Scaffold(
@@ -57,25 +57,40 @@ class _PaymentMethodState extends ConsumerState<PaymentMethod> {
               ApplePay(
                 context,
                 onPay: () async {
-                  final pid = productIdForPlan(isInternational: widget.isInternational);
+                  final pid =
+                  productIdForPlan(isInternational: widget.isInternational);
 
                   // IAP service instance
                   final svc = ref.read(iapServiceProvider);
 
-                  if (widget.isInternational == 2 && widget.movieId != null) {
-                    // 👉 PPV → /payment/apple/ppv/verify  (image-1 format)
-                    // body: { receipt, movie_id, transaction_id, days }
+                  if (widget.isInternational == 2) {
+                    // 👉 PPV
+                    if (widget.movieId == null || widget.movieId == 0) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Movie not found for PPV purchase'),
+                        ),
+                      );
+                      return;
+                    }
                     svc.setExtraPayload({
                       'source': 'ppv',
                       'movieId': widget.movieId, // int
-                      'days': 3,                 // চাইলে UI থেকে ডাইনামিক পাঠাও
+                      'days': 3,                 // চাইলে UI থেকে ডাইনামিক
                     });
                   } else {
-                    // 👉 Subscription → /payment/apple/verify  (image-2 format)
-                    // body: { receipt, plan_id }
+                    // 👉 Subscription
+                    if (widget.planId == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Plan not found for subscription'),
+                        ),
+                      );
+                      return;
+                    }
                     svc.setExtraPayload({
                       'source': 'subscription',
-                      'planId': widget.planId,   // int
+                      'planId': widget.planId, // int
                     });
                   }
 
@@ -83,11 +98,14 @@ class _PaymentMethodState extends ConsumerState<PaymentMethod> {
                     const SnackBar(content: Text('Processing purchase...')),
                   );
 
-                  final ok = await ref.read(iapControllerProvider.notifier).buy(pid);
+                  final ok =
+                  await ref.read(iapControllerProvider.notifier).buy(pid);
 
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(ok ? 'Subscription active ✅' : 'Payment failed or canceled'),
+                      content: Text(
+                        ok ? 'Subscription active ✅' : 'Payment failed or canceled',
+                      ),
                     ),
                   );
 
@@ -194,7 +212,6 @@ Widget paymentMethodSelect(BuildContext context) {
             Container(height: 4, width: 40, color: Colors.red),
             const SizedBox(height: 10),
 
-            // Info text — চাইলে isInternational দেখে টেক্সট আলাদা করতে পারো
             const Text(
               'You have Selected Yearly Plan (\$)',
               style: TextStyle(fontSize: 16, color: Colors.white70),
@@ -231,7 +248,7 @@ Widget paymentMethodSelect(BuildContext context) {
 
             const SizedBox(height: 10),
             InkWell(
-              onTap: () => context.push(SubscriptionPlanScreen.routeName),
+              onTap: () { context.go(SubscriptionPlanScreen.routeName);},
               child: Container(
                 width: 130,
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -277,79 +294,6 @@ Widget ApplePay(BuildContext content, {required VoidCallback onPay, bool busy = 
             onPressed: busy ? () {} : onPay,
             variant: ApplePayButtonVariant.white,
             label: busy ? 'Processing...' : 'Pay',
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-// Paystack placeholder
-Widget paystackPayment(BuildContext content) {
-  return Container(
-    padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-    width: double.infinity,
-    decoration: BoxDecoration(
-      color: const Color(0xFF1A093F),
-      borderRadius: BorderRadius.circular(8),
-    ),
-    child: Center(
-      child: Column(
-        children: [
-          const Text(
-            "paystack -(Pay with ATM Card) ",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
-          ),
-          Container(alignment: Alignment.center, height: 4, width: 40, color: Colors.red),
-          SizedBox(height: 10.h),
-          InkWell(
-            onTap: () {},
-            child: Container(
-              width: 95,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [Colors.orange, Colors.red]),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: const Text("PAY NOW", style: TextStyle(color: Colors.white)),
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-// Flutterwave placeholder
-Widget FlutterWavePayment(BuildContext content) {
-  return Container(
-    padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-    width: double.infinity,
-    decoration: BoxDecoration(
-      color: const Color(0xFF1A093F),
-      borderRadius: BorderRadius.circular(8),
-    ),
-    child: Center(
-      child: Column(
-        children: [
-          const Align(alignment: Alignment.center),
-          const Text(
-            "Flutterwave -(Pay with Card, Bank, Transfer, USSD)",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
-          ),
-          Container(alignment: Alignment.center, height: 4, width: 40, color: Colors.red),
-          SizedBox(height: 10.h),
-          InkWell(
-            onTap: () {},
-            child: Container(
-              width: 95,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [Colors.orange, Colors.red]),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: const Text("PAY NOW", style: TextStyle(color: Colors.white)),
-            ),
           ),
         ],
       ),

@@ -18,6 +18,11 @@ import 'package:Oloflix/features/profile/screen/profile_screen.dart';
 
 class BottomNavBar extends ConsumerStatefulWidget {
   static const String routeName = "/bottomNavBar";
+
+  /// ShellRoute থেকে আসা child এখানে render হবে
+  final Widget child;
+  const BottomNavBar({super.key, required this.child});
+
   @override
   _BottomNavBarState createState() => _BottomNavBarState();
 }
@@ -25,17 +30,32 @@ class BottomNavBar extends ConsumerStatefulWidget {
 class _BottomNavBarState extends ConsumerState<BottomNavBar> {
   final GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
 
-  static final List<Widget> _pages = <Widget>[
-    const HomeScreen(),
-    const PpvScreen(),
-    const LiveScreen(),
-    const ProfileScreen(),
-  ];
+  int _indexFromLocation(String loc) {
+    // location দিয়ে active tab নির্ধারণ
+    if (loc.startsWith(ProfileScreen.routeName)) return 3;
+    if (loc.startsWith(LiveScreen.routeName)) return 2;
+    if (loc.startsWith(PpvScreen.routeName)) return 1;
+    return 0; // default -> Home
+  }
+
+  String _pathForIndex(int index) {
+    switch (index) {
+      case 1:
+        return PpvScreen.routeName;
+      case 2:
+        return LiveScreen.routeName;
+      case 3:
+        return ProfileScreen.routeName;
+      case 0:
+      default:
+        return HomeScreen.routeName;
+    }
+  }
 
   Widget _navItem(IconData icon, String label, bool isActive) {
     final color = isActive ? AllColor.white : AllColor.white.withOpacity(0.7);
     return Padding(
-      padding:  EdgeInsets.all(3.0.r),
+      padding: EdgeInsets.all(3.0.r),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -44,7 +64,7 @@ class _BottomNavBarState extends ConsumerState<BottomNavBar> {
           Text(
             label,
             style: TextStyle(
-              fontSize: 10.sp, // ছোট রাখো যাতে 75 এর মধ্যে ফিট করে
+              fontSize: 10.sp,
               color: color,
               fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
               height: 1.0,
@@ -55,21 +75,59 @@ class _BottomNavBarState extends ConsumerState<BottomNavBar> {
     );
   }
 
+  Future<void> _onTap(BuildContext context, int index) async {
+    // Live tab guard
+    if (index == 2) {
+      final premium = hasPremium(ref);
+      if (!premium) {
+        if (mounted) {
+          ScaffoldMessenger.of(context)
+            ..clearSnackBars()
+            ..showSnackBar(
+              const SnackBar(
+                content: Text("Please purchase the YEARLY subscription to view page!!"),
+              ),
+            );
+        }
+        return;
+      }
+    }
+
+    // Account tab guard
+    if (index == 3) {
+      final loggedIn = await AuthHelper.isLoggedIn();
+      if (!loggedIn) {
+        if (mounted) context.push(LoginScreen.routeName);
+        return;
+      }
+    }
+
+    // Navigate & provider sync (তোমার আগের provider-ও রেখে দিলাম)
+    final path = _pathForIndex(index);
+    if (mounted) {
+      context.go(path);
+      ref.read(selectedIndexProvider.notifier).state = index;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final int selectedIndex = ref.watch(selectedIndexProvider);
-    final double navHeight = math.min(70.h, 75.0); // টেক্সট রাখায় একটু বেশি, তবু ≤ 75
+    final loc = GoRouterState.of(context).uri.toString();
+    final int selectedIndex =
+    _indexFromLocation(loc.isEmpty ? HomeScreen.routeName : loc);
+
+    final double navHeight = math.min(70.h, 75.0);
 
     return Scaffold(
-      body: _pages.elementAt(selectedIndex),
+      body: widget.child, // ShellRoute এর বর্তমান child
       bottomNavigationBar: CurvedNavigationBar(
         key: _bottomNavigationKey,
         index: selectedIndex,
         height: navHeight,
         items: <Widget>[
           _navItem(FontAwesomeIcons.homeUser, "Home", selectedIndex == 0),
-          _navItem(FontAwesomeIcons.eye,       "PPV",  selectedIndex == 1),
-          _navItem(Icons.live_tv,              "Live", selectedIndex == 2),
+          _navItem(FontAwesomeIcons.eye, "PPV", selectedIndex == 1),
+          _navItem(Icons.live_tv, "Live", selectedIndex == 2),
           _navItem(CupertinoIcons.profile_circled, "Account", selectedIndex == 3),
         ],
         color: AllColor.black,
@@ -77,37 +135,7 @@ class _BottomNavBarState extends ConsumerState<BottomNavBar> {
         backgroundColor: AllColor.white,
         animationCurve: Curves.easeInOut,
         animationDuration: const Duration(milliseconds: 600),
-
-        onTap: (index) async {
-          // A) Live tab (index 2) → plan_id 8/12 দরকার
-          if (index == 2) {
-            final premium = hasPremium(ref);
-            if (!premium) {
-              if (mounted) {
-                ScaffoldMessenger.of(context)
-                  ..clearSnackBars()
-                  ..showSnackBar(
-                    const SnackBar(
-                      content: Text("Please purchase the YEARLY subscription to view page!!"),
-                    ),
-                  );
-              }
-              return; // index change হবে না
-            }
-          }
-
-          // B) Account tab (index 3) → login দরকার
-          if (index == 3) {
-            final loggedIn = await AuthHelper.isLoggedIn();
-            if (!loggedIn) {
-              if (mounted) context.push(LoginScreen.routeName);
-              return; // index change হবে না
-            }
-          }
-
-          // অনুমোদিত হলে ট্যাব বদলান
-          ref.read(selectedIndexProvider.notifier).state = index;
-        },
+        onTap: (i) => _onTap(context, i),
       ),
     );
   }

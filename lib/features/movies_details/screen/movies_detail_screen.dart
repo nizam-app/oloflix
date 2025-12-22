@@ -87,8 +87,13 @@ class MoviesDetailScreen extends ConsumerWidget {
         final String videoUrl = movie.videoUrl ?? '';
 
         // Trailer URL (supports different possible keys)
-        final String trailerUrl =
-        (movie.trailerUrl ?? movie.trailerUrl?? '').toString();
+        
+        // final String trailerUrl =
+        // (movie.trailerUrl ?? movie.trailerUrl?? '').toString();
+
+        final String trailerUrl = (movie.trailerUrl ?? '').toString().trim();
+
+
 
         // Related movies
         final relatedAsync = ref.watch(
@@ -119,7 +124,7 @@ class MoviesDetailScreen extends ConsumerWidget {
               CustomCategoryName(
                 context: context,
                 text: "You May Also Like",
-                onPressed: () {},
+                onPressed: () {}
               ),
               relatedAsync.when(
                 data: (movies) => CustomCard(movies: movies),
@@ -418,11 +423,11 @@ class DetailsImage extends ConsumerWidget {
   Future<void> videoPlayButtonLogic(
       BuildContext context,
       WidgetRef ref, {
-        required String checkPaid,     // "Paid" / "Free" / "PPV"
-        required bool isPpv,           // derived from videoAccess
-        required int movieId,          // PPV হলে লাগবে
-        required String? videoUrl,     // প্লে করার লিংক
-        required String videoSlug,     // ✅ নতুন: API hit-এর জন্য দরকার
+        required String checkPaid,     // "Paid" / "Free" (string)
+        required bool isPpv,           // এই ভিডিও PPV নাকি
+        required int movieId,          // PPV হলে দরকার
+        required String? videoUrl,     // প্লে লিংক
+        required String videoSlug,     // PPV API hit-এর জন্য
       }) async {
     // 🔐 Login check
     final loggedIn = await AuthHelper.isLoggedIn();
@@ -432,17 +437,26 @@ class DetailsImage extends ConsumerWidget {
     }
 
     final user = ref.read(userProvider);
-    final isPremium  = hasPremium(user);
-    final isPaidFlag = checkPaid.toLowerCase() == 'paid';
-    final isPpvFlag  = isPpv;
+    final bool hasSub = hasPremium(user); // ✅ তোমার আগের ফাংশন
 
-    // ✅ শুধুই PPV কেসে: token নিয়ে slug+id দিয়ে API hit
-    if (isPpvFlag) {
+    // 🎬 helper: play or show error
+    Future<void> _play(String? url) async {
+      if (url != null && url.trim().isNotEmpty) {
+        playVideoRoute(context, url);
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context)
+            ..clearSnackBars()
+            ..showSnackBar(const SnackBar(content: Text("Video URL not found")));
+        }
+      }
+    }
+
+    // 🧾 helper: PPV access check (slug + id + token)
+    Future<bool> _ppvAccessCheck() async {
       try {
         final prefs = await SharedPreferences.getInstance();
         final token = prefs.getString('token') ?? '';
-
-        // নিজের এন্ডপয়েন্ট বসাও: eg. "$api/ppv/access/$videoSlug/$movieId"
         final url = "${AuthAPIController.movies_watch_ppv}/$videoSlug/$movieId";
 
         final res = await http.get(
@@ -452,55 +466,56 @@ class DetailsImage extends ConsumerWidget {
             if (token.isNotEmpty) 'Authorization': 'Bearer $token',
           },
         );
-
-        if (res.statusCode == 200) {
-          if (videoUrl != null && videoUrl.trim().isNotEmpty) {
-            playVideoRoute(context, videoUrl);
-          } else {
-            if (context.mounted) {
-              ScaffoldMessenger.of(context)
-                ..clearSnackBars()
-                ..showSnackBar(const SnackBar(content: Text("Video URL not found")));
-            }
-          }
-        } else {
-          // Not allowed → PPV subscription page
-          if (context.mounted) {
-            context.push(
-              PPVSubscriptionPlanScreen.routeName,
-              extra: {'movieId': movieId},
-            );
-          }
-        }
+        return res.statusCode == 200;
       } catch (e) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Network error: $e')),
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text('Network error: $e')));
+        }
+        return false;
+      }
+    }
+
+    // =========================
+    //        MAIN LOGIC
+    // =========================
+
+    // 1) Subscription আছে → সব ভিডিও প্লে (PPV-তেও কোনো অতিরিক্ত চেক না)
+    if (hasSub) {
+      await _play(videoUrl);
+      return;
+    }
+
+    // 2) Subscription নেই → যদি PPV হয়, তাহলে অ্যাক্সেস চেক
+    if (isPpv) {
+      final ok = await _ppvAccessCheck();
+      if (ok) {
+        await _play(videoUrl);
+      } else {
+        if (context.mounted) {
+          context.push(
+            PPVSubscriptionPlanScreen.routeName,
+            extra: {'movieId': movieId},
           );
         }
       }
-      return; // PPV flow end
+      return;
     }
 
-    // 🔁 Normal Paid (non-PPV) & user not premium → Subscription plans
-    if (isPaidFlag && !isPremium) {
+    // 3) Subscription নেই & PPV নয় → Paid হলে সাবস্ক্রিপশন চাইবে
+    final bool contentNeedsPaid = checkPaid.toLowerCase() == 'paid';
+    if (contentNeedsPaid) {
       if (context.mounted) {
         context.push(SubscriptionPlanScreen.routeName);
       }
       return;
     }
 
-    // 🎬 Otherwise → play main video
-    if (videoUrl != null && videoUrl.trim().isNotEmpty) {
-      playVideoRoute(context, videoUrl);
-    } else {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context)
-          ..clearSnackBars()
-          ..showSnackBar(const SnackBar(content: Text("Video URL not found")));
-      }
-    }
+    // 4) Free কনটেন্ট → প্লে
+    await _play(videoUrl);
   }
+
+
 
 }
 

@@ -75,7 +75,7 @@ class _SubscriptionPlanScreenState extends ConsumerState<SubscriptionPlanScreen>
                       context.push(
                         PaymentMethod.routeName,
                         extra: {
-                          'planId': p.id,
+                          'planId': p.id ?? 0,
                           'amount': p.price,
                           'title': p.name,
                           'isInternational': p.isInternational, // int: 0/1

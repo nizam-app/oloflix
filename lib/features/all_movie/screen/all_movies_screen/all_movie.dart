@@ -1,6 +1,5 @@
 // Flutter imports:
-import 'package:Oloflix/%20business_logic/models/movie_details_model.dart';
-import 'package:Oloflix/features/home/logic/cetarory_fiend_controller.dart';
+import 'package:Oloflix/business_logic/models/movie_details_model.dart';
 import 'package:Oloflix/features/movies_details/logic/get_movie_details.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -65,7 +64,7 @@ class _AllMoviesScreenState extends State<AllMoviesScreen> {
                       // লোকালি ফিল্টার
                       final filtered = (_selectedGenreId == null || _selectedGenreId!.isEmpty)
                           ? movies
-                          : movies.where((m) => m.movieGenreId?.toString() == _selectedGenreId).toList();
+                          : movies.where((m) => m!.movieGenreId?.toString() == _selectedGenreId).toList();
 
                       return _CustomMovieGrid(movies: filtered);
                     },

@@ -1,5 +1,5 @@
 // Flutter imports:
-import 'package:Oloflix/%20business_logic/models/movie_details_model.dart';
+import 'package:Oloflix/business_logic/models/movie_details_model.dart';
 import 'package:Oloflix/core/constants/api_control/global_api.dart';
 import 'package:Oloflix/core/utils/logOut_botton.dart';
 import 'package:Oloflix/features/auth/screens/login_screen.dart';
@@ -39,7 +39,7 @@ class CustomHomeTopperSection extends ConsumerWidget {
           children: [
             InkWell(
               onTap: (){
-                context.go(BottomNavBar.routeName);
+                context.go(HomeScreen.routeName);
               },
                 child: Image.asset(ImagePath.logo, width: 80.w)),
             Spacer(),
@@ -99,16 +99,7 @@ class CustomHomeTopperSection extends ConsumerWidget {
     _MenuItem('My Watchlist', Icons.list_alt),
     _MenuItem('Logout', Icons.logout),
   ];
-  final List<String> items = [
-    'Apple',
-    'Banana',
-    'Mango',
-    'Orange',
-    'Pineapple',
-    'Watermelon',
-    'Grapes',
-    'Strawberry',
-  ];
+
   void goToSearch(BuildContext context, List<MovieDetailsModel> movies) {
     showSearch(
       context: context,
@@ -121,7 +112,13 @@ class CustomHomeTopperSection extends ConsumerWidget {
     });
   }
 
-  void goToSubscriptionScreen(BuildContext context) {
+void goToSubscriptionScreen(BuildContext context)   async  {
+  final bool loggedIn = await AuthHelper.isLoggedIn();
+
+    if (!loggedIn) {
+      context.push(LoginScreen.routeName);
+      return;
+    }
     context.push(SubscriptionPlanScreen.routeName);
   }
 }

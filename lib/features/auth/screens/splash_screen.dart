@@ -26,7 +26,7 @@ class _SplashScreenState extends State<SplashScreen> {
     String? token = await _pref.getString("token");
 
     Future.delayed(const Duration(seconds: 3), () {
-     if (email != null && token != null ) { context.go(BottomNavBar.routeName); }
+     if (email != null && token != null ) { context.go(HomeScreen.routeName); }
      else{
        context.go(LoginScreen.routeName);
      }

@@ -1,5 +1,6 @@
 // features/movies_details/model/movie_detail_response.dart
-import 'package:Oloflix/%20business_logic/models/movie_details_model.dart';
+
+import 'package:Oloflix/business_logic/models/movie_details_model.dart';
 
 class RelatedMovieDetailResponse {
   final MovieDetailsModel movie;
