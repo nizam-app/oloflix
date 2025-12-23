@@ -38,7 +38,6 @@ class HomeScreen extends ConsumerWidget {
               MovieSlider(),
               PPVNoticeSection(),
               PromosionSlider(),
-
               // PPV Movies
               CustomCategoryName(
                 context: context,

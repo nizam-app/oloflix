@@ -13,6 +13,8 @@ final adsRepoProvider = Provider<AdsRepository>((ref) {
   );
 });
 
+
+
 final adsProvider = FutureProvider<List<AdModel>>((ref) async {
   final prefs = await SharedPreferences.getInstance();
   final token = prefs.getString('token') ?? '';

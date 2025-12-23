@@ -53,8 +53,7 @@ class VideoShowScreen extends ConsumerWidget {
                     child: VideoPlayer(controller),
                   ),
                 ),
-
-                // 🔙 Back Button (Top-Left)
+                //Back button (top_left)
                 Positioned(
                   top: 30,
                   left: 10,
