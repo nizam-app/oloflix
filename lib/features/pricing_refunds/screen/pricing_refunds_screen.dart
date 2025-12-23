@@ -1,4 +1,5 @@
 // Flutter imports:
+import 'package:Oloflix/features/subscription/screen/subscription_plan_screen.dart';
 import 'package:flutter/material.dart';
 
 // Package imports:
@@ -50,44 +51,11 @@ class PricingRefundsScreen extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 16.h),
-
-                    // Basic Plan
-                    _buildPlanCard(
-                      title: "Basic",
-                      price: "₦950.00",
-                      duration: "expires after 15 Days",
-                    ),
-                    SizedBox(height: 16.h),
-
-                    // Standard Plan
-                    _buildPlanCard(
-                      title: "Standard",
-                      price: "₦1,400.00",
-                      duration: "expires after 1 Month",
-                    ),
-                    SizedBox(height: 16.h),
-
-                    // Premium Plan
-                    _buildPlanCard(
-                      title: "Premium",
-                      price: "₦2,500.00",
-                      duration: "expires after 2 Months",
-                    ),
-                    SizedBox(height: 16.h),
-
-                    // Quarterly Plan
-                    _buildPlanCard(
-                      title: "Quarterly Plan",
-                      price: "₦3,800.00",
-                      duration: "expires after 3 Months",
-                    ),
-                    SizedBox(height: 16.h),
-
-                    // Half Year Plan
                     _buildPlanCard(
                       title: "Half Year Membership",
                       price: "₦8,000.00",
                       duration: "expires after 6 Months",
+                      context:   context
                     ),
                     SizedBox(height: 16.h),
 
@@ -96,6 +64,7 @@ class PricingRefundsScreen extends StatelessWidget {
                       title: "Yearly Membership",
                       price: "₦15,000.00",
                       duration: "expires after 1 Year",
+                      context:  context
                     ),
                     SizedBox(height: 16.h),
 
@@ -104,6 +73,7 @@ class PricingRefundsScreen extends StatelessWidget {
                       title: "Pay Per View",
                       price: "₦1,000.00",
                       duration: "expires after 48 Hours",
+                      context:     context
                     ),
                     SizedBox(height: 24.h),
 
@@ -202,6 +172,7 @@ class PricingRefundsScreen extends StatelessWidget {
     required String title,
     required String price,
     required String duration,
+    required BuildContext context
   }) {
     return Card(
       elevation: 3,
@@ -222,7 +193,7 @@ class PricingRefundsScreen extends StatelessWidget {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    // Handle select button press
+                    context.push(SubscriptionPlanScreen.routeName);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue, // Button color

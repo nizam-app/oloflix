@@ -1,9 +1,11 @@
 // Flutter imports:
-import 'package:Oloflix/%20business_logic/models/movie_details_model.dart';
+import 'package:Oloflix/business_logic/models/movie_details_model.dart';
 import 'package:Oloflix/core/constants/api_control/global_api.dart';
+import 'package:Oloflix/core/utils/logOut_botton.dart';
 import 'package:Oloflix/features/auth/screens/login_screen.dart';
 import 'package:Oloflix/features/movies_details/logic/get_movie_details.dart';
 import 'package:Oloflix/features/movies_details/screen/movies_detail_screen.dart';
+import 'package:Oloflix/features/profile/logic/login_check.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -37,7 +39,7 @@ class CustomHomeTopperSection extends ConsumerWidget {
           children: [
             InkWell(
               onTap: (){
-                context.go(BottomNavBar.routeName);
+                context.go(HomeScreen.routeName);
               },
                 child: Image.asset(ImagePath.logo, width: 80.w)),
             Spacer(),
@@ -97,16 +99,7 @@ class CustomHomeTopperSection extends ConsumerWidget {
     _MenuItem('My Watchlist', Icons.list_alt),
     _MenuItem('Logout', Icons.logout),
   ];
-  final List<String> items = [
-    'Apple',
-    'Banana',
-    'Mango',
-    'Orange',
-    'Pineapple',
-    'Watermelon',
-    'Grapes',
-    'Strawberry',
-  ];
+
   void goToSearch(BuildContext context, List<MovieDetailsModel> movies) {
     showSearch(
       context: context,
@@ -119,7 +112,13 @@ class CustomHomeTopperSection extends ConsumerWidget {
     });
   }
 
-  void goToSubscriptionScreen(BuildContext context) {
+void goToSubscriptionScreen(BuildContext context)   async  {
+  final bool loggedIn = await AuthHelper.isLoggedIn();
+
+    if (!loggedIn) {
+      context.push(LoginScreen.routeName);
+      return;
+    }
     context.push(SubscriptionPlanScreen.routeName);
   }
 }
@@ -239,54 +238,51 @@ class _UserMenu extends StatelessWidget {
     );
   }
 
-  void goToNextPage(int index, BuildContext context) {
+// আগের onSelected একই থাকবে:
+// onSelected: (index) { goToNextPage(index, context); },
+
+  Future<void> goToNextPage(int index, BuildContext context) async {
+    final bool loggedIn = await AuthHelper.isLoggedIn();
+
     if (index == 0) {
+      // Dashboard
+      if (!loggedIn) {
+        context.push(LoginScreen.routeName);
+        return;
+      }
       context.push(DashboardScreen.routeName);
+
     } else if (index == 1) {
+      // Profile
+      if (!loggedIn) {
+        context.push(LoginScreen.routeName);
+        return;
+      }
       context.push(ProfileScreen.routeName);
+
     } else if (index == 2) {
+      // My Watchlist
+      if (!loggedIn) {
+        context.push(LoginScreen.routeName);
+        return;
+      }
       context.push(MyWatchlistScreen.routeName);
+
     } else if (index == 3) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text("LogOut"),
-            content: Text("Are you sure you want to LogOut ?"),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15.r),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => context.pop(),
-                child: const Text("Cancel"),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(backgroundColor: AllColor.red),
-                onPressed: () {
-                  logout(context);
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text(" LogOut Done")));
-                },
-                child: const Text("LogOut"),
-              ),
-            ],
-          );
-        },
-      );
+      // Logout (logged-in না থাকলে Login এ নেবে)
+      if (!loggedIn) {
+        context.push(LoginScreen.routeName);
+        return;
+      }
+
+      showLogOutDialog(context);
     }
   }
 
-    Future<void> logout(BuildContext context) async {
-      final prefs = await SharedPreferences.getInstance();
 
-      // সব ডেটা clear করো
-      await prefs.clear();
 
-      // login screen এ redirect করো
-      context.go(LoginScreen.routeName);
-    }
+
+
 
 }
 

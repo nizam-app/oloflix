@@ -12,7 +12,7 @@ class WatchlistAddController extends StateNotifier<AsyncValue<bool>> {
   Future<void> addMovie(String apiUrl, int postId, String postType) async {
     state = const AsyncValue.loading();
     try {
-      final repo = WatchlistRepository();
+      final repo = WatchlistAddRepository();
       final result = await repo.addToWatchlist(apiUrl, postId, postType);
       state = AsyncValue.data(result);
     } catch (e, st) {

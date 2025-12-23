@@ -1,4 +1,5 @@
-import 'package:Oloflix/%20business_logic/models/movie_details_model.dart';
+
+import 'package:Oloflix/business_logic/models/movie_details_model.dart';
 import 'package:Oloflix/features/movies_details/logic/get_movie_details.dart';
 import 'package:Oloflix/features/watchlist/data/watchlish_data.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

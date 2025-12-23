@@ -9,6 +9,6 @@ class TvShowsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BaseWidgetTupperBotton(child2:FilterDropdownSection(),);
+    return BaseWidgetTupperBotton(child2:FilterDropdownSection(onGenreSelected: (String p1) {  },),);
   }
 }

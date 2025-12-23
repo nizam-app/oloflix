@@ -2,18 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class FilterDropdownSection extends StatefulWidget {
-  const FilterDropdownSection({Key? key}) : super(key: key);
+  final Function(String) onGenreSelected; // <-- callback
+
+  const FilterDropdownSection({Key? key, required this.onGenreSelected}) : super(key: key);
 
   @override
   State<FilterDropdownSection> createState() => _FilterDropdownSectionState();
 }
 
 class _FilterDropdownSectionState extends State<FilterDropdownSection> {
-  // State variables for selected values can be added here if needed
   // for more complex interactions between filters.
+
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, String> genres = {
+      "Action": "1",
+      "Nollywood & African Movies": "2",
+      "Music Videos": "12",
+      "Shows & Comedy": "14",
+      "Talk Shows & Documentaries": "15",
+    };
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       child: Column( // Using Column to stack two rows of filters
@@ -37,13 +46,17 @@ class _FilterDropdownSectionState extends State<FilterDropdownSection> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _FilterDropdownButton(
-                label: "GENRES",
-                items: const ["Action", "Nollywood & African Movies", "Music Videos", "Shows & Comedy", "Talk Shows & Documentaries"], // Consider making this dynamic
-                onChanged: (String? newValue) {
-                  print("Selected Genre: $newValue");
-                },
-              ),
+            _FilterDropdownButton(
+            label: "GENRES",
+            items: genres.keys.toList(),   // শুধু নামগুলো দেখাবে
+            onChanged: (String? newValue) {
+              if (newValue != null) {
+                final selectedId = genres[newValue]!; // নাম থেকে id বের করলাম
+                widget.onGenreSelected(selectedId);   // MoviesScreen এ পাঠালাম শুধু ID
+                print("Selected Genre: $newValue  -> ID: $selectedId");
+              }
+            },
+          ),
               _FilterDropdownButton(
                 label: "NEWEST",
                 items: const ["OLDEST", "A to Z", "RANDOM"], // Consider making this dynamic

@@ -1,6 +1,5 @@
 // Flutter imports:
-import 'package:Oloflix/%20business_logic/models/movie_details_model.dart';
-import 'package:Oloflix/features/home/logic/cetarory_fiend_controller.dart';
+import 'package:Oloflix/business_logic/models/movie_details_model.dart';
 import 'package:Oloflix/features/movies_details/logic/get_movie_details.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,10 +17,23 @@ import 'package:Oloflix/core/widget/movie_and_promotion/promosion_slider.dart';
 
 
 
-class AllMoviesScreen extends StatelessWidget {
-  const AllMoviesScreen({super.key, });
+class AllMoviesScreen extends StatefulWidget {
+  const AllMoviesScreen({super.key});
 
   static final String routeName = "/AllMoviesScreen";
+
+  @override
+  State<AllMoviesScreen> createState() => _AllMoviesScreenState();
+}
+
+class _AllMoviesScreenState extends State<AllMoviesScreen> {
+  String? _selectedGenreId; // null মানে "All"
+
+  void _onGenreSelected(String? genreId) {
+    setState(() {
+      _selectedGenreId = genreId; // null দিলে সব দেখাবে
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,32 +43,39 @@ class AllMoviesScreen extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               CustomHomeTopperSection(),
               MovieSlider(),
-              SizedBox(height: 16.h), // Add some spacing
-              const FilterDropdownSection(),
-              // <-- Add this new custom widget call
+              SizedBox(height: 16.h),
+
+              // Filter-এ callback পাঠাও (name দেখাবে, id pass করবে)
+              FilterDropdownSection(onGenreSelected: _onGenreSelected),
+
               SizedBox(height: 16.h),
               PromosionSlider(),
-              SizedBox(height: 16.h), // Add some spacing
-              // Add some spacing
+              SizedBox(height: 16.h),
+
               Consumer(
                 builder: (context, ref, child) {
                   final allMovie = ref.watch(MovieDetailsController.movieDetailsProvider);
 
                   return allMovie.when(
-                    data: (movies) => _CustomMovieGrid(movies: movies),
+                    data: (movies) {
+                      // লোকালি ফিল্টার
+                      final filtered = (_selectedGenreId == null || _selectedGenreId!.isEmpty)
+                          ? movies
+                          : movies.where((m) => m!.movieGenreId?.toString() == _selectedGenreId).toList();
+
+                      return _CustomMovieGrid(movies: filtered);
+                    },
                     loading: () => const Center(child: CircularProgressIndicator()),
                     error: (e, _) => Text("Error: $e"),
                   );
                 },
-              ), // <-- Add this custom widget
-              SizedBox(height: 16.h), // Add some spacing
-              // Footer section if needed
-              // PaginationExample(), // Uncomment if you have pagination
-              FooterSection(), // Uncomment if you have a footer section
+              ),
+
+              SizedBox(height: 16.h),
+              FooterSection(),
             ],
           ),
         ),
@@ -64,7 +83,6 @@ class AllMoviesScreen extends StatelessWidget {
     );
   }
 }
-
 // --------------------------- Custom Codebase ---------------------------
 
 /// A StatefulWidget that builds the filter section with dropdowns.

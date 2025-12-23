@@ -49,28 +49,30 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'] ?? 0,
-      usertype: json['usertype'] ?? '',
-      loginStatus: json['login_status'] ?? 0,
-      googleId: json['google_id'],
-      facebookId: json['facebook_id'],
-      name: json['name'] ?? '',
-      email: json['email'] ?? '',
-      password: json['password'] ?? '',
-      phone: json['phone'],
-      userAddress: json['user_address'],
-      userImage: json['user_image']??"https://static.vecteezy.com/system/resources/previews/036/594/092/original/man-empty-avatar-photo-placeholder-for-social-networks-resumes-forums-and-dating-sites-male-and-female-no-photo-images-for-unfilled-user-profile-free-vector.jpg",
-      status: json['status'] ?? 0,
-      planId: json['plan_id'] ?? 0,
-      startDate: json['start_date'],
-      expDate: json['exp_date'],
-      planAmount: json['plan_amount'] ?? '0',
-      confirmationCode: json['confirmation_code'],
-      rememberToken: json['remember_token'],
-      sessionId: json['session_id'],
-      createdAt: json['created_at'] ?? '',
-      updatedAt: json['updated_at'] ?? '',
-      deletedAt: json['deleted_at'],
+      id: (json['id'] is int) ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
+      usertype: json['usertype']?.toString() ?? '',
+      loginStatus: (json['login_status'] is int) ? json['login_status'] : int.tryParse(json['login_status'].toString()) ?? 0,
+      googleId: json['google_id']?.toString(),
+      facebookId: json['facebook_id']?.toString(),
+      name: json['name']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
+      password: json['password']?.toString() ?? '',
+      phone: json['phone']?.toString(), // ✅ int আসলেও String হয়ে যাবে
+      userAddress: json['user_address']?.toString(),
+      userImage: json['user_image']?.toString().isNotEmpty == true
+          ? json['user_image'].toString()
+          : "https://static.vecteezy.com/system/resources/previews/036/594/092/original/man-empty-avatar-photo-placeholder-for-social-networks-resumes-forums-and-dating-sites-male-and-female-no-photo-images-for-unfilled-user-profile-free-vector.jpg",
+      status: (json['status'] is int) ? json['status'] : int.tryParse(json['status'].toString()) ?? 0,
+      planId: (json['plan_id'] is int) ? json['plan_id'] : int.tryParse(json['plan_id'].toString()) ?? 0,
+      startDate: json['start_date']?.toString(),
+      expDate: json['exp_date']?.toString(),
+      planAmount: json['plan_amount']?.toString() ?? '0', // ✅ এখানে fix
+      confirmationCode: json['confirmation_code']?.toString(),
+      rememberToken: json['remember_token']?.toString(),
+      sessionId: json['session_id']?.toString(),
+      createdAt: json['created_at']?.toString() ?? '',
+      updatedAt: json['updated_at']?.toString() ?? '',
+      deletedAt: json['deleted_at']?.toString(),
     );
   }
 }
@@ -86,7 +88,7 @@ class ProfileResponse {
 
   factory ProfileResponse.fromJson(Map<String, dynamic> json) {
     return ProfileResponse(
-      status: json['status'] ?? '',
+      status: json['status']?.toString() ?? '',
       user: UserModel.fromJson(json['user']),
     );
   }
