@@ -429,16 +429,6 @@ class DetailsImage extends ConsumerWidget {
         required String? videoUrl,     // প্লে লিংক
         required String videoSlug,     // PPV API hit-এর জন্য
       }) async {
-    // 🔐 Login check
-    final loggedIn = await AuthHelper.isLoggedIn();
-    if (!loggedIn) {
-      if (context.mounted) context.push(LoginScreen.routeName);
-      return;
-    }
-
-    final user = ref.read(userProvider);
-    final bool hasSub = hasPremium(user); // ✅ তোমার আগের ফাংশন
-
     // 🎬 helper: play or show error
     Future<void> _play(String? url) async {
       if (url != null && url.trim().isNotEmpty) {
@@ -480,7 +470,29 @@ class DetailsImage extends ConsumerWidget {
     //        MAIN LOGIC
     // =========================
 
-    // 1) Subscription আছে → সব ভিডিও প্লে (PPV-তেও কোনো অতিরিক্ত চেক না)
+    // 🔐 Check if user is logged in
+    final loggedIn = await AuthHelper.isLoggedIn();
+    
+    // 1) Check if content is FREE first
+    final bool isFreeContent = checkPaid.toLowerCase() == 'free' || checkPaid.trim().isEmpty;
+    
+    // 2) If FREE content and NOT PPV → Allow playback without login (with ads for non-logged users)
+    if (isFreeContent && !isPpv) {
+      await _play(videoUrl);
+      return;
+    }
+
+    // 3) For PAID or PPV content → Login is required
+    if (!loggedIn) {
+      if (context.mounted) context.push(LoginScreen.routeName);
+      return;
+    }
+
+    // User is logged in, get user info
+    final user = ref.read(userProvider);
+    final bool hasSub = hasPremium(user);
+
+    // 4) Subscription আছে → সব ভিডিও প্লে (PPV-তেও কোনো অতিরিক্ত চেক না)
     if (hasSub) {
       await _play(videoUrl);
       return;
