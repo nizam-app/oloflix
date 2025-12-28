@@ -38,7 +38,6 @@ class HomeScreen extends ConsumerWidget {
               MovieSlider(),
               PPVNoticeSection(),
               PromosionSlider(),
-
               // PPV Movies
               CustomCategoryName(
                 context: context,
@@ -51,7 +50,6 @@ class HomeScreen extends ConsumerWidget {
                 loading: () => const CircularProgressIndicator(),
                 error: (e, _) => Text("Error: $e"),
               ),
-
               // Nollywood Movies
               CustomCategoryName(
                 context: context,

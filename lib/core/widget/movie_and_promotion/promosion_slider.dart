@@ -16,7 +16,7 @@ class PromosionSlider extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final adsAsync = ref.watch(adsProvider);
     final currentIndex = ref.watch(adsSliderIndexProvider);
-
+//update
     return Padding(
       padding: EdgeInsets.all(10.r),
       child: Column(
