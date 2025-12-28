@@ -27,6 +27,7 @@ import 'package:Oloflix/features/ppv/screen/ppv_screen.dart';
 import 'package:Oloflix/features/pricing_refunds/screen/pricing_refunds_screen.dart';
 import 'package:Oloflix/features/privacy_policy/screen/privacy_policy_screen.dart';
 import 'package:Oloflix/features/profile/screen/profile_screen.dart';
+import 'package:Oloflix/features/Notification/screen/notification_screen.dart';
 import 'package:Oloflix/features/subscription/screen/subscription_plan_screen.dart';
 import 'package:Oloflix/features/terms_of/screen/terms_of_use_screen.dart';
 import 'package:Oloflix/features/tv_shows/screen/tv_shows_screen.dart';
@@ -110,8 +111,11 @@ final GoRouter router = GoRouter(
           name: "ppv_screen",
           builder: (context, state) => const PpvScreen(),
         ),
-
-
+        GoRoute(
+          path: NotificationScreen.routeName,
+          name: "notification_screen",
+          builder: (context, state) => const NotificationScreen(),
+        ),
         GoRoute(
           path: LiveScreen.routeName,
           name: "live_screen",
