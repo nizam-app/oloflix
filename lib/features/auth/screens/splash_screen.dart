@@ -28,7 +28,8 @@ class _SplashScreenState extends State<SplashScreen> {
     Future.delayed(const Duration(seconds: 3), () {
      if (email != null && token != null ) { context.go(HomeScreen.routeName); }
      else{
-       context.go(LoginScreen.routeName);
+       context.go(HomeScreen.routeName);
+      // context.go(LoginScreen.routeName);
      }
      // GoRouter navigation
     });

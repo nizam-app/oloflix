@@ -38,7 +38,9 @@ class PromosionSlider extends ConsumerWidget {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(5.r),
                     child: Image.asset("assets/images/promotion.jpg",
-                        fit: BoxFit.cover, width: double.infinity),
+                        fit: BoxFit.cover,
+                      width: double.infinity
+                    ),
                   ),
                 );
               }
@@ -68,7 +70,7 @@ class PromosionSlider extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(5.r),
                           child: Image.network(
                             fullImg,
-                            fit: BoxFit.cover,
+                          //  fit: BoxFit.cover,
                             width: double.infinity,
                             errorBuilder: (_, __, ___) => Container(
                               color: Colors.black12,
@@ -88,7 +90,7 @@ class PromosionSlider extends ConsumerWidget {
                       );
                     },
                     options: CarouselOptions(
-                      height: 100.h,
+                       height: 120.h,
                       autoPlay: true,
                       autoPlayInterval: const Duration(seconds: 5),
                       enlargeCenterPage: false,
