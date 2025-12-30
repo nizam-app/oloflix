@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
-import 'dart:async';
-import 'package:Oloflix/features/profile/logic/login_check.dart';
-import 'package:Oloflix/features/video_show/data/player_ads_data.dart';
-import 'package:Oloflix/features/video_show/model/player_ads_model.dart';
-import 'package:Oloflix/features/video_show/widgets/ad_player_overlay.dart';
-
 class FullScreenPlayer extends StatefulWidget {
   const FullScreenPlayer({super.key, required this.controller});
   final VideoPlayerController controller;
@@ -17,13 +11,6 @@ class FullScreenPlayer extends StatefulWidget {
 
 class _FullScreenPlayerState extends State<FullScreenPlayer> {
   bool _showControls = true;
-  bool _isLoggedIn = false;
-  PlayerAdsResponse? _adsResponse;
-  List<AdItem> _pendingAds = [];
-  Set<int> _shownAdIndexes = {};
-  bool _isShowingAd = false;
-  Timer? _adCheckTimer;
-  Duration? _pausedPosition;
 
   @override
   void initState() {
@@ -33,108 +20,10 @@ class _FullScreenPlayerState extends State<FullScreenPlayer> {
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
-    
-    _checkAuthAndLoadAds();
-    _startAdCheckTimer();
-  }
-
-  /// Check if user is logged in and load ads if not
-  Future<void> _checkAuthAndLoadAds() async {
-    _isLoggedIn = await AuthHelper.isLoggedIn();
-    
-    if (!_isLoggedIn) {
-      // User is not logged in, fetch ads
-      _adsResponse = await PlayerAdsService.fetchPlayerAds();
-      
-      if (_adsResponse != null && _adsResponse!.showAds) {
-        setState(() {
-          _pendingAds = List.from(_adsResponse!.ads);
-        });
-      }
-    }
-  }
-
-  /// Start timer to check if it's time to show an ad
-  void _startAdCheckTimer() {
-    _adCheckTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
-      if (!_isShowingAd && !_isLoggedIn && _pendingAds.isNotEmpty) {
-        _checkAndShowAd();
-      }
-    });
-  }
-
-  /// Check current video position and show ad if needed
-  void _checkAndShowAd() {
-    if (_isShowingAd || widget.controller.value.position == Duration.zero) {
-      return;
-    }
-
-    final currentSeconds = widget.controller.value.position.inSeconds;
-
-    for (int i = 0; i < _pendingAds.length; i++) {
-      if (_shownAdIndexes.contains(i)) continue;
-
-      final ad = _pendingAds[i];
-      final adTriggerTime = ad.timestartInSeconds;
-
-      // Show ad if we've reached or passed the trigger time
-      if (currentSeconds >= adTriggerTime && currentSeconds < adTriggerTime + 2) {
-        _showAd(ad, i);
-        break;
-      }
-    }
-  }
-
-  /// Show the ad overlay
-  void _showAd(AdItem ad, int adIndex) async {
-    if (_isShowingAd) return;
-
-    setState(() {
-      _isShowingAd = true;
-      _shownAdIndexes.add(adIndex);
-    });
-
-    // Pause the main video
-    _pausedPosition = widget.controller.value.position;
-    await widget.controller.pause();
-
-    if (!mounted) return;
-
-    // Show ad overlay
-    await Navigator.of(context).push(
-      PageRouteBuilder(
-        opaque: true,
-        pageBuilder: (context, _, __) => AdPlayerOverlay(
-          adUrl: ad.source,
-          onAdComplete: () {
-            Navigator.of(context).pop();
-          },
-          onAdSkipped: () {
-            Navigator.of(context).pop();
-          },
-        ),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-      ),
-    );
-
-    // Resume main video after ad
-    if (mounted) {
-      setState(() {
-        _isShowingAd = false;
-      });
-      
-      if (_pausedPosition != null) {
-        await widget.controller.seekTo(_pausedPosition!);
-      }
-      await widget.controller.play();
-    }
   }
 
   @override
   void dispose() {
-    _adCheckTimer?.cancel();
     // 👉 Back to portrait when exit
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -167,11 +56,7 @@ class _FullScreenPlayerState extends State<FullScreenPlayer> {
       child: Scaffold(
         backgroundColor: Colors.black,
         body: GestureDetector(
-          onTap: () {
-            if (!_isShowingAd) {
-              setState(() => _showControls = !_showControls);
-            }
-          },
+          onTap: () => setState(() => _showControls = !_showControls),
           child: Stack(
             children: [
               // 🎬 Video

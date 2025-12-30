@@ -17,9 +17,11 @@ final adsRepoProvider = Provider<AdsRepository>((ref) {
 
 final adsProvider = FutureProvider<List<AdModel>>((ref) async {
   final prefs = await SharedPreferences.getInstance();
-  final token = prefs.getString('token'); // null হতে পারে
-  
-  // token থাকুক বা না থাকুক, ads fetch করবে (public access)
+  final token = prefs.getString('token') ?? '';
+  if (token.isEmpty) {
+    // token না থাকলে empty list দেই (চাইলে throw করতে পারো)
+    return <AdModel>[];
+  }
   return ref.read(adsRepoProvider).fetchAds(token: token);
 });
 
