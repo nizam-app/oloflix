@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "872422278804",
+    "project_id": "oloflix-304db",
+    "storage_bucket": "oloflix-304db.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:872422278804:android:96f68004c30c075ef51681",
+        "android_client_info": {
+          "package_name": "Oloflix.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlebbAwzKSIW7h5J4W7VT6UJZA8S-NQb8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

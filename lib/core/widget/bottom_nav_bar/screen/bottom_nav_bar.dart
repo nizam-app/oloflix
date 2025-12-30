@@ -13,6 +13,7 @@ import 'package:Oloflix/core/constants/color_control/all_color.dart';
 import 'package:Oloflix/core/widget/bottom_nav_bar/controller/bottom_controller.dart';
 import 'package:Oloflix/features/home/screens/home_screen.dart';
 import 'package:Oloflix/features/live/screen/live_screen.dart';
+import 'package:Oloflix/features/notifications/screen/notifications_screen.dart';
 import 'package:Oloflix/features/ppv/screen/ppv_screen.dart';
 import 'package:Oloflix/features/profile/screen/profile_screen.dart';
 import 'package:Oloflix/features/Notification/screen/notification_screen.dart';
@@ -32,10 +33,17 @@ class _BottomNavBarState extends ConsumerState<BottomNavBar> {
   final GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
 
   int _indexFromLocation(String loc) {
+<<<<<<< HEAD
+    // location দিয়ে active tab নির্ধারণ
+    if (loc.startsWith(ProfileScreen.routeName)) return 4;
+    if (loc.startsWith(LiveScreen.routeName)) return 3;
+    if (loc.startsWith(NotificationsScreen.routeName)) return 2;
+=======
     // location দিয়ে active tab নির্ধারণ
     if (loc.startsWith(ProfileScreen.routeName)) return 4;
     if (loc.startsWith(LiveScreen.routeName)) return 3;
     if (loc.startsWith(NotificationScreen.routeName)) return 2;
+>>>>>>> dfb80205fcb95e4d7e62a93b9de165653822ef7e
     if (loc.startsWith(PpvScreen.routeName)) return 1;
     return 0; // default -> Home
   }
@@ -45,7 +53,11 @@ class _BottomNavBarState extends ConsumerState<BottomNavBar> {
       case 1:
         return PpvScreen.routeName;
       case 2:
+<<<<<<< HEAD
+        return NotificationsScreen.routeName;
+=======
         return NotificationScreen.routeName;
+>>>>>>> dfb80205fcb95e4d7e62a93b9de165653822ef7e
       case 3:
         return LiveScreen.routeName;
       case 4:
@@ -80,7 +92,11 @@ class _BottomNavBarState extends ConsumerState<BottomNavBar> {
   }
 
   Future<void> _onTap(BuildContext context, int index) async {
+<<<<<<< HEAD
+    // Live tab guard (index updated from 2 to 3)
+=======
     // Live tab guard (shifted to index 3)
+>>>>>>> dfb80205fcb95e4d7e62a93b9de165653822ef7e
     if (index == 3) {
       final premium = hasPremium(ref);
       if (!premium) {
@@ -97,7 +113,11 @@ class _BottomNavBarState extends ConsumerState<BottomNavBar> {
       }
     }
 
+<<<<<<< HEAD
+    // Account tab guard (index updated from 3 to 4)
+=======
     // Account tab guard (shifted to index 4)
+>>>>>>> dfb80205fcb95e4d7e62a93b9de165653822ef7e
     if (index == 4) {
       final loggedIn = await AuthHelper.isLoggedIn();
       if (!loggedIn) {
@@ -131,7 +151,11 @@ class _BottomNavBarState extends ConsumerState<BottomNavBar> {
         items: <Widget>[
           _navItem(FontAwesomeIcons.homeUser, "Home", selectedIndex == 0),
           _navItem(FontAwesomeIcons.eye, "PPV", selectedIndex == 1),
+<<<<<<< HEAD
+          _navItem(Icons.notifications, "Notify", selectedIndex == 2),
+=======
           _navItem(Icons.notifications_outlined, "Notify", selectedIndex == 2),
+>>>>>>> dfb80205fcb95e4d7e62a93b9de165653822ef7e
           _navItem(Icons.live_tv, "Live", selectedIndex == 3),
           _navItem(CupertinoIcons.profile_circled, "Account", selectedIndex == 4),
         ],
