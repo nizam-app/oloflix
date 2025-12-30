@@ -54,6 +54,8 @@ dependencies:
   in_app_purchase: ^3.2.3
   webview_flutter: ^4.13.0
   in_app_purchase_storekit: ^0.4.4
+  firebase_core: ^4.3.0
+  firebase_messaging: ^16.1.0
 
 
 
