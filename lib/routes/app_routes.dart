@@ -113,15 +113,11 @@ final GoRouter router = GoRouter(
           builder: (context, state) => const PpvScreen(),
         ),
         GoRoute(
-<<<<<<< HEAD
+
           path: NotificationsScreen.routeName,
           name: "notifications_screen",
           builder: (context, state) => const NotificationsScreen(),
-=======
-          path: NotificationScreen.routeName,
-          name: "notification_screen",
-          builder: (context, state) => const NotificationScreen(),
->>>>>>> dfb80205fcb95e4d7e62a93b9de165653822ef7e
+
         ),
         GoRoute(
           path: LiveScreen.routeName,
