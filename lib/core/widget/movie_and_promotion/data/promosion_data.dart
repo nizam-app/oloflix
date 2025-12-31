@@ -15,19 +15,13 @@ class AdsRepository {
     return '$baseUrl$path';
   }
 
-  Future<List<AdModel>> fetchAds({String? token}) async {
-    final headers = {
-      'Accept': 'application/json',
-    };
-    
-    // Add authorization only if token is provided
-    if (token != null && token.isNotEmpty) {
-      headers['Authorization'] = 'Bearer $token';
-    }
-    
+  Future<List<AdModel>> fetchAds({required String token}) async {
     final res = await http.get(
       Uri.parse(endpoint),
-      headers: headers,
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
     );
     if (res.statusCode != 200) {
       throw Exception('Ads fetch failed: ${res.statusCode} ${res.body}');

@@ -4,142 +4,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
-import 'dart:async';
-import 'package:Oloflix/features/profile/logic/login_check.dart';
-import 'package:Oloflix/features/video_show/data/player_ads_data.dart';
-import 'package:Oloflix/features/video_show/model/player_ads_model.dart';
-import 'package:Oloflix/features/video_show/widgets/ad_player_overlay.dart';
 
 import 'logic/video_controler.dart';
 
-class VideoShowScreen extends ConsumerStatefulWidget {
+class VideoShowScreen extends ConsumerWidget {
   final String videoUrl;
   const VideoShowScreen({super.key, required this.videoUrl});
   static const String routeName = '/videoShowScreen';
-
-  @override
-  ConsumerState<VideoShowScreen> createState() => _VideoShowScreenState();
-}
-
-class _VideoShowScreenState extends ConsumerState<VideoShowScreen> {
-  bool _isLoggedIn = false;
-  PlayerAdsResponse? _adsResponse;
-  List<AdItem> _pendingAds = [];
-  Set<int> _shownAdIndexes = {};
-  bool _isShowingAd = false;
-  Timer? _adCheckTimer;
-  Duration? _pausedPosition;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkAuthAndLoadAds();
-    _startAdCheckTimer();
-  }
-
-  @override
-  void dispose() {
-    _adCheckTimer?.cancel();
-    super.dispose();
-  }
-
-  /// Check if user is logged in and load ads if not
-  Future<void> _checkAuthAndLoadAds() async {
-    _isLoggedIn = await AuthHelper.isLoggedIn();
-    
-    if (!_isLoggedIn) {
-      // User is not logged in, fetch ads
-      _adsResponse = await PlayerAdsService.fetchPlayerAds();
-      
-      if (_adsResponse != null && _adsResponse!.showAds) {
-        if (mounted) {
-          setState(() {
-            _pendingAds = List.from(_adsResponse!.ads);
-          });
-        }
-      }
-    }
-  }
-
-  /// Start timer to check if it's time to show an ad
-  void _startAdCheckTimer() {
-    _adCheckTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
-      if (!_isShowingAd && !_isLoggedIn && _pendingAds.isNotEmpty && mounted) {
-        _checkAndShowAd();
-      }
-    });
-  }
-
-  /// Check current video position and show ad if needed
-  void _checkAndShowAd() {
-    final videoAsync = ref.read(videoPlayerControllerProvider(widget.videoUrl));
-    final controller = videoAsync.asData?.value;
-    
-    if (controller == null || !controller.value.isInitialized) return;
-    if (_isShowingAd || controller.value.position == Duration.zero) return;
-
-    final currentSeconds = controller.value.position.inSeconds;
-
-    for (int i = 0; i < _pendingAds.length; i++) {
-      if (_shownAdIndexes.contains(i)) continue;
-
-      final ad = _pendingAds[i];
-      final adTriggerTime = ad.timestartInSeconds;
-
-      // Show ad if we've reached or passed the trigger time
-      if (currentSeconds >= adTriggerTime && currentSeconds < adTriggerTime + 2) {
-        _showAd(ad, i, controller);
-        break;
-      }
-    }
-  }
-
-  /// Show the ad overlay
-  void _showAd(AdItem ad, int adIndex, VideoPlayerController controller) async {
-    if (_isShowingAd) return;
-
-    setState(() {
-      _isShowingAd = true;
-      _shownAdIndexes.add(adIndex);
-    });
-
-    // Pause the main video
-    _pausedPosition = controller.value.position;
-    await controller.pause();
-
-    if (!mounted) return;
-
-    // Show ad overlay
-    await Navigator.of(context).push(
-      PageRouteBuilder(
-        opaque: true,
-        pageBuilder: (context, _, __) => AdPlayerOverlay(
-          adUrl: ad.source,
-          onAdComplete: () {
-            Navigator.of(context).pop();
-          },
-          onAdSkipped: () {
-            Navigator.of(context).pop();
-          },
-        ),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-      ),
-    );
-
-    // Resume main video after ad
-    if (mounted) {
-      setState(() {
-        _isShowingAd = false;
-      });
-      
-      if (_pausedPosition != null) {
-        await controller.seekTo(_pausedPosition!);
-      }
-      await controller.play();
-    }
-  }
 
   String formatDuration(Duration position) {
     String twoDigits(int n) => n.toString().padLeft(2, "0");
@@ -154,9 +25,9 @@ class _VideoShowScreenState extends ConsumerState<VideoShowScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    final videoAsync = ref.watch(videoPlayerControllerProvider(widget.videoUrl));
-    final position = ref.watch(videoPositionProvider(widget.videoUrl)); // ⏱️ real-time
+  Widget build(BuildContext context, WidgetRef ref) {
+    final videoAsync = ref.watch(videoPlayerControllerProvider(videoUrl));
+    final position = ref.watch(videoPositionProvider(videoUrl)); // ⏱️ real-time
 
     return WillPopScope(
       onWillPop: () async {
