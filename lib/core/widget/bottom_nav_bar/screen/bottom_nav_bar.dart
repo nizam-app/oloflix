@@ -13,7 +13,6 @@ import 'package:Oloflix/core/constants/color_control/all_color.dart';
 import 'package:Oloflix/core/widget/bottom_nav_bar/controller/bottom_controller.dart';
 import 'package:Oloflix/features/home/screens/home_screen.dart';
 import 'package:Oloflix/features/live/screen/live_screen.dart';
-import 'package:Oloflix/features/notifications/screen/notifications_screen.dart';
 import 'package:Oloflix/features/ppv/screen/ppv_screen.dart';
 import 'package:Oloflix/features/profile/screen/profile_screen.dart';
 import 'package:Oloflix/features/Notification/screen/notification_screen.dart';
@@ -47,7 +46,7 @@ class _BottomNavBarState extends ConsumerState<BottomNavBar> {
       case 1:
         return PpvScreen.routeName;
       case 2:
-        return NotificationsScreen.routeName;
+        return NotificationScreen.routeName;
       case 3:
         return LiveScreen.routeName;
       case 4:
