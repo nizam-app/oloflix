@@ -32,6 +32,7 @@ class PromosionSlider extends ConsumerWidget {
             ),
             data: (ads) {
               if (ads.isEmpty) {
+                print("⚠️ No promotion ads available, showing fallback image");
                 // টোকেন নাই/ডেটা নাই হলে fallback (ইচ্ছা হলে hide করতে পারো)
                 return SizedBox(
                   height: 110.h,
@@ -39,7 +40,17 @@ class PromosionSlider extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(5.r),
                     child: Image.asset("assets/images/promotion.jpg",
                         fit: BoxFit.cover,
-                      width: double.infinity
+                      width: double.infinity,
+                      errorBuilder: (context, error, stackTrace) {
+                        print("❌ Failed to load fallback promotion image");
+                        return Container(
+                          color: Colors.grey[800],
+                          child: Center(
+                            child: Text("No promotions available",
+                              style: TextStyle(color: Colors.white70)),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 );

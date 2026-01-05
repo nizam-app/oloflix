@@ -6,15 +6,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 class MovieDetailsController {
   static final movieDetailsProvider = FutureProvider<List<MovieDetailsModel>>((ref) async {
     try {
+      print("🎬 Fetching all movies from: ${SliderApi.sliderMovie}");
       final data = await GlobalGetDataFrame.getDataFrame<MovieDetailsModel>(
         "${SliderApi.sliderMovie}",
         key: "movies",
         fromJson: (map) => MovieDetailsModel.fromJson(map),
       );
-
+      print("✅ Movies loaded successfully: ${data.length} items");
       return data;
     } catch (e) {
-      print("Error fetching movies: $e");
+      print("❌ Error fetching movies: $e");
       return [];
     }
   });
@@ -22,14 +23,17 @@ class MovieDetailsController {
 
 
   static final movieByIdProvider = FutureProvider.family<MovieDetailsModel?,int>((ref, int id) async {
-    final movies = await ref.watch(movieDetailsProvider.future); // future থেকে data আনুন
-                 print("Fetching movie by: ${movies.length}");
+    print("🔍 Fetching movie by ID: $id");
+    final movies = await ref.watch(movieDetailsProvider.future);
+    print("   Total movies available: ${movies.length}");
+    
     try {
       final movie = movies.firstWhere((m) => m.id == id);
-      print(movie.id);
+      print("✅ Movie found: ${movie.videoTitle}");
+      print("   Video URL: ${movie.videoUrl}");
       return movie;
     } catch (e) {
-      print("Error fetching movie by id: $e");
+      print("❌ Error: Movie with ID $id not found");
       return null;
     }
   });
