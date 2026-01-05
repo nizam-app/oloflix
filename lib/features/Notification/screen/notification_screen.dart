@@ -324,60 +324,60 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   ),
 
                 // ✅ DEV TEST BUTTONS
-                SizedBox(height: 16.h),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () => FcmTokenService.pushTest(),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AllColor.orange,
-                              ),
-                              child: const Text("Test Push"),
-                            ),
-                          ),
-                          SizedBox(width: 12.w),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () {
-                                if (_authToken.isEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Please login first'),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                  return;
-                                }
-                                FcmTokenService.pushUser(authToken: _authToken);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AllColor.orange,
-                              ),
-                              child: const Text("User Push"),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 12.h),
-                      ElevatedButton.icon(
-                        onPressed: _refreshNotifications,
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Refresh Notifications'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          minimumSize: Size(double.infinity, 40.h),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                 SizedBox(height: 400.h),
+                // Padding(
+                //   padding: EdgeInsets.symmetric(horizontal: 16.w),
+                //   child: Column(
+                //     children: [
+                //       Row(
+                //         children: [
+                //           Expanded(
+                //             child: ElevatedButton(
+                //               onPressed: () => FcmTokenService.pushTest(),
+                //               style: ElevatedButton.styleFrom(
+                //                 backgroundColor: AllColor.orange,
+                //               ),
+                //               child: const Text("Test Push"),
+                //             ),
+                //           ),
+                //           SizedBox(width: 12.w),
+                //           Expanded(
+                //             child: ElevatedButton(
+                //               onPressed: () {
+                //                 if (_authToken.isEmpty) {
+                //                   ScaffoldMessenger.of(context).showSnackBar(
+                //                     const SnackBar(
+                //                       content: Text('Please login first'),
+                //                       backgroundColor: Colors.red,
+                //                     ),
+                //                   );
+                //                   return;
+                //                 }
+                //                 FcmTokenService.pushUser(authToken: _authToken);
+                //               },
+                //               style: ElevatedButton.styleFrom(
+                //                 backgroundColor: AllColor.orange,
+                //               ),
+                //               child: const Text("User Push"),
+                //             ),
+                //           ),
+                //         ],
+                //       ),
+                //       SizedBox(height: 12.h),
+                //       // ElevatedButton.icon(
+                //       //   onPressed: _refreshNotifications,
+                //       //   icon: const Icon(Icons.refresh),
+                //       //   label: const Text('Refresh Notifications'),
+                //       //   style: ElevatedButton.styleFrom(
+                //       //     backgroundColor: Colors.green,
+                //       //     minimumSize: Size(double.infinity, 40.h),
+                //       //   ),
+                //       // ),
+                //     ],
+                //   ),
+                // ),
 
-                SizedBox(height: 60.h),
+
                 FooterSection(),
               ],
             ),
