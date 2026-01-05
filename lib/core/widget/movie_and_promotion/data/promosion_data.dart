@@ -15,19 +15,42 @@ class AdsRepository {
     return '$baseUrl$path';
   }
 
-  Future<List<AdModel>> fetchAds({required String token}) async {
+  Future<List<AdModel>> fetchAds({String? token}) async {
+    print("📡 Fetching ads from: $endpoint");
+    
+    // Prepare headers
+    final headers = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    };
+    
+    // Add authorization if token is provided
+    if (token != null && token.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $token';
+      print("🔑 Using authentication token");
+    } else {
+      print("🔓 Fetching without authentication");
+    }
+    
     final res = await http.get(
       Uri.parse(endpoint),
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
+      headers: headers,
     );
+    
+    print("📥 Response status: ${res.statusCode}");
+    
     if (res.statusCode != 200) {
+      print("❌ Failed: ${res.body}");
       throw Exception('Ads fetch failed: ${res.statusCode} ${res.body}');
     }
+    
+    print("📄 Response body: ${res.body}");
+    
     final data = jsonDecode(res.body) as Map<String, dynamic>;
     final parsed = AdsResponse.fromJson(data);
+    
+    print("✅ Parsed ${parsed.ads.length} ads successfully");
+    
     return parsed.ads;
   }
 }

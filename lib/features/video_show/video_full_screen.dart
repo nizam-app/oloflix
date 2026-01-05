@@ -1,16 +1,38 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
-class FullScreenPlayer extends StatefulWidget {
-  const FullScreenPlayer({super.key, required this.controller});
+import 'logic/player_ads_provider.dart';
+import 'models/player_ads_model.dart';
+
+class FullScreenPlayer extends ConsumerStatefulWidget {
+  const FullScreenPlayer({
+    super.key, 
+    required this.controller,
+    this.videoUrl,
+  });
   final VideoPlayerController controller;
+  final String? videoUrl;
 
   @override
-  State<FullScreenPlayer> createState() => _FullScreenPlayerState();
+  ConsumerState<FullScreenPlayer> createState() => _FullScreenPlayerState();
 }
 
-class _FullScreenPlayerState extends State<FullScreenPlayer> {
+class _FullScreenPlayerState extends ConsumerState<FullScreenPlayer> {
   bool _showControls = true;
+  
+  // Ad system variables
+  VideoPlayerController? _adController;
+  bool _isPlayingAd = false;
+  bool _isLoggedIn = false;
+  PlayerAdsResponse? _adsResponse;
+  Set<int> _playedAds = {};
+  bool _canSkipAd = false;
+  int _currentAdIndex = -1;
+  Timer? _skipCountdownTimer;
+  int _skipCountdown = 5;
 
   @override
   void initState() {
@@ -20,6 +42,11 @@ class _FullScreenPlayerState extends State<FullScreenPlayer> {
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
+    
+    // Initialize ad system
+    _checkLoginStatus();
+    _initializeAds();
+    _setupAdListener();
   }
 
   @override
@@ -28,7 +55,211 @@ class _FullScreenPlayerState extends State<FullScreenPlayer> {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
+    _adController?.dispose();
+    _skipCountdownTimer?.cancel();
     super.dispose();
+  }
+  
+  Future<void> _checkLoginStatus() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+      setState(() {
+        _isLoggedIn = token.isNotEmpty;
+      });
+      print('🔐 Fullscreen - Login status: ${_isLoggedIn ? "Logged In" : "Guest"}');
+      
+      if (_isLoggedIn) {
+        print('✅ User logged in - Ads DISABLED in fullscreen');
+      } else {
+        print('👤 Guest user - Ads ENABLED in fullscreen');
+      }
+    } catch (e) {
+      print('❌ Error checking login status: $e');
+      setState(() {
+        _isLoggedIn = false;
+      });
+    }
+  }
+
+  Future<void> _initializeAds() async {
+    if (_isLoggedIn) {
+      print('🚫 Skipping ad initialization - User is logged in');
+      return;
+    }
+
+    final adsAsync = ref.read(playerAdsProvider);
+    adsAsync.when(
+      data: (adsResponse) {
+        if (adsResponse != null && adsResponse.showAds) {
+          setState(() {
+            _adsResponse = adsResponse;
+          });
+          print('✅ Fullscreen ads initialized: ${adsResponse.ads.length} ads');
+        } else {
+          print('⚠️ No ads to show in fullscreen');
+        }
+      },
+      loading: () => print('🔄 Loading ads for fullscreen...'),
+      error: (e, _) => print('❌ Error loading ads: $e'),
+    );
+  }
+
+  void _setupAdListener() {
+    if (_isLoggedIn) return;
+    
+    widget.controller.addListener(() {
+      if (!mounted || _isLoggedIn || _isPlayingAd) return;
+      
+      final currentPosition = widget.controller.value.position;
+      _checkAndPlayAd(currentPosition);
+    });
+    
+    print('✅ Fullscreen video listener added for ad checks');
+  }
+
+  void _checkAndPlayAd(Duration currentPosition) {
+    if (_isLoggedIn || _isPlayingAd || _adsResponse == null) {
+      return;
+    }
+
+    for (var i = 0; i < _adsResponse!.ads.length; i++) {
+      if (_playedAds.contains(i)) {
+        continue;
+      }
+
+      final ad = _adsResponse!.ads[i];
+      final adTime = ad.timestartDuration;
+
+      if (currentPosition >= adTime &&
+          currentPosition < adTime + const Duration(seconds: 1)) {
+        print('🎬 Fullscreen ad trigger at ${currentPosition.inSeconds}s (target: ${adTime.inSeconds}s)');
+        _playAd(i, ad);
+        break;
+      }
+    }
+  }
+
+  Future<void> _playAd(int adIndex, VideoAd ad) async {
+    print('🎬 Attempting to play ad ${adIndex + 1} in fullscreen at ${ad.timestart}');
+    print('   Source: ${ad.source}');
+
+    if (!ad.isVideoAd) {
+      print('⚠️ Skipping non-video ad (not a video format)');
+      _markAdAsPlayed(adIndex);
+      return;
+    }
+
+    // Validate ad source URL
+    if (ad.source.isEmpty || 
+        (!ad.source.startsWith('http://') && !ad.source.startsWith('https://'))) {
+      print('⚠️ Invalid ad source URL: ${ad.source}');
+      _markAdAsPlayed(adIndex);
+      return;
+    }
+
+    setState(() {
+      _isPlayingAd = true;
+      _canSkipAd = false;
+      _currentAdIndex = adIndex;
+      _skipCountdown = 5;
+    });
+
+    // Start countdown timer
+    _skipCountdownTimer?.cancel();
+    _skipCountdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!_isPlayingAd || _currentAdIndex != adIndex) {
+        timer.cancel();
+        return;
+      }
+
+      setState(() {
+        _skipCountdown--;
+      });
+
+      if (_skipCountdown <= 0) {
+        timer.cancel();
+        setState(() {
+          _canSkipAd = true;
+        });
+        print('⏭️ Skip button enabled for ad ${adIndex + 1}');
+      }
+    });
+
+    // Pause main video
+    print('⏸️ Pausing main video for ad');
+    widget.controller.pause();
+
+    try {
+      print('📥 Loading ad from: ${ad.source}');
+      _adController = VideoPlayerController.network(ad.source);
+      
+      await _adController!.initialize().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          print('⏱️ Ad initialization timed out');
+          throw TimeoutException('Ad loading timeout');
+        },
+      );
+
+      print('✅ Ad initialized successfully');
+      await _adController!.play();
+      print('▶️ Ad playing');
+
+      _adController!.addListener(() {
+        if (_adController != null &&
+            _adController!.value.isInitialized &&
+            _adController!.value.position >= _adController!.value.duration) {
+          print('✅ Ad completed normally');
+          _onAdComplete(adIndex);
+        }
+      });
+    } catch (e) {
+      print('❌ Error playing ad: $e');
+      print('🔄 Resuming main video');
+      _onAdComplete(adIndex);
+    }
+  }
+
+  void _onAdComplete(int adIndex) {
+    print('🏁 Completing ad ${adIndex + 1} in fullscreen');
+    _markAdAsPlayed(adIndex);
+
+    _skipCountdownTimer?.cancel();
+    _skipCountdownTimer = null;
+
+    _adController?.dispose();
+    _adController = null;
+
+    setState(() {
+      _isPlayingAd = false;
+      _canSkipAd = false;
+      _currentAdIndex = -1;
+      _skipCountdown = 5;
+    });
+
+    // Resume main video
+    print('▶️ Resuming main video');
+    if (widget.controller.value.isInitialized) {
+      widget.controller.play();
+      print('✅ Main video resumed');
+    } else {
+      print('⚠️ Warning: Controller not available for resume');
+    }
+  }
+
+  void _skipAd() {
+    if (!_canSkipAd || _currentAdIndex == -1) return;
+    
+    print('⏭️ User skipped ad ${_currentAdIndex + 1} in fullscreen');
+    _onAdComplete(_currentAdIndex);
+  }
+
+  void _markAdAsPlayed(int adIndex) {
+    setState(() {
+      _playedAds.add(adIndex);
+    });
+    print('   Marked ad ${adIndex + 1} as played (${_playedAds.length}/${_adsResponse?.ads.length ?? 0})');
   }
 
   String formatDuration(Duration position) {
@@ -45,21 +276,27 @@ class _FullScreenPlayerState extends State<FullScreenPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    final controller = widget.controller;
+    final controller = _isPlayingAd && _adController != null 
+        ? _adController! 
+        : widget.controller;
 
     return WillPopScope(
       onWillPop: () async {
-        // fullscreen থেকে বের হওয়ার সময়ও থামাও চাইলে:
-        await controller.pause();
+        await widget.controller.pause();
+        _adController?.dispose();
         return true;
       },
       child: Scaffold(
         backgroundColor: Colors.black,
         body: GestureDetector(
-          onTap: () => setState(() => _showControls = !_showControls),
+          onTap: () {
+            if (!_isPlayingAd) {
+              setState(() => _showControls = !_showControls);
+            }
+          },
           child: Stack(
             children: [
-              // 🎬 Video
+              // 🎬 Video (Main or Ad)
               Center(
                 child: AspectRatio(
                   aspectRatio: controller.value.aspectRatio,
@@ -67,7 +304,124 @@ class _FullScreenPlayerState extends State<FullScreenPlayer> {
                 ),
               ),
 
-              if (_showControls) ...[
+              // Ad Label and Skip Button (only during ad)
+              if (_isPlayingAd)
+                Positioned(
+                  top: 30,
+                  right: 30,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      // AD Label
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.yellow.withOpacity(0.9),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: const Text(
+                          'AD',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 10),
+                      
+                      // Skip Button or Countdown
+                      if (_canSkipAd)
+                        ElevatedButton.icon(
+                          onPressed: _skipAd,
+                          icon: const Icon(Icons.skip_next, size: 18),
+                          label: const Text(
+                            'Skip Ad',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white.withOpacity(0.9),
+                            foregroundColor: Colors.black,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            elevation: 4,
+                          ),
+                        )
+                      else
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.6),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            'Skip in ${_skipCountdown}s',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+
+              // Ad Progress Bar (only during ad)
+              if (_isPlayingAd && _adController != null && _adController!.value.isInitialized)
+                Positioned(
+                  bottom: 20,
+                  left: 30,
+                  right: 30,
+                  child: Column(
+                    children: [
+                      VideoProgressIndicator(
+                        _adController!,
+                        allowScrubbing: false,
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        colors: const VideoProgressColors(
+                          playedColor: Colors.yellow,
+                          backgroundColor: Colors.white24,
+                          bufferedColor: Colors.white38,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            formatDuration(_adController!.value.position),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          Text(
+                            formatDuration(_adController!.value.duration),
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+              // Main video controls (only when NOT playing ad)
+              if (_showControls && !_isPlayingAd) ...[
                 // 🔙 Back/Close Button (top-left)
                 Positioned(
                   top: 20,
@@ -87,14 +441,14 @@ class _FullScreenPlayerState extends State<FullScreenPlayer> {
                       IconButton(
                         icon: const Icon(Icons.replay_10, color: Colors.white, size: 40),
                         onPressed: () {
-                          final newPos = controller.value.position - const Duration(seconds: 10);
-                          controller.seekTo(newPos >= Duration.zero ? newPos : Duration.zero);
+                          final newPos = widget.controller.value.position - const Duration(seconds: 10);
+                          widget.controller.seekTo(newPos >= Duration.zero ? newPos : Duration.zero);
                         },
                       ),
 
                       // ▶️ / ⏸️ Play / Pause (reactive)
                       ValueListenableBuilder<VideoPlayerValue>(
-                        valueListenable: controller,
+                        valueListenable: widget.controller,
                         builder: (_, value, __) {
                           final playing = value.isPlaying;
                           return IconButton(
@@ -105,10 +459,10 @@ class _FullScreenPlayerState extends State<FullScreenPlayer> {
                             ),
                             onPressed: () {
                               if (playing) {
-                                controller.pause();
+                                widget.controller.pause();
                               } else {
-                                controller.setVolume(1.0);
-                                controller.play();
+                                widget.controller.setVolume(1.0);
+                                widget.controller.play();
                               }
                             },
                           );
@@ -119,42 +473,51 @@ class _FullScreenPlayerState extends State<FullScreenPlayer> {
                       IconButton(
                         icon: const Icon(Icons.forward_10, color: Colors.white, size: 40),
                         onPressed: () {
-                          final maxPos = controller.value.duration;
-                          final newPos = controller.value.position + const Duration(seconds: 10);
-                          controller.seekTo(newPos <= maxPos ? newPos : maxPos);
+                          final maxPos = widget.controller.value.duration;
+                          final newPos = widget.controller.value.position + const Duration(seconds: 10);
+                          widget.controller.seekTo(newPos <= maxPos ? newPos : maxPos);
                         },
                       ),
                     ],
                   ),
                 ),
 
-                // Timeline + Time
+                // Timeline + Time (Main Video)
                 Positioned(
-                  bottom: 10,
-                  left: 20,
-                  right: 20,
+                  bottom: 20,
+                  left: 30,
+                  right: 30,
                   child: Column(
                     children: [
                       VideoProgressIndicator(
-                        controller,
+                        widget.controller,
                         allowScrubbing: true,
+                        padding: const EdgeInsets.symmetric(vertical: 8),
                         colors: const VideoProgressColors(
                           playedColor: Colors.red,
                           backgroundColor: Colors.grey,
                           bufferedColor: Colors.white30,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 6),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            formatDuration(controller.value.position),
-                            style: const TextStyle(color: Colors.white),
+                            formatDuration(widget.controller.value.position),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                           Text(
-                            formatDuration(controller.value.duration),
-                            style: const TextStyle(color: Colors.white),
+                            formatDuration(widget.controller.value.duration),
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ],
                       ),
@@ -162,6 +525,20 @@ class _FullScreenPlayerState extends State<FullScreenPlayer> {
                   ),
                 ),
               ],
+              
+              // Back button during ad
+              if (_isPlayingAd)
+                Positioned(
+                  top: 20,
+                  left: 20,
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 32),
+                    onPressed: () {
+                      _adController?.dispose();
+                      Navigator.pop(context);
+                    },
+                  ),
+                ),
             ],
           ),
         ),

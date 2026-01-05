@@ -43,6 +43,12 @@ class VideoShowScreen extends ConsumerWidget {
         backgroundColor: Colors.black,
         body: videoAsync.when(
           data: (controller) {
+            if (!controller.value.isInitialized) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            
             return Stack(
               alignment: Alignment.center,
               children: [
@@ -174,9 +180,53 @@ class VideoShowScreen extends ConsumerWidget {
               ],
             );
           },
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                CircularProgressIndicator(color: Colors.orange),
+                SizedBox(height: 20),
+                Text(
+                  "Loading video...",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ],
+            ),
+          ),
           error: (e, _) => Center(
-            child: Text("Error: $e", style: const TextStyle(color: Colors.white)),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.red, size: 60),
+                  const SizedBox(height: 20),
+                  const Text(
+                    "Failed to load video",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    "$e",
+                    style: const TextStyle(color: Colors.white70),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 30),
+                  ElevatedButton.icon(
+                    onPressed: () => context.pop(),
+                    icon: const Icon(Icons.arrow_back),
+                    label: const Text("Go Back"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

@@ -32,7 +32,7 @@ import 'package:Oloflix/features/subscription/screen/subscription_plan_screen.da
 import 'package:Oloflix/features/terms_of/screen/terms_of_use_screen.dart';
 import 'package:Oloflix/features/tv_shows/screen/tv_shows_screen.dart';
 import 'package:Oloflix/features/watchlist/screen/my_watchlist_screen.dart';
-import '../features/video_show/video_show_screen.dart';
+import '../features/video_show/video_show_with_ads_screen.dart';
 
 final GoRouter router = GoRouter(
   initialLocation: SplashScreen.routeName,
@@ -88,11 +88,11 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const ResetPassword(),
     ),
     GoRoute(
-      path: VideoShowScreen.routeName,
-      name: VideoShowScreen.routeName,
+      path: VideoShowWithAdsScreen.routeName,
+      name: VideoShowWithAdsScreen.routeName,
       builder: (context, state) {
         final videoUrl = state.uri.queryParameters['url'];
-        return VideoShowScreen(videoUrl: videoUrl!);
+        return VideoShowWithAdsScreen(videoUrl: videoUrl!);
       },
     ),
 

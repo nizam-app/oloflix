@@ -56,7 +56,15 @@ bool hasText(String? v) =>
     v != null && v.trim().isNotEmpty && v.toLowerCase() != 'null';
 
 void playVideoRoute(BuildContext context, String url) {
-  context.push("${VideoShowScreen.routeName}?url=$url");
+  print("🎬 Playing video with URL: $url");
+  if (url.isEmpty) {
+    print("❌ Cannot play video: URL is empty");
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Video URL is not available")),
+    );
+    return;
+  }
+  context.push("/videoShowScreen?url=$url");
 }
 
 /// --------------------
@@ -429,25 +437,27 @@ class DetailsImage extends ConsumerWidget {
         required String? videoUrl,     // প্লে লিংক
         required String videoSlug,     // PPV API hit-এর জন্য
       }) async {
-    // 🔐 Login check
-    final loggedIn = await AuthHelper.isLoggedIn();
-    if (!loggedIn) {
-      if (context.mounted) context.push(LoginScreen.routeName);
-      return;
-    }
-
-    final user = ref.read(userProvider);
-    final bool hasSub = hasPremium(user); // ✅ তোমার আগের ফাংশন
+    
+    print("🎬 Video Play Button Logic Started");
+    print("   Video Access: $checkPaid");
+    print("   Is PPV: $isPpv");
 
     // 🎬 helper: play or show error
     Future<void> _play(String? url) async {
+      print("🎯 Attempting to play video");
+      print("   URL: $url");
+      
       if (url != null && url.trim().isNotEmpty) {
         playVideoRoute(context, url);
       } else {
+        print("❌ Video URL is null or empty");
         if (context.mounted) {
           ScaffoldMessenger.of(context)
             ..clearSnackBars()
-            ..showSnackBar(const SnackBar(content: Text("Video URL not found")));
+            ..showSnackBar(const SnackBar(
+              content: Text("Video URL not found. Please contact support."),
+              backgroundColor: Colors.red,
+            ));
         }
       }
     }
@@ -480,7 +490,31 @@ class DetailsImage extends ConsumerWidget {
     //        MAIN LOGIC
     // =========================
 
-    // 1) Subscription আছে → সব ভিডিও প্লে (PPV-তেও কোনো অতিরিক্ত চেক না)
+    // STEP 1: Check if video is FREE first (BEFORE login check!)
+    final bool isFree = checkPaid.toLowerCase() == 'free';
+    
+    if (isFree && !isPpv) {
+      print("✅ Free content - Playing without login (with ads)");
+      await _play(videoUrl);
+      return;
+    }
+
+    // STEP 2: For PAID/PPV content, check login
+    print("🔐 Paid/PPV content - Checking login");
+    final loggedIn = await AuthHelper.isLoggedIn();
+    
+    if (!loggedIn) {
+      print("❌ User not logged in - Redirecting to login");
+      if (context.mounted) context.push(LoginScreen.routeName);
+      return;
+    }
+
+    print("✅ User logged in");
+    final user = ref.read(userProvider);
+    final bool hasSub = hasPremium(user);
+    print("   Has Premium: $hasSub");
+
+    // STEP 3: User logged in with subscription -> Play everything
     if (hasSub) {
       await _play(videoUrl);
       return;
@@ -490,8 +524,10 @@ class DetailsImage extends ConsumerWidget {
     if (isPpv) {
       final ok = await _ppvAccessCheck();
       if (ok) {
+        print("✅ PPV access granted - Playing");
         await _play(videoUrl);
       } else {
+        print("❌ PPV access denied - Showing purchase screen");
         if (context.mounted) {
           context.push(
             PPVSubscriptionPlanScreen.routeName,
@@ -511,7 +547,8 @@ class DetailsImage extends ConsumerWidget {
       return;
     }
 
-    // 4) Free কনটেন্ট → প্লে
+    // STEP 6: Fallback - Play anyway
+    print("⚠️ Fallback - Playing video");
     await _play(videoUrl);
   }
 

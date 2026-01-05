@@ -153,18 +153,16 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 
 // Project imports:
 import 'package:Oloflix/core/widget/aboute_fooder.dart';
 import 'package:Oloflix/core/widget/app_drawer.dart';
 import 'package:Oloflix/core/widget/custom_home_topper_section.dart';
 import 'package:Oloflix/core/constants/color_control/all_color.dart';
-
 import 'package:Oloflix/features/Notification/model/notifications_model.dart';
-
-import '../../../core/constants/api_control/token_store.dart';
+import 'package:Oloflix/core/constants/api_control/token_store.dart';
 import '../data/fcm_token_service.dart';
+import '../data/notification_service.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -175,24 +173,15 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-  final List<NotificationsModel> _items = [
-    NotificationsModel(
-      id: 1,
-      icon: Icons.info_outline,
-      title: "Welcome to Oloflix!",
-      message: "Stay tuned for updates and announcements.",
-      time: "Just now",
-    ),
-  ];
-
+  List<NotificationsModel> _items = [];
   String _authToken = "";
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-
     _loadToken();
-    _listenForegroundPush();
+    _loadStoredNotifications();
   }
 
   Future<void> _loadToken() async {
@@ -201,28 +190,93 @@ class _NotificationScreenState extends State<NotificationScreen> {
     print("✅ LOADED TOKEN => ${_authToken.isEmpty ? 'EMPTY' : 'OK'}");
   }
 
-  void _listenForegroundPush() {
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      final title =
-          message.notification?.title ?? message.data['title'] ?? 'Notification';
-      final body =
-          message.notification?.body ?? message.data['body'] ?? '';
+  Future<void> _loadStoredNotifications() async {
+    setState(() => _isLoading = true);
+    
+    try {
+      final stored = await NotificationService.getStoredNotifications();
+      
+      final List<NotificationsModel> notifications = stored.map((item) {
+        return NotificationsModel(
+          id: item['id'] ?? DateTime.now().millisecondsSinceEpoch,
+          icon: item['read'] == true 
+              ? Icons.notifications_outlined 
+              : Icons.notifications_active_outlined,
+          title: item['title'] ?? 'Notification',
+          message: item['body'] ?? '',
+          time: _formatTimestamp(item['timestamp']),
+        );
+      }).toList();
 
-      setState(() {
-        _items.insert(
-          0,
+      // Add welcome notification if no notifications exist
+      if (notifications.isEmpty) {
+        notifications.add(
           NotificationsModel(
-            id: DateTime.now().millisecondsSinceEpoch,
-            icon: Icons.notifications_active_outlined,
-            title: title.toString(),
-            message: body.toString(),
-            time: "Now",
+            id: 1,
+            icon: Icons.info_outline,
+            title: "Welcome to Oloflix!",
+            message: "Stay tuned for updates and announcements.",
+            time: "Just now",
           ),
         );
+      }
+
+      setState(() {
+        _items = notifications;
+        _isLoading = false;
       });
 
-      print("🔔 PUSH RECEIVED => $title | $body");
-    });
+      print("✅ Loaded ${_items.length} notifications from storage");
+    } catch (e) {
+      print("❌ Error loading notifications: $e");
+      setState(() {
+        _items = [
+          NotificationsModel(
+            id: 1,
+            icon: Icons.info_outline,
+            title: "Welcome to Oloflix!",
+            message: "Stay tuned for updates and announcements.",
+            time: "Just now",
+          ),
+        ];
+        _isLoading = false;
+      });
+    }
+  }
+
+  String _formatTimestamp(dynamic timestamp) {
+    if (timestamp == null) return 'Just now';
+    
+    try {
+      final DateTime dateTime = DateTime.parse(timestamp);
+      final Duration difference = DateTime.now().difference(dateTime);
+
+      if (difference.inMinutes < 1) {
+        return 'Just now';
+      } else if (difference.inMinutes < 60) {
+        return '${difference.inMinutes}m ago';
+      } else if (difference.inHours < 24) {
+        return '${difference.inHours}h ago';
+      } else if (difference.inDays < 7) {
+        return '${difference.inDays}d ago';
+      } else {
+        return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+      }
+    } catch (e) {
+      return 'Just now';
+    }
+  }
+
+  Future<void> _refreshNotifications() async {
+    await _loadStoredNotifications();
+  }
+
+  Future<void> _clearAllNotifications() async {
+    await NotificationService.clearAll();
+    await _loadStoredNotifications();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('All notifications cleared')),
+    );
   }
 
   @override
@@ -230,48 +284,103 @@ class _NotificationScreenState extends State<NotificationScreen> {
     return Scaffold(
       endDrawer: AppDrawer(),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CustomHomeTopperSection(),
-              SizedBox(height: 20.h),
-              _buildNotificationHeader(),
-              SizedBox(height: 20.h),
-              _buildNotificationContent(_items),
+        child: RefreshIndicator(
+          onRefresh: _refreshNotifications,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                CustomHomeTopperSection(),
+                SizedBox(height: 20.h),
+                _buildNotificationHeader(),
+                SizedBox(height: 20.h),
 
-              // ✅ DEV TEST (চাইলে রাখো, production এ remove)
-              SizedBox(height: 16.h),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.w),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => FcmTokenService.pushTest(),
-                        child: const Text("Test Push"),
+                // Loading indicator
+                if (_isLoading)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(32.0),
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                else
+                  _buildNotificationContent(_items),
+
+                // Clear all button
+                if (!_isLoading && _items.length > 1)
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+                    child: Center(
+                      child: TextButton.icon(
+                        onPressed: _clearAllNotifications,
+                        icon: const Icon(Icons.clear_all),
+                        label: const Text('Clear All Notifications'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.red,
+                        ),
                       ),
                     ),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          if (_authToken.isEmpty) {
-                            print("❌ authToken empty. login token set kor");
-                            return;
-                          }
-                          FcmTokenService.pushUser(authToken: _authToken);
-                        },
-                        child: const Text("User Push"),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+                  ),
 
-              SizedBox(height: 60.h),
-              FooterSection(),
-            ],
+                // ✅ DEV TEST BUTTONS
+                 SizedBox(height: 400.h),
+                // Padding(
+                //   padding: EdgeInsets.symmetric(horizontal: 16.w),
+                //   child: Column(
+                //     children: [
+                //       Row(
+                //         children: [
+                //           Expanded(
+                //             child: ElevatedButton(
+                //               onPressed: () => FcmTokenService.pushTest(),
+                //               style: ElevatedButton.styleFrom(
+                //                 backgroundColor: AllColor.orange,
+                //               ),
+                //               child: const Text("Test Push"),
+                //             ),
+                //           ),
+                //           SizedBox(width: 12.w),
+                //           Expanded(
+                //             child: ElevatedButton(
+                //               onPressed: () {
+                //                 if (_authToken.isEmpty) {
+                //                   ScaffoldMessenger.of(context).showSnackBar(
+                //                     const SnackBar(
+                //                       content: Text('Please login first'),
+                //                       backgroundColor: Colors.red,
+                //                     ),
+                //                   );
+                //                   return;
+                //                 }
+                //                 FcmTokenService.pushUser(authToken: _authToken);
+                //               },
+                //               style: ElevatedButton.styleFrom(
+                //                 backgroundColor: AllColor.orange,
+                //               ),
+                //               child: const Text("User Push"),
+                //             ),
+                //           ),
+                //         ],
+                //       ),
+                //       SizedBox(height: 12.h),
+                //       // ElevatedButton.icon(
+                //       //   onPressed: _refreshNotifications,
+                //       //   icon: const Icon(Icons.refresh),
+                //       //   label: const Text('Refresh Notifications'),
+                //       //   style: ElevatedButton.styleFrom(
+                //       //     backgroundColor: Colors.green,
+                //       //     minimumSize: Size(double.infinity, 40.h),
+                //       //   ),
+                //       // ),
+                //     ],
+                //   ),
+                // ),
+
+
+                FooterSection(),
+              ],
+            ),
           ),
         ),
       ),
