@@ -24,6 +24,18 @@ class MovieSlider extends ConsumerWidget {
 
     return sliderData.when(
       data: (sliders) {
+        // If no sliders, show a message instead of crashing
+        if (sliders.isEmpty) {
+          return SizedBox(
+            height: 200.h,
+            child: Center(
+              child: Text(
+                "No banners available",
+                style: TextStyle(color: AllColor.white70),
+              ),
+            ),
+          );
+        }
 
         return Column(
           children: [
@@ -40,6 +52,27 @@ class MovieSlider extends ConsumerWidget {
                         fit: BoxFit.cover,
                         width: double.infinity,
                         height: 200.h,
+                        errorBuilder: (context, error, stackTrace) {
+                          print("❌ Failed to load banner image: ${api}${slider.image}");
+                          return Container(
+                            color: Colors.grey[800],
+                            child: Center(
+                              child: Icon(Icons.image_not_supported, 
+                                color: Colors.white54, size: 50),
+                            ),
+                          );
+                        },
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                          );
+                        },
                       ),
                     ),
                     Positioned(

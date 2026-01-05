@@ -1,26 +1,3 @@
-// // Flutter imports:
-// import 'package:flutter/material.dart';
-//
-// // Package imports:
-// import 'package:flutter_riverpod/flutter_riverpod.dart';
-// import 'package:flutter_screenutil/flutter_screenutil.dart';
-//
-// // Project imports:
-// import 'app.dart';
-//
-// void main() {
-//   runApp(
-//     ProviderScope(
-//       child: ScreenUtilInit(
-//         designSize: const Size(393, 852),
-//         minTextAdapt: true,
-//         splitScreenMode: true,
-//         child: const App(),
-//       ),
-//     ),
-//   );
-// }
-
 // Flutter imports:
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -34,45 +11,57 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // Project imports:
 import 'app.dart';
+import 'features/Notification/data/notification_service.dart';
 
+/// Background message handler (must be top-level function)
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // Background এ message এলে Firebase init লাগতে পারে
   await Firebase.initializeApp();
-  // debug:
-  // print('BG message: ${message.messageId}');
+  debugPrint('🔔 Background message: ${message.notification?.title}');
+  // Note: Local notifications won't show here automatically
+  // The NotificationService will handle this when app opens
 }
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Firebase init
-  await Firebase.initializeApp();
+  try {
+    // Initialize Firebase
+    await Firebase.initializeApp();
+    debugPrint('✅ Firebase initialized');
 
-  // Background notification handler
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    // Set background message handler
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  // Permission (Android 13+/iOS)
-  final messaging = FirebaseMessaging.instance;
-  await messaging.requestPermission(
-    alert: true,
-    badge: true,
-    sound: true,
-  );
+    // Request notification permissions
+    final messaging = FirebaseMessaging.instance;
+    final settings = await messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+      provisional: false,
+    );
+    
+    debugPrint('🔔 Notification permission: ${settings.authorizationStatus}');
 
-  // FCM Token (এটা backend এ save করবে)
-  final token = await messaging.getToken();
-  debugPrint('FCM Token: $token');
+    // Get FCM token
+    final token = await messaging.getToken();
+    if (token != null) {
+      debugPrint('🔥 FCM Token (Full): $token');
+      debugPrint('🔥 FCM Token Length: ${token.length} characters');
+      // Token will be sent to backend after user logs in
+    } else {
+      debugPrint('⚠️ FCM Token is null');
+    }
 
-  // Foreground messages
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    debugPrint('Foreground message: ${message.notification?.title}');
-  });
+    // Initialize comprehensive notification service
+    await NotificationService.initialize();
 
-  // Notification tap -> app opened
-  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-    debugPrint('Opened from notification: ${message.notification?.title}');
-  });
+    debugPrint('✅ App initialization complete');
+  } catch (e, stackTrace) {
+    debugPrint('❌ Error during app initialization: $e');
+    debugPrint('Stack trace: $stackTrace');
+  }
 
   runApp(
     const ProviderScope(

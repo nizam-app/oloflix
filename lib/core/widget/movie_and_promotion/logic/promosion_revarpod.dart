@@ -16,13 +16,36 @@ final adsRepoProvider = Provider<AdsRepository>((ref) {
 
 
 final adsProvider = FutureProvider<List<AdModel>>((ref) async {
-  final prefs = await SharedPreferences.getInstance();
-  final token = prefs.getString('token') ?? '';
-  if (token.isEmpty) {
-    // token না থাকলে empty list দেই (চাইলে throw করতে পারো)
+  try {
+    print("🎬 Starting to fetch ads...");
+    
+    // Try to get token (but don't fail if it's missing)
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token') ?? '';
+    
+    if (token.isEmpty) {
+      print("⚠️ No auth token found, trying without authentication");
+    } else {
+      print("🔑 Auth token found, using it");
+    }
+    
+    // Fetch ads (with or without token)
+    final ads = await ref.read(adsRepoProvider).fetchAds(token: token.isEmpty ? null : token);
+    
+    print("✅ Successfully loaded ${ads.length} ads");
+    
+    if (ads.isNotEmpty) {
+      print("📋 First ad: ${ads[0].title}");
+      print("   Image: ${ads[0].image}");
+    }
+    
+    return ads;
+  } catch (e, stackTrace) {
+    print("❌ Error loading ads: $e");
+    print("Stack trace: $stackTrace");
+    // Return empty list instead of throwing to prevent app crash
     return <AdModel>[];
   }
-  return ref.read(adsRepoProvider).fetchAds(token: token);
 });
 
 // ডট ইন্ডিকেটর/কারেন্ট ইনডেক্সের জন্য ছোট state
