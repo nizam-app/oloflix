@@ -12,6 +12,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/widget/bottom_nav_bar/controller/bottom_controller.dart';
 import '../../deshboard/logic/deshboard_reverport.dart';
+import '../../Notification/screen/push_notification_manager.dart';
+
 class LoginController extends GetxController {
   var isLoading = false.obs;
    var rememberMe = false.obs;
@@ -40,7 +42,7 @@ class LoginController extends GetxController {
       if (response.statusCode == 200) {
         final String token = data["data"]?["token"] ?? "";
 
-        // 1) Token সেভ (await দিয়ে)
+        // 1) Token সেভ (await দিয়ে)
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString("email", email);
         if (token.isNotEmpty) await prefs.setString("token", token);
@@ -57,11 +59,21 @@ class LoginController extends GetxController {
         container.invalidate(selectedIndexProvider);
         container.invalidate(ProfileDataController.profileProvider);
 
-        // চাইলে প্রোফাইল আগে থেকেই ফেচ করিয়ে নিতে পারেন
+        // চাইলে প্রোফাইল আগে থেকেই ফেচ করিয়ে নিতে পারেন
         try {
           await container.read(profileProvider.future);
         } catch (_) {
-          // প্রোফাইল না এলে ন্যাভিগেট করলেও UI পরে লোড হয়ে যাবে
+          // প্রোফাইল না এলে ন্যাভিগেট করলেও UI পরে লোড হয়ে যাবে
+        }
+
+        // ✅ Send FCM token to backend after successful login
+        try {
+          debugPrint('🔥 Initializing FCM after login...');
+          await PushNotificationManager.init(authToken: token);
+          debugPrint('✅ FCM token sent to backend successfully');
+        } catch (e) {
+          debugPrint('⚠️ Failed to send FCM token: $e');
+          // Don't block login if FCM fails
         }
 
         // 3) ন্যাভিগেট

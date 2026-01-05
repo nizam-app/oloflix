@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:Oloflix/features/Notification/screen/push_notification_manager.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -24,6 +25,17 @@ class _SplashScreenState extends State<SplashScreen> {
     SharedPreferences _pref = await SharedPreferences.getInstance();
     String? email = await _pref.getString("email");
     String? token = await _pref.getString("token");
+
+    // ✅ If user is already logged in, send FCM token to backend
+    if (email != null && token != null && token.isNotEmpty) {
+      try {
+        debugPrint('🔥 User already logged in. Sending FCM token...');
+        await PushNotificationManager.init(authToken: token);
+        debugPrint('✅ FCM token sent successfully on app start');
+      } catch (e) {
+        debugPrint('⚠️ Failed to send FCM token on app start: $e');
+      }
+    }
 
     Future.delayed(const Duration(seconds: 3), () {
      if (email != null && token != null ) { context.go(HomeScreen.routeName); }

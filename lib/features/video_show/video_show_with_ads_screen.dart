@@ -7,6 +7,7 @@ import 'package:video_player/video_player.dart';
 import 'logic/video_controler.dart';
 import 'logic/player_ads_provider.dart';
 import 'models/player_ads_model.dart';
+import 'data/player_ads_service.dart';
 import 'video_full_screen.dart';
 
 class TimeoutException implements Exception {
@@ -33,6 +34,8 @@ class _VideoShowWithAdsScreenState extends ConsumerState<VideoShowWithAdsScreen>
   Set<int> _playedAds = {};
   VideoPlayerController? _mainController;
   bool _listenerAdded = false;
+  bool _adSystemReady = false;
+  bool _hasPreloadedFirstAd = false;
   
   // Skip button state
   bool _canSkipAd = false;
@@ -44,17 +47,42 @@ class _VideoShowWithAdsScreenState extends ConsumerState<VideoShowWithAdsScreen>
   @override
   void initState() {
     super.initState();
-    _checkLoginStatus();
-    _initializeAds();
+    _initializeAdSystem();
+  }
+
+  // Initialize ad system with proper async handling
+  Future<void> _initializeAdSystem() async {
+    try {
+      // Step 1: Check login status first (must complete before ads)
+      await _checkLoginStatus();
+      
+      // Step 2: Initialize ads if user is not logged in
+      if (!_isLoggedIn) {
+        await _initializeAds();
+        
+        // Step 3: Pre-load first ad if it exists and is at start of video
+        await _preloadFirstAd();
+      }
+      
+      setState(() {
+        _adSystemReady = true;
+      });
+      
+      print('✅ Ad system fully initialized and ready');
+    } catch (e) {
+      print('❌ Error initializing ad system: $e');
+      setState(() {
+        _adSystemReady = true; // Allow video to play even if ad system fails
+      });
+    }
   }
 
   Future<void> _checkLoginStatus() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
-      setState(() {
-        _isLoggedIn = token.isNotEmpty;
-      });
+      _isLoggedIn = token.isNotEmpty;
+      
       print('🔐 Login status checked: ${_isLoggedIn ? "Logged In" : "Guest"}');
       
       if (_isLoggedIn) {
@@ -64,9 +92,7 @@ class _VideoShowWithAdsScreenState extends ConsumerState<VideoShowWithAdsScreen>
       }
     } catch (e) {
       print('❌ Error checking login status: $e');
-      setState(() {
-        _isLoggedIn = false;
-      });
+      _isLoggedIn = false;
     }
   }
 
@@ -76,21 +102,168 @@ class _VideoShowWithAdsScreenState extends ConsumerState<VideoShowWithAdsScreen>
       return;
     }
 
-    final adsAsync = ref.read(playerAdsProvider);
-    adsAsync.when(
-      data: (adsResponse) {
-        if (adsResponse != null && adsResponse.showAds) {
-          setState(() {
+    try {
+      print('🔄 Loading ads from provider...');
+      
+      // Use ref.read to get the AsyncValue and handle it properly
+      final adsAsyncValue = ref.read(playerAdsProvider);
+      
+      // Handle the AsyncValue using when() or direct pattern matching
+      await adsAsyncValue.when(
+        data: (adsResponse) async {
+          if (adsResponse != null && adsResponse.showAds) {
             _adsResponse = adsResponse;
-          });
-          print('✅ Ads initialized: ${adsResponse.ads.length} ads');
-        } else {
-          print('⚠️ No ads to show');
+            print('✅ Ads loaded: ${adsResponse.ads.length} ads available');
+            
+            // Log ad timings for debugging
+            for (var i = 0; i < adsResponse.ads.length; i++) {
+              final ad = adsResponse.ads[i];
+              print('   Ad ${i + 1}: ${ad.timestart} (${ad.timestartDuration.inSeconds}s) - ${ad.isVideoAd ? "VIDEO" : "LINK"}');
+            }
+          } else {
+            print('⚠️ No ads to show');
+          }
+        },
+        loading: () async {
+          print('🔄 Ads still loading, waiting...');
+          // If still loading, we need to wait for it
+          // Use a workaround: read the provider service directly
+          final adsResponse = await PlayerAdsService.fetchPlayerAds();
+          if (adsResponse != null && adsResponse.showAds) {
+            _adsResponse = adsResponse;
+            print('✅ Ads loaded: ${adsResponse.ads.length} ads available');
+            
+            for (var i = 0; i < adsResponse.ads.length; i++) {
+              final ad = adsResponse.ads[i];
+              print('   Ad ${i + 1}: ${ad.timestart} (${ad.timestartDuration.inSeconds}s) - ${ad.isVideoAd ? "VIDEO" : "LINK"}');
+            }
+          }
+        },
+        error: (error, stackTrace) async {
+          print('❌ Error loading ads: $error');
+        },
+      );
+    } catch (e) {
+      print('❌ Error loading ads: $e');
+    }
+  }
+
+  // Pre-load the first ad if it's at the start of the video
+  Future<void> _preloadFirstAd() async {
+    if (_adsResponse == null || _adsResponse!.ads.isEmpty) {
+      print('⚠️ No ads to preload');
+      return;
+    }
+
+    try {
+      // Find first ad that's within the first 5 seconds
+      for (var i = 0; i < _adsResponse!.ads.length; i++) {
+        final ad = _adsResponse!.ads[i];
+        
+        // Check if ad is at the start (within first 5 seconds)
+        if (ad.timestartDuration.inSeconds <= 5 && ad.isVideoAd) {
+          print('📥 Pre-loading first ad at ${ad.timestart}...');
+          
+          // Validate URL
+          if (ad.source.isEmpty || 
+              (!ad.source.startsWith('http://') && !ad.source.startsWith('https://'))) {
+            print('⚠️ Invalid ad URL: ${ad.source}');
+            continue;
+          }
+
+          // Pre-initialize the ad controller
+          _adController = VideoPlayerController.network(ad.source);
+          
+          await _adController!.initialize().timeout(
+            const Duration(seconds: 15),
+            onTimeout: () {
+              print('⏱️ First ad pre-load timed out');
+              throw TimeoutException('Ad pre-load timeout');
+            },
+          );
+          
+          print('✅ First ad pre-loaded successfully');
+          _hasPreloadedFirstAd = true;
+          
+          // If ad is at position 0, play it immediately
+          if (ad.timestartDuration.inSeconds == 0) {
+            print('🎬 Playing pre-roll ad immediately...');
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _playPreloadedAd(i, ad);
+            });
+          }
+          
+          break; // Only preload the first early ad
         }
-      },
-      loading: () => print('🔄 Loading ads...'),
-      error: (e, _) => print('❌ Error loading ads: $e'),
-    );
+      }
+    } catch (e) {
+      print('❌ Error pre-loading first ad: $e');
+      _adController?.dispose();
+      _adController = null;
+      _hasPreloadedFirstAd = false;
+    }
+  }
+
+  // Play a pre-loaded ad
+  Future<void> _playPreloadedAd(int adIndex, VideoAd ad) async {
+    if (_adController == null || !_adController!.value.isInitialized) {
+      print('⚠️ Pre-loaded ad not ready, loading now...');
+      await _playAd(adIndex, ad);
+      return;
+    }
+
+    print('🎬 Playing pre-loaded ad ${adIndex + 1}');
+    
+    setState(() {
+      _isPlayingAd = true;
+      _canSkipAd = false;
+      _currentAdIndex = adIndex;
+      _adStartTime = DateTime.now().millisecondsSinceEpoch;
+      _skipCountdown = 5;
+    });
+
+    // Start countdown timer
+    _skipCountdownTimer?.cancel();
+    _skipCountdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!_isPlayingAd || _currentAdIndex != adIndex) {
+        timer.cancel();
+        return;
+      }
+
+      setState(() {
+        _skipCountdown--;
+      });
+
+      if (_skipCountdown <= 0) {
+        timer.cancel();
+        setState(() {
+          _canSkipAd = true;
+        });
+        print('⏭️ Skip button enabled for ad ${adIndex + 1}');
+      }
+    });
+
+    // Pause main video if it's playing
+    _mainController?.pause();
+
+    try {
+      // Play the pre-loaded ad
+      await _adController!.play();
+      print('▶️ Pre-loaded ad playing');
+
+      // Listen for ad completion
+      _adController!.addListener(() {
+        if (_adController != null &&
+            _adController!.value.isInitialized &&
+            _adController!.value.position >= _adController!.value.duration) {
+          print('✅ Pre-loaded ad completed normally');
+          _onAdComplete(adIndex);
+        }
+      });
+    } catch (e) {
+      print('❌ Error playing pre-loaded ad: $e');
+      _onAdComplete(adIndex);
+    }
   }
 
   void _setupMainVideoListener() {
@@ -155,6 +328,16 @@ class _VideoShowWithAdsScreenState extends ConsumerState<VideoShowWithAdsScreen>
       return;
     }
 
+    // Check if this is the first ad and it's already pre-loaded
+    bool usingPreloadedAd = false;
+    if (_hasPreloadedFirstAd && 
+        _adController != null && 
+        _adController!.value.isInitialized &&
+        ad.timestartDuration.inSeconds <= 5) {
+      print('✅ Using pre-loaded ad controller');
+      usingPreloadedAd = true;
+    }
+
     setState(() {
       _isPlayingAd = true;
       _canSkipAd = false;
@@ -189,19 +372,23 @@ class _VideoShowWithAdsScreenState extends ConsumerState<VideoShowWithAdsScreen>
     _mainController?.pause();
 
     try {
-      // Initialize ad controller with timeout
-      print('📥 Loading ad from: ${ad.source}');
-      _adController = VideoPlayerController.network(ad.source);
-      
-      await _adController!.initialize().timeout(
-        const Duration(seconds: 10),
-        onTimeout: () {
-          print('⏱️ Ad initialization timed out');
-          throw TimeoutException('Ad loading timeout');
-        },
-      );
+      // Initialize ad controller if not using pre-loaded one
+      if (!usingPreloadedAd) {
+        print('📥 Loading ad from: ${ad.source}');
+        _adController = VideoPlayerController.network(ad.source);
+        
+        await _adController!.initialize().timeout(
+          const Duration(seconds: 10),
+          onTimeout: () {
+            print('⏱️ Ad initialization timed out');
+            throw TimeoutException('Ad loading timeout');
+          },
+        );
 
-      print('✅ Ad initialized successfully');
+        print('✅ Ad initialized successfully');
+      } else {
+        print('✅ Using pre-loaded ad - instant playback');
+      }
 
       // Play the ad
       await _adController!.play();
@@ -234,6 +421,9 @@ class _VideoShowWithAdsScreenState extends ConsumerState<VideoShowWithAdsScreen>
     // Cancel countdown timer
     _skipCountdownTimer?.cancel();
     _skipCountdownTimer = null;
+
+    // Reset preload flag
+    _hasPreloadedFirstAd = false;
 
     setState(() {
       _isPlayingAd = false;
@@ -307,8 +497,25 @@ class _VideoShowWithAdsScreenState extends ConsumerState<VideoShowWithAdsScreen>
               );
             }
 
+            // Show loading while ad system initializes (only for guest users)
+            if (!_isLoggedIn && !_adSystemReady) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    CircularProgressIndicator(color: Colors.orange),
+                    SizedBox(height: 20),
+                    Text(
+                      "Preparing video...",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ],
+                ),
+              );
+            }
+
             // Setup listener for ad checks (only once)
-            if (!_isLoggedIn && !_listenerAdded) {
+            if (!_isLoggedIn && !_listenerAdded && _adSystemReady) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 _setupMainVideoListener();
               });

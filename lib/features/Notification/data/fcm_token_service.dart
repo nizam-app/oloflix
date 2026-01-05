@@ -26,7 +26,7 @@ class FcmTokenService {
           'Authorization': 'Bearer $authToken',
         },
         body: jsonEncode({
-          'device_token': fcmToken,
+          'token': fcmToken,
           'platform': platform,
         }),
       );
