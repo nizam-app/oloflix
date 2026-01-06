@@ -21,9 +21,13 @@ class IAPService {
   final Map<String, ProductDetails> _products = {};
   List<ProductDetails> get allProducts => _products.values.toList();
 
-  // Verify URLs
-  String _verifyUrlSub = AuthAPIController.payment_apple_verify;
-  String _verifyUrlPpv = AuthAPIController.payment_apple_ppv_verify;
+  // Verify URLs - Platform-specific
+  String get _verifyUrlSub => Platform.isAndroid 
+      ? AuthAPIController.payment_google_verify 
+      : AuthAPIController.payment_apple_verify;
+  String get _verifyUrlPpv => Platform.isAndroid
+      ? AuthAPIController.payment_google_ppv_verify
+      : AuthAPIController.payment_apple_ppv_verify;
 
   StreamSubscription<List<PurchaseDetails>>? _purchaseSub;
   Completer<bool>? _pending; // a single in-flight purchase guard
@@ -76,10 +80,9 @@ class IAPService {
 
   Future<void> init({
     required Set<String> productIds,
-    required String serverVerifyUrl, // backward compatible
+    required String serverVerifyUrl, // backward compatible (deprecated, use platform detection)
   }) async {
-    _verifyUrlSub =
-    serverVerifyUrl.isNotEmpty ? serverVerifyUrl : _verifyUrlSub;
+    // Note: serverVerifyUrl is kept for backward compatibility but platform detection takes precedence
 
     _available = await _iap.isAvailable();
     _log('IAP available: $_available');
@@ -175,19 +178,36 @@ class IAPService {
           // 1) Optional sync (StoreKit2)
           await _storekitSyncIfPossible();
 
-          // 2) Pick receipt; refresh if empty/invalid
-          var serverData = p.verificationData.serverVerificationData;
-          if (serverData.isEmpty) {
-            _log('serverVerificationData empty → trying refreshPurchaseVerificationData()');
-            final refreshed = await _refreshVerificationDataIfPossible();
-            if (refreshed != null && refreshed.isNotEmpty) {
-              serverData = refreshed;
+          // 2) Pick verification data based on platform
+          String? purchaseToken;
+          String? receiptData;
+          
+          if (Platform.isAndroid) {
+            // Android/Google: Extract purchase token from verification data
+            // The purchase token is typically in serverVerificationData for Android
+            purchaseToken = p.verificationData.serverVerificationData;
+            if (purchaseToken.isEmpty) {
+              // Try to get from source if available
+              purchaseToken = p.verificationData.source;
+            }
+            _log('Android purchase token extracted: ${purchaseToken.isNotEmpty ? purchaseToken.substring(0, purchaseToken.length > 20 ? 20 : purchaseToken.length) + "..." : "empty"}');
+          } else {
+            // iOS/Apple: Use receipt data
+            receiptData = p.verificationData.serverVerificationData;
+            if (receiptData.isEmpty) {
+              _log('serverVerificationData empty → trying refreshPurchaseVerificationData()');
+              final refreshed = await _refreshVerificationDataIfPossible();
+              if (refreshed != null && refreshed.isNotEmpty) {
+                receiptData = refreshed;
+              }
             }
           }
 
           final ok = await _verifyOnServer(
-            receiptData: serverData,
+            purchaseToken: purchaseToken,
+            receiptData: receiptData,
             transactionId: p.purchaseID,
+            productId: p.productID,
           );
 
           if (!(_pending?.isCompleted ?? true)) {
@@ -224,11 +244,15 @@ class IAPService {
 
   // ------------ Server Verify (POST) -------------
 
-  /// subscription: {receipt, plan_id}
-  /// ppv:          {receipt, movie_id, transaction_id, days}
+  /// Platform-aware verification:
+  /// Android/Google: {purchase_token, product_id, plan_id}
+  /// iOS/Apple: {receipt, plan_id} (existing format)
+  /// ppv: {receipt/purchase_token, movie_id, transaction_id, days}
   Future<bool> _verifyOnServer({
-    required String receiptData,
+    String? purchaseToken,
+    String? receiptData,
     required String? transactionId,
+    required String? productId,
   }) async {
     try {
       // auth header (Laravel API হলে দরকার)
@@ -239,25 +263,51 @@ class IAPService {
       final uri = Uri.parse(isPpv ? _verifyUrlPpv : _verifyUrlSub);
 
       late final Map<String, dynamic> body;
-      if (isPpv) {
-        body = {
-          'receipt': receiptData,
-          'movie_id': _extraPayload['movieId'],
-          'transaction_id': transactionId,
-          'days': _extraPayload['days'] ?? 3,
-        };
+      
+      if (Platform.isAndroid) {
+        // Android/Google verification format
+        if (isPpv) {
+          // PPV for Android - API spec: {purchase_token, product_id, movie_id}
+          body = {
+            'purchase_token': purchaseToken ?? '',
+            'product_id': productId ?? '',
+            'movie_id': _extraPayload['movieId'],
+          };
+        } else {
+          // Subscription for Android/Google
+          body = {
+            'purchase_token': purchaseToken ?? '',
+            'product_id': productId ?? '',
+            'plan_id': _extraPayload['planId'],
+          };
+        }
       } else {
-        body = {
-          'receipt': receiptData,
-          'plan_id': _extraPayload['planId'],
-        };
+        // iOS/Apple verification format (existing)
+        if (isPpv) {
+          body = {
+            'receipt': receiptData ?? '',
+            'movie_id': _extraPayload['movieId'],
+            'transaction_id': transactionId,
+            'days': _extraPayload['days'] ?? 3,
+          };
+        } else {
+          body = {
+            'receipt': receiptData ?? '',
+            'plan_id': _extraPayload['planId'],
+          };
+        }
       }
 
-      // 🔎 LOG (mask receipt)
-      foundation.debugPrint('verify POST → $uri');
-      foundation.debugPrint(
-        'payload: ${jsonEncode({...body, 'receipt': '***masked***'})}',
-      );
+      // 🔎 LOG (mask sensitive data)
+      foundation.debugPrint('verify POST → $uri (Platform: ${Platform.isAndroid ? "Android" : "iOS"})');
+      final maskedBody = Map<String, dynamic>.from(body);
+      if (maskedBody.containsKey('purchase_token')) {
+        maskedBody['purchase_token'] = '***masked***';
+      }
+      if (maskedBody.containsKey('receipt')) {
+        maskedBody['receipt'] = '***masked***';
+      }
+      foundation.debugPrint('payload: ${jsonEncode(maskedBody)}');
 
       final res = await http.post(
         uri,
@@ -270,12 +320,37 @@ class IAPService {
       );
 
       foundation.debugPrint('status: ${res.statusCode} body: ${res.body}');
-      if (res.statusCode != 200) return false;
+      if (res.statusCode != 200) {
+        _log('verify failed: HTTP ${res.statusCode}');
+        return false;
+      }
 
       final data = jsonDecode(res.body);
       final success =
           (data['status'] == 'success') || (data['active'] == true);
       _log('server verify (POST) → success=$success');
+      
+      // Store PPV order_id and expiry_date for Android only
+      if (success && Platform.isAndroid && isPpv && data['data'] != null) {
+        try {
+          final prefs = await SharedPreferences.getInstance();
+          final ppvData = data['data'] as Map<String, dynamic>;
+          final orderId = ppvData['order_id']?.toString();
+          final expiryDate = ppvData['expiry_date']?.toString();
+          
+          if (orderId != null) {
+            await prefs.setString('ppv_order_id_${_extraPayload['movieId']}', orderId);
+            _log('Stored PPV order_id: $orderId');
+          }
+          if (expiryDate != null) {
+            await prefs.setString('ppv_expiry_${_extraPayload['movieId']}', expiryDate);
+            _log('Stored PPV expiry_date: $expiryDate');
+          }
+        } catch (e) {
+          _log('Error storing PPV data: $e');
+        }
+      }
+      
       return success;
     } catch (e) {
       _log('verify (POST) error: $e');

@@ -137,7 +137,7 @@ class _BottomNavBarState extends ConsumerState<BottomNavBar> {
         items: <Widget>[
           _navItem(FontAwesomeIcons.homeUser, "Home", selectedIndex == 0),
           _navItem(FontAwesomeIcons.eye, "PPV", selectedIndex == 1),
-          _navItem(Icons.notifications_outlined, "Notify", selectedIndex == 2),
+          _navItem(Icons.notifications_outlined, "Alerts", selectedIndex == 2),
           _navItem(Icons.live_tv, "Live", selectedIndex == 3),
           _navItem(CupertinoIcons.profile_circled, "Account", selectedIndex == 4),
         ],
