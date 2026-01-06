@@ -3,11 +3,19 @@ import 'global_api.dart';
 
 class NotificationApi {
   static final String _base_api = "${api}api";
-  // ✅ Save device token
+  
+  // ✅ Device token endpoints
   static final String deviceToken = "$_base_api/device-token";
-  // ✅ Dev/Test push
+  
+  // ✅ Push notification endpoints
   static final String pushTest = "$_base_api/push/test";
-  // ✅ Push to logged-in user
   static final String pushUser = "$_base_api/push/user";
+  
+  // ✅ Notification endpoints
+  static final String notifications = "$_base_api/notifications";
+  static String notificationRead(int id) => "$_base_api/notifications/$id/read";
+  static String notificationUnread(int id) => "$_base_api/notifications/$id/unread";
+  static final String notificationsReadAll = "$_base_api/notifications/read-all";
+  static String notificationDelete(int id) => "$_base_api/notifications/$id";
 
 }
