@@ -69,8 +69,28 @@ class LoginController extends GetxController {
         // ✅ Send FCM token to backend after successful login
         try {
           debugPrint('🔥 Initializing FCM after login...');
+          debugPrint('🔑 Auth token length: ${token.length}');
+          
+          // Reset PushNotificationManager to ensure fresh initialization
+          PushNotificationManager.reset();
+          
           await PushNotificationManager.init(authToken: token);
-          debugPrint('✅ FCM token sent to backend successfully');
+          debugPrint('✅ FCM initialization completed');
+          
+          // Also try to force resend after a short delay (in case token wasn't available immediately)
+          Future.delayed(const Duration(seconds: 2), () async {
+            try {
+              debugPrint('🔄 Attempting to force resend FCM token after delay...');
+              final success = await PushNotificationManager.forceResendToken(authToken: token);
+              if (success) {
+                debugPrint('✅ FCM token force re-sent successfully');
+              } else {
+                debugPrint('⚠️ FCM token force resend failed (token might not be available yet)');
+              }
+            } catch (e) {
+              debugPrint('⚠️ Error in force resend: $e');
+            }
+          });
         } catch (e) {
           debugPrint('⚠️ Failed to send FCM token: $e');
           // Don't block login if FCM fails
