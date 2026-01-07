@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:logger/logger.dart';
@@ -273,6 +274,49 @@ class NotificationService {
       _logger.e('❌ Error getting unread count: $e');
       return 0;
     }
+  }
+
+  /// Get FCM token safely (handles iOS APNS token delay)
+  /// Returns null if token is not available yet
+  static Future<String?> getFCMToken({int retryDelayMs = 500}) async {
+    try {
+      final messaging = FirebaseMessaging.instance;
+      
+      if (Platform.isIOS) {
+        // On iOS, check if APNS token is available
+        _logger.i('📱 Checking for iOS APNS token...');
+        
+        // Wait a bit for APNS token
+        await Future.delayed(Duration(milliseconds: retryDelayMs));
+        
+        final apnsToken = await messaging.getAPNSToken();
+        if (apnsToken == null) {
+          _logger.w('⚠️ APNS token not available yet');
+          return null;
+        }
+        
+        _logger.i('🍎 APNS Token available: ${apnsToken.substring(0, 20)}...');
+      }
+      
+      final token = await messaging.getToken();
+      if (token != null) {
+        _logger.i('🔥 FCM Token retrieved successfully');
+        _logger.i('Token length: ${token.length} characters');
+        _logger.d('Token preview: ${token.substring(0, 30)}...');
+      } else {
+        _logger.w('⚠️ FCM Token is null');
+      }
+      
+      return token;
+    } catch (e) {
+      _logger.e('❌ Error getting FCM token: $e');
+      return null;
+    }
+  }
+
+  /// Listen for FCM token refresh
+  static Stream<String> onTokenRefresh() {
+    return FirebaseMessaging.instance.onTokenRefresh;
   }
 }
 

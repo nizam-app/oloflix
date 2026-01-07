@@ -1,4 +1,6 @@
 // Flutter imports:
+import 'dart:io';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
@@ -8,6 +10,7 @@ import 'package:firebase_core/firebase_core.dart';
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Project imports:
 import 'app.dart';
@@ -42,16 +45,91 @@ Future<void> main() async {
       provisional: false,
     );
     
+    // await messaging.setForegroundNotificationPresentationOptions(
+    //   alert: true,
+    //   badge: true,
+    //   sound: true,
+    // );
+
+    
     debugPrint('🔔 Notification permission: ${settings.authorizationStatus}');
 
-    // Get FCM token
-    final token = await messaging.getToken();
-    if (token != null) {
-      debugPrint('🔥 FCM Token (Full): $token');
-      debugPrint('🔥 FCM Token Length: ${token.length} characters');
-      // Token will be sent to backend after user logs in
-    } else {
-      debugPrint('⚠️ FCM Token is null');
+    // Get FCM token with iOS-specific handling
+    try {
+      String? token;
+      
+      if (Platform.isIOS) {
+        // On iOS, APNS token might not be immediately available
+        // Try multiple times with increasing delays
+        debugPrint('📱 Waiting for iOS APNS token...');
+        
+        int retryCount = 0;
+        const maxRetries = 5;
+        const retryDelays = [500, 1000, 1500, 2000, 3000]; // milliseconds
+        
+        while (token == null && retryCount < maxRetries) {
+          if (retryCount > 0) {
+            debugPrint('🔄 Retrying APNS token retrieval (attempt ${retryCount + 1}/$maxRetries)...');
+            await Future.delayed(Duration(milliseconds: retryDelays[retryCount - 1]));
+          } else {
+            await Future.delayed(const Duration(milliseconds: 500));
+          }
+          
+          // Try to get APNS token first
+          final apnsToken = await messaging.getAPNSToken();
+          if (apnsToken != null) {
+            debugPrint('🍎 APNS Token received: ${apnsToken.substring(0, 20)}...');
+            token = await messaging.getToken();
+            if (token != null) {
+              debugPrint('✅ FCM token retrieved successfully on attempt ${retryCount + 1}');
+              break;
+            }
+          }
+          
+          retryCount++;
+        }
+        
+        // If still no token, setup refresh listener
+        if (token == null) {
+          debugPrint('⚠️ APNS token not available after $maxRetries attempts, will retry via refresh listener');
+          // Listen for token refresh and save it
+          FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
+            debugPrint('🔄 FCM Token refreshed: $newToken');
+            // Save token locally when it becomes available
+            try {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setString('fcm_token', newToken);
+              await prefs.setString('fcm_token_timestamp', DateTime.now().toIso8601String());
+              debugPrint('💾 FCM token saved locally after refresh');
+            } catch (e) {
+              debugPrint('⚠️ Could not save refreshed FCM token: $e');
+            }
+          });
+        }
+      } else {
+        // Android doesn't need APNS token
+        token = await messaging.getToken();
+      }
+      
+      if (token != null) {
+        debugPrint('🔥 FCM Token (Full): $token');
+        debugPrint('🔥 FCM Token Length: ${token.length} characters');
+        // Save token locally so it can be used after login
+        try {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('fcm_token', token);
+          await prefs.setString('fcm_token_timestamp', DateTime.now().toIso8601String());
+          debugPrint('💾 FCM token saved locally');
+        } catch (e) {
+          debugPrint('⚠️ Could not save FCM token locally: $e');
+        }
+        // Token will be sent to backend after user logs in
+      } else {
+        debugPrint('⚠️ FCM Token not available yet, will be retrieved later');
+      }
+    } catch (tokenError) {
+      debugPrint('⚠️ Could not get FCM token immediately: $tokenError');
+      debugPrint('💡 Token will be retrieved when available');
     }
 
     // Initialize comprehensive notification service
@@ -74,4 +152,3 @@ Future<void> main() async {
     ),
   );
 }
-
