@@ -17,12 +17,21 @@ import 'app.dart';
 import 'features/Notification/data/notification_service.dart';
 
 /// Background message handler (must be top-level function)
+/// This is called when app is in background or terminated
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  debugPrint('🔔 Background message: ${message.notification?.title}');
-  // Note: Local notifications won't show here automatically
-  // The NotificationService will handle this when app opens
+  debugPrint('🔔 Background message received');
+  debugPrint('Title: ${message.notification?.title}');
+  debugPrint('Body: ${message.notification?.body}');
+  debugPrint('Data: ${message.data}');
+  
+  // On iOS, when app is in background/terminated, the system handles notification display
+  // automatically if the payload has proper notification fields.
+  // This handler is mainly for processing data payloads.
+  
+  // Note: For iOS, notifications with notification field in payload will be displayed
+  // automatically by the system. This handler processes the data.
 }
 
 Future<void> main() async {
@@ -45,14 +54,31 @@ Future<void> main() async {
       provisional: false,
     );
     
-    // await messaging.setForegroundNotificationPresentationOptions(
-    //   alert: true,
-    //   badge: true,
-    //   sound: true,
-    // );
-
-    
     debugPrint('🔔 Notification permission: ${settings.authorizationStatus}');
+    
+    // Enable foreground notification presentation for iOS
+    // This allows notifications to show when app is in foreground
+    if (Platform.isIOS) {
+      await messaging.setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      debugPrint('✅ iOS foreground notification presentation enabled');
+      
+      // IMPORTANT: Check APNS token availability
+      // Getting APNS token will trigger remote notification registration if not already done
+      try {
+        final apnsToken = await messaging.getAPNSToken();
+        if (apnsToken != null) {
+          debugPrint('✅ APNS token available: ${apnsToken.substring(0, 20)}...');
+        } else {
+          debugPrint('⚠️ APNS token not yet available - will be retrieved automatically');
+        }
+      } catch (e) {
+        debugPrint('⚠️ Error checking APNS token: $e');
+      }
+    }
 
     // Get FCM token with iOS-specific handling
     try {
