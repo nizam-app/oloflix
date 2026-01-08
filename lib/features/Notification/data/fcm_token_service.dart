@@ -14,26 +14,54 @@ class FcmTokenService {
     String platform = 'android',
   }) async {
     try {
+      final endpoint = NotificationApi.deviceToken;
       _logger.i('📤 Sending FCM token to backend...');
-      _logger.d('Token: ${fcmToken.substring(0, 20)}...');
+      _logger.i('📍 Endpoint: $endpoint');
+      _logger.d('Token (first 20 chars): ${fcmToken.substring(0, fcmToken.length > 20 ? 20 : fcmToken.length)}...');
+      _logger.d('Token length: ${fcmToken.length} characters');
       _logger.d('Platform: $platform');
+      _logger.d('Auth token (first 20 chars): ${authToken.substring(0, authToken.length > 20 ? 20 : authToken.length)}...');
+
+      if (fcmToken.isEmpty) {
+        _logger.e('❌ FCM token is empty, cannot send');
+        return false;
+      }
+
+      if (authToken.isEmpty) {
+        _logger.e('❌ Auth token is empty, cannot send FCM token');
+        return false;
+      }
+
+      final requestBody = {
+        'token': fcmToken,
+        'platform': platform,
+      };
+
+      _logger.d('Request body: ${jsonEncode(requestBody)}');
 
       final response = await http.post(
-        Uri.parse(NotificationApi.deviceToken),
+        Uri.parse(endpoint),
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $authToken',
         },
-        body: jsonEncode({
-          'token': fcmToken,
-          'platform': platform,
-        }),
+        body: jsonEncode(requestBody),
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          _logger.e('❌ Request timeout after 30 seconds');
+          throw Exception('Request timeout');
+        },
       );
 
+      _logger.i('📥 Response received');
+      _logger.d('Status code: ${response.statusCode}');
+      _logger.d('Response headers: ${response.headers}');
+      _logger.d('Response body: ${response.body}');
+
       if (response.statusCode == 200 || response.statusCode == 201) {
-        _logger.i('✅ FCM token sent successfully');
-        _logger.d('Response: ${response.body}');
+        _logger.i('✅ FCM token sent successfully to backend');
         return true;
       } else {
         _logger.e('❌ Failed to send FCM token');
@@ -43,6 +71,7 @@ class FcmTokenService {
       }
     } catch (e, stackTrace) {
       _logger.e('❌ Error sending FCM token: $e');
+      _logger.e('Error type: ${e.runtimeType}');
       _logger.e('Stack trace: $stackTrace');
       return false;
     }

@@ -8,6 +8,7 @@ import 'package:Oloflix/core/widget/app_drawer.dart';
 import 'package:Oloflix/core/widget/custom_home_topper_section.dart';
 import 'package:Oloflix/core/constants/color_control/all_color.dart';
 import 'package:Oloflix/core/constants/api_control/token_store.dart';
+import 'package:Oloflix/features/auth/screens/login_screen.dart';
 import '../data/notification_api_service.dart';
 import '../model/notification_api_model.dart';
 import 'package:go_router/go_router.dart';
@@ -53,18 +54,18 @@ class _NotificationScreenState extends State<NotificationScreen> {
       if (_authToken.isNotEmpty) {
         await _fetchNotifications();
       } else {
-        setState(() {
-          _isLoading = false;
-          _errorMessage = "Please login to view notifications";
-        });
-        debugPrint("❌ No token found - user needs to login");
+        // User not logged in - redirect to login screen
+        debugPrint("❌ No token found - Redirecting to login");
+        if (mounted) {
+          context.push(LoginScreen.routeName);
+        }
       }
     } catch (e) {
       debugPrint("❌ Error loading token: $e");
-      setState(() {
-        _isLoading = false;
-        _errorMessage = "Error loading authentication token";
-      });
+      // On error, also redirect to login as we can't verify authentication
+      if (mounted) {
+        context.push(LoginScreen.routeName);
+      }
     }
   }
 
