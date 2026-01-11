@@ -17,6 +17,11 @@ class AuthAPIController {
   static final payment_apple_ppv_verify = '$_base_api/payment/apple/ppv/verify';
   static final String payment_google_verify = "$_base_api/payment/google/verifyd";
   static final String payment_google_ppv_verify = "$_base_api/payment/google/ppv/verify";
+  // Flutterwave payment endpoints
+  static final String payment_flutterwave_initiate = "$_base_api/payment/flutterwave/initiate";
+  static final String payment_flutterwave_ppv_initiate = "$_base_api/payment/flutterwave/ppv/initiate";
+  static final String payment_flutterwave_verify = "$_base_api/payment/flutterwave/verify";
+  static final String payment_flutterwave_ppv_verify = "$_base_api/payment/flutterwave/ppv/verify";
   static final String account_delete = "$_base_api/account_delete";
   static final String movies_watch_ppv = "$_base_api/movies/watch";
 

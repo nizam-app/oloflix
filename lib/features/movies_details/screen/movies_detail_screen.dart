@@ -463,11 +463,44 @@ class DetailsImage extends ConsumerWidget {
     }
 
     // 🧾 helper: PPV access check (slug + id + token)
+    // This checks if the user has purchased THIS SPECIFIC movie
     Future<bool> _ppvAccessCheck() async {
       try {
+        print("🔍 Checking PPV access for Movie ID: $movieId");
+        
         final prefs = await SharedPreferences.getInstance();
         final token = prefs.getString('token') ?? '';
+        
+        // Verify movie ID is valid
+        if (movieId == 0) {
+          print("❌ Invalid movie ID: $movieId");
+          return false;
+        }
+        
+        // Check if this specific movie was purchased (client-side validation)
+        final expiryKey = 'ppv_expiry_$movieId';
+        final storedExpiry = prefs.getString(expiryKey);
+        
+        if (storedExpiry != null) {
+          try {
+            final expiryDate = DateTime.parse(storedExpiry);
+            if (expiryDate.isAfter(DateTime.now())) {
+              print("✅ PPV access found in local storage for Movie ID: $movieId (expires: $expiryDate)");
+            } else {
+              print("⚠️ PPV access expired for Movie ID: $movieId (expired: $expiryDate)");
+              // Still check with backend in case it's been extended
+            }
+          } catch (e) {
+            print("⚠️ Could not parse expiry date: $e");
+          }
+        } else {
+          print("ℹ️ No local PPV record found for Movie ID: $movieId - checking with backend");
+        }
+        
+        // Always verify with backend API (server is source of truth)
+        // Backend should check if user has purchased THIS SPECIFIC movie
         final url = "${AuthAPIController.movies_watch_ppv}/$videoSlug/$movieId";
+        print("📡 Calling backend API: $url");
 
         final res = await http.get(
           Uri.parse(url),
@@ -475,9 +508,28 @@ class DetailsImage extends ConsumerWidget {
             'Accept': 'application/json',
             if (token.isNotEmpty) 'Authorization': 'Bearer $token',
           },
+        ).timeout(
+          const Duration(seconds: 10),
+          onTimeout: () {
+            print("❌ API request timeout");
+            throw Exception('Request timeout');
+          },
         );
-        return res.statusCode == 200;
+        
+        print("📥 Backend response status: ${res.statusCode}");
+        
+        if (res.statusCode == 200) {
+          print("✅ Backend confirmed PPV access for Movie ID: $movieId");
+          return true;
+        } else {
+          print("❌ Backend denied PPV access for Movie ID: $movieId (Status: ${res.statusCode})");
+          if (res.statusCode == 403 || res.statusCode == 401) {
+            print("   → User has not purchased this specific movie");
+          }
+          return false;
+        }
       } catch (e) {
+        print("❌ Error checking PPV access: $e");
         if (context.mounted) {
           ScaffoldMessenger.of(context)
               .showSnackBar(SnackBar(content: Text('Network error: $e')));
@@ -521,14 +573,26 @@ class DetailsImage extends ConsumerWidget {
     }
 
     // 2) Subscription নেই → যদি PPV হয়, তাহলে অ্যাক্সেস চেক
+    // IMPORTANT: PPV access is movie-specific. Each movie must be purchased separately.
     if (isPpv) {
+      print("🎬 PPV Movie Access Check");
+      print("   Movie ID: $movieId");
+      print("   Video Slug: $videoSlug");
+      
       final ok = await _ppvAccessCheck();
       if (ok) {
-        print("✅ PPV access granted - Playing");
+        print("✅ PPV access granted for Movie ID: $movieId - Playing");
         await _play(videoUrl);
       } else {
-        print("❌ PPV access denied - Showing purchase screen");
+        print("❌ PPV access denied for Movie ID: $movieId - Showing purchase screen");
         if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('This movie requires a separate purchase. Each PPV movie must be purchased individually.'),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 3),
+            ),
+          );
           context.push(
             PPVSubscriptionPlanScreen.routeName,
             extra: {'movieId': movieId},
