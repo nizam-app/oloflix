@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:872422278804:android:96f68004c30c075ef51681",
         "android_client_info": {
-          "package_name": "Oloflix.app"
+          "package_name": "com.oloflix.android"
         }
       },
       "oauth_client": [],

@@ -5,8 +5,6 @@ import 'package:Oloflix/core/widget/aboute_fooder.dart';
 import 'package:Oloflix/core/widget/custom_home_topper_section.dart';
 import 'package:Oloflix/features/subscription/logic/payment_reverpod.dart';
 import 'package:Oloflix/features/subscription/screen/subscription_plan_screen.dart';
-import 'package:Oloflix/features/subscription/data/flutterwave_payment_service.dart';
-import 'package:Oloflix/features/subscription/screen/flutterwave_payment_webview.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -40,152 +38,8 @@ class PaymentMethod extends ConsumerStatefulWidget {
 }
 
 class _PaymentMethodState extends ConsumerState<PaymentMethod> {
-  /// Handle Flutterwave payment flow for Android
-  Future<bool> _handleFlutterwavePayment(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
-    // Validate required parameters
-    if (widget.isInternational == 2) {
-      // PPV
-      if (widget.movieId == null || widget.movieId == 0) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Movie not found for PPV purchase'),
-            ),
-          );
-        }
-        return false;
-      }
-    } else {
-      // Subscription
-      if (widget.planId == null) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Plan not found for subscription'),
-            ),
-          );
-        }
-        return false;
-      }
-    }
-
-    // Set busy state
-    ref.read(purchaseBusyProvider.notifier).state = true;
-
-    try {
-      final flutterwaveService = FlutterwavePaymentService.instance;
-      String? paymentUrl;
-
-      // Initiate payment and get payment URL
-      if (widget.isInternational == 2) {
-        // PPV payment initiation
-        paymentUrl = await flutterwaveService.initiatePPVPayment(
-          movieId: widget.movieId!,
-          amount: widget.amount,
-        );
-      } else {
-        // Subscription payment initiation
-        paymentUrl = await flutterwaveService.initiateSubscriptionPayment(
-          planId: widget.planId!,
-          amount: widget.amount,
-        );
-      }
-
-      if (paymentUrl == null || paymentUrl.isEmpty) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Failed to initiate payment. Please try again.'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-        return false;
-      }
-
-      // Open WebView for payment
-      if (context.mounted) {
-        final result = await Navigator.of(context).push<bool>(
-          MaterialPageRoute(
-            builder: (context) => FlutterwavePaymentWebView(
-              paymentUrl: paymentUrl!,
-              planId: widget.planId,
-              movieId: widget.movieId,
-              isPPV: widget.isInternational == 2,
-              onPaymentComplete: (transactionId, success) async {
-                if (success) {
-                  // Refresh user profile to update subscription status
-                  ref.invalidate(profileProvider);
-
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Payment completed successfully! ✅'),
-                        backgroundColor: Colors.green,
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  }
-
-                  // Navigate to home after a short delay
-                  await Future.delayed(const Duration(seconds: 1));
-                  if (context.mounted) {
-                    context.go('/homePage');
-                  }
-                } else {
-                  if (context.mounted) {
-                    String errorMsg = 'Payment was not completed.';
-                    if (transactionId == null) {
-                      errorMsg = 'Payment verification failed: Transaction ID not found. Please contact support.';
-                    } else {
-                      errorMsg = 'Payment verification failed. Transaction ID: $transactionId. Please try again or contact support.';
-                    }
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(errorMsg),
-                        backgroundColor: Colors.orange,
-                        duration: const Duration(seconds: 5),
-                      ),
-                    );
-                  }
-                }
-              },
-            ),
-          ),
-        );
-
-        return result ?? false;
-      }
-
-      return false;
-    } catch (e) {
-      debugPrint('Error initiating Flutterwave payment: $e');
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-      return false;
-    } finally {
-      ref.read(purchaseBusyProvider.notifier).state = false;
-    }
-  }
-
-  /// Handle payment - uses Flutterwave for Android, IAP for iOS
+  /// Handle payment - Google Play Billing on Android, StoreKit on iOS
   Future<void> _handlePayment(BuildContext context, WidgetRef ref) async {
-    // For Android, use Flutterwave payment flow
-    if (Platform.isAndroid) {
-      await _handleFlutterwavePayment(context, ref);
-      return;
-    }
-
-    // For iOS, use IAP (existing flow)
     final pid = productIdForPlan(isInternational: widget.isInternational);
     final svc = ref.read(iapServiceProvider);
 
@@ -552,7 +406,7 @@ Widget GooglePay(BuildContext content, {required VoidCallback onPay, bool busy =
         mainAxisSize: MainAxisSize.min,
         children: [
           const Text(
-            "Google Pay",
+            "Google Play",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20),
           ),
           Container(
@@ -564,7 +418,7 @@ Widget GooglePay(BuildContext content, {required VoidCallback onPay, bool busy =
           const SizedBox(height: 12),
           GooglePayButton(
             onPressed: busy ? () {} : onPay,
-            label: busy ? 'Processing...' : 'Pay with Google',
+            label: busy ? 'Processing...' : 'Pay with Google Play',
           ),
         ],
       ),
@@ -577,7 +431,7 @@ class GooglePayButton extends StatelessWidget {
   const GooglePayButton({
     super.key,
     required this.onPressed,
-    this.label = 'Pay with Google',
+    this.label = 'Pay with Google Play',
     this.height = 48,
     this.borderRadius = 10,
   });

@@ -2,6 +2,7 @@
 import 'global_api.dart';
 
 class AuthAPIController {
+  
   static final String _base_api = "${api}api";
   static final String login = "$_base_api/login";
   static final String signup = "$_base_api/signup";
@@ -15,7 +16,7 @@ class AuthAPIController {
   static final String membership_plan = "$_base_api/membership_plan";
   static final String payment_apple_verify = "$_base_api/payment/apple/verify";
   static final payment_apple_ppv_verify = '$_base_api/payment/apple/ppv/verify';
-  static final String payment_google_verify = "$_base_api/payment/google/verifyd";
+  static final String payment_google_verify = "$_base_api/payment/google/verify";
   static final String payment_google_ppv_verify = "$_base_api/payment/google/ppv/verify";
   // Flutterwave payment endpoints
   static final String payment_flutterwave_initiate = "$_base_api/payment/flutterwave/initiate";

@@ -1,16 +1,18 @@
 // lib/features/subscription/logic/payment_reverpod.dart
 import 'package:Oloflix/core/constants/api_control/auth_api.dart';
+import 'dart:io' show Platform;
 import 'package:Oloflix/features/subscription/data/payment_data.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
-/// ✅ Product IDs (App Store Connect-এর সাথে হুবহু মিলবে)
-const kProductIdYearlyLocal = 'oloflix_yearlyplan';
-const kProductIdYearlyUSD   = 'oloflix_yearlyplan';
+/// ✅ iOS Product IDs (App Store Connect)
+const kIosProductIdYearlyLocal = 'oloflix_yearlyplan';
+const kIosProductIdYearlyUSD = 'oloflix_yearlyplan';
+const kIosProductIdPPV = 'com.sampleppv.product';
 
-/// 👉 তোমার টেস্ট লগে ছিল com.sampleppv.product — সেটাই রাখলাম
-///    যদি চূড়ান্তটি অন্য কিছু হয় (e.g. com.oloflix.premiumsub), এটা বদলে দিও।
-const kProductIdPPV         = 'com.sampleppv.product';
+/// ✅ Android Product IDs (Google Play Billing)
+const kAndroidProductIdYearly = 'sub_premium';
+const kAndroidProductIdPPV = 'ppv_credits_1';
 
 /// 👉 তোমার verify API
 final kVerifyUrl = AuthAPIController.payment_apple_verify;
@@ -39,8 +41,17 @@ class IapController extends StateNotifier<AsyncValue<IapState>> {
   Future<void> init() async {
     try {
       final svc = ref.read(iapServiceProvider);
+      final iosProducts = <String>{
+        kIosProductIdYearlyLocal,
+        kIosProductIdPPV,
+      };
+      if (kIosProductIdYearlyUSD != kIosProductIdYearlyLocal) {
+        iosProducts.add(kIosProductIdYearlyUSD);
+      }
       await svc.init(
-        productIds: {kProductIdYearlyLocal, kProductIdYearlyUSD, kProductIdPPV},
+        productIds: Platform.isAndroid
+            ? {kAndroidProductIdYearly, kAndroidProductIdPPV}
+            : iosProducts,
         serverVerifyUrl: kVerifyUrl,
       );
       state = AsyncValue.data(
@@ -73,13 +84,17 @@ class IapController extends StateNotifier<AsyncValue<IapState>> {
 
 /// 🔁 int ভিত্তিক ম্যাপিং: 0=Local, 1=USD, 2=PPV
 String productIdForPlan({required int isInternational}) {
+  if (Platform.isAndroid) {
+    return isInternational == 2 ? kAndroidProductIdPPV : kAndroidProductIdYearly;
+  }
+
   switch (isInternational) {
     case 1:
-      return kProductIdYearlyUSD;
+      return kIosProductIdYearlyUSD;
     case 2:
-      return kProductIdPPV; // ← PPV
+      return kIosProductIdPPV; // ← PPV
     case 0:
     default:
-      return kProductIdYearlyLocal;
+      return kIosProductIdYearlyLocal;
   }
 }
