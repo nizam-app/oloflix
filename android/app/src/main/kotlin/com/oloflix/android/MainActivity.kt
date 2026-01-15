@@ -1,4 +1,4 @@
-package com.example.market_jango
+package com.oloflix.android
 
 import io.flutter.embedding.android.FlutterActivity
 
